@@ -1,0 +1,36 @@
+# Core web framework and API layer
+Django==5.1.4
+djangorestframework==3.15.2
+djangorestframework-camel-case==1.4.2
+django-cors-headers==4.6.0
+django-filter==24.3
+
+# Configuration
+django-environ==0.11.2
+
+# Database driver
+psycopg[binary]==3.2.3
+
+# Async task queue and scheduler
+celery==5.4.0
+django-celery-beat==2.7.0
+redis==5.2.1
+
+# Ingestion / scraping pipeline
+httpx==0.28.1
+beautifulsoup4==4.12.3
+lxml==5.3.0
+pydantic==2.10.4
+# Headless browser for JavaScript-rendered sources (ACB). The Chromium binary is
+# installed separately in the Dockerfile via `playwright install`.
+playwright==1.49.1
+
+# Advanced statistics engine
+numpy==2.2.1
+pandas==2.2.3
+
+# Production application server
+gunicorn==23.0.0
+
+# Observability
+sentry-sdk==2.19.2

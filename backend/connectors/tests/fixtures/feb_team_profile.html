@@ -1,0 +1,924 @@
+
+<!DOCTYPE html>
+
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>
+	Competiciones FEB
+</title><meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <script src="https://baloncestoenvivo.feb.es/scripts/jquery-1.11.0.js"></script>
+    <script src="https://baloncestoenvivo.feb.es/scripts/basics.js?v=23092020"></script>
+
+<!-- Start cookieyes banner --> <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/a35cb4c6be15abd5570b413e1d031eb5/script.js"></script> <!-- End cookieyes banner -->
+    
+    <!--<link href="https://baloncestoenvivo.feb.es/styles/theme.css?v=02102020" rel="stylesheet" />-->
+	<link href="https://baloncestoenvivo.feb.es/styles/theme.css?v=30122024" rel="stylesheet" />
+
+
+    <link href="https://www.feb.es/favicon.ico" type="image/x-icon" rel="shortcut icon" />
+    <style>
+    #js_plantilla
+    {
+        display:block;
+    }
+    
+    #js_trayectoria,
+    #js_infoClub{
+        display:none;
+    }
+
+</style>
+    <script>
+        $(function () {
+
+            $('#js_plantilla-btn').on("click", function () {
+                $('.btn-tab').removeClass("js_activo");
+                $(this).addClass("js_activo");
+                $('#js_plantilla').show();
+                $('#js_infoClub').hide();
+                $('#js_trayectoria').hide();
+            });
+            $('#js_club-btn').on("click", function () {
+                $('.btn-tab').removeClass("js_activo");
+                $(this).addClass("js_activo");
+                $('#js_infoClub').show();
+                $('#js_plantilla').hide();
+                $('#js_trayectoria').hide();
+            });
+            $('#js_trayectoria-btn').on("click", function () {
+                $('.btn-tab').removeClass("js_activo");
+                $(this).addClass("js_activo");
+                $('#js_trayectoria').show();
+                $('#js_infoClub').hide();
+                $('#js_plantilla').hide();
+            });
+        });
+
+    </script>
+
+
+    <script>
+        $(function ($) {
+            $('#site-btn-menu').on('click', function () {
+                var container = $('#containermenu');
+
+                if (container.find('.wrapper-menu').hasClass('d_on')) {
+                    $('#site-btn-menu').removeClass('d_on');
+                    $('#site-btn-menu[class=""]').removeAttr('class');//if is empty
+
+                    container.find('.wrapper-menu').removeClass('d_on');
+                    container.find('.wrapper-menu[class=""]').removeAttr('class');//if is empty
+                    container.find('.wrapper-menu').removeAttr('style');//clean
+                    container.find('.site-menu').removeAttr('style');//clean
+                } else {
+                    $('#site-btn-menu').addClass('d_on');
+                    container.find('.wrapper-menu').addClass('d_on');
+                    var alto = $('body').outerHeight(true) - $('#site-head').outerHeight(true);
+                    container.find('.wrapper-menu').attr('style', 'min-height:' + alto + 'px;');
+                    container.find('.site-menu').attr('style', 'min-height:' + alto + 'px;');
+                }
+
+            });
+        });
+    </script>
+</head>
+<body>
+    <form name="aspnetForm" method="post" action="/equipo/952158" id="aspnetForm">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTg3OTczMzgwMA9kFgJmD2QWAgIDDxYCHgZhY3Rpb24FDi9lcXVpcG8vOTUyMTU4FgQCAQ9kFgJmDxYCHgtfIUl0ZW1Db3VudAIYFjBmD2QWBAIBDw8WAh4ISW1hZ2VVcmwFLmh0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9NCZ0PTIwMjVkZAICDxUFCUxGIEVOREVTQVBodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9NCZhbXA7dD0yMDI1JmFtcDtubT1sZmVuZGVzYU5odHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTQmYW1wO3Q9MjAyNSZhbXA7bm09bGZlbmRlc2FOaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz00JmFtcDt0PTIwMjUmYW1wO25tPWxmZW5kZXNhTGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTQmYW1wO3Q9MjAyNSZhbXA7bm09bGZlbmRlc2FkAgEPZBYEAgEPDxYCHwIFLmh0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9MSZ0PTIwMjVkZAICDxUFC1BSSU1FUkEgRkVCUmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0xJmFtcDt0PTIwMjUmYW1wO25tPXByaW1lcmFmZWJQaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yZXN1bHRhZG9zLmFzcHg/Zz0xJmFtcDt0PTIwMjUmYW1wO25tPXByaW1lcmFmZWJQaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz0xJmFtcDt0PTIwMjUmYW1wO25tPXByaW1lcmFmZWJOaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MSZhbXA7dD0yMDI1JmFtcDtubT1wcmltZXJhZmViZAICD2QWBAIBDw8WAh8CBS9odHRwczovL2ltYWdlbmVzLmZlYi5lcy9JbWFnZW4uYXNweD9nPTY3JnQ9MjAyNWRkAgIPFQUMTEYgQ0hBTExFTkdFVGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz02NyZhbXA7dD0yMDI1JmFtcDtubT1sZmNoYWxsZW5nZVJodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTY3JmFtcDt0PTIwMjUmYW1wO25tPWxmY2hhbGxlbmdlUmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvY2FsZW5kYXJpby5hc3B4P2c9NjcmYW1wO3Q9MjAyNSZhbXA7bm09bGZjaGFsbGVuZ2VQaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9NjcmYW1wO3Q9MjAyNSZhbXA7bm09bGZjaGFsbGVuZ2VkAgMPZBYEAgEPDxYCHwIFLmh0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9MiZ0PTIwMjVkZAICDxUFC1NFR1VOREEgRkVCUmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0yJmFtcDt0PTIwMjUmYW1wO25tPXNlZ3VuZGFmZWJQaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yZXN1bHRhZG9zLmFzcHg/Zz0yJmFtcDt0PTIwMjUmYW1wO25tPXNlZ3VuZGFmZWJQaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz0yJmFtcDt0PTIwMjUmYW1wO25tPXNlZ3VuZGFmZWJOaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MiZhbXA7dD0yMDI1JmFtcDtubT1zZWd1bmRhZmViZAIED2QWBAIBDw8WAh8CBS5odHRwczovL2ltYWdlbmVzLmZlYi5lcy9JbWFnZW4uYXNweD9nPTkmdD0yMDI1ZGQCAg8VBQZMLkYuLTJLaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTkmYW1wO3Q9MjAyNSZhbXA7bm09bGYySWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9OSZhbXA7dD0yMDI1JmFtcDtubT1sZjJJaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz05JmFtcDt0PTIwMjUmYW1wO25tPWxmMkdodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz05JmFtcDt0PTIwMjUmYW1wO25tPWxmMmQCBQ9kFgQCAQ8PFgIfAgUuaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0zJnQ9MjAyNWRkAgIPFQULVEVSQ0VSQSBGRUJSaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTMmYW1wO3Q9MjAyNSZhbXA7bm09dGVyY2VyYWZlYlBodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTMmYW1wO3Q9MjAyNSZhbXA7bm09dGVyY2VyYWZlYlBodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTMmYW1wO3Q9MjAyNSZhbXA7bm09dGVyY2VyYWZlYk5odHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz0zJmFtcDt0PTIwMjUmYW1wO25tPXRlcmNlcmFmZWJkAgYPZBYEAgEPDxYCHwIFL2h0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9NzQmdD0yMDI1ZGQCAg8VBQZMSUdBIFVOaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTc0JmFtcDt0PTIwMjUmYW1wO25tPWxpZ2F1TGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9NzQmYW1wO3Q9MjAyNSZhbXA7bm09bGlnYXVMaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz03NCZhbXA7dD0yMDI1JmFtcDtubT1saWdhdUpodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz03NCZhbXA7dD0yMDI1JmFtcDtubT1saWdhdWQCBw9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz03MyZ0PTIwMjVkZAICDxUFDENPUEEgRVNQQcORQVJodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9NzMmYW1wO3Q9MjAyNSZhbXA7bm09Y29wYWVzcGFhUGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9NzMmYW1wO3Q9MjAyNSZhbXA7bm09Y29wYWVzcGFhUGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvY2FsZW5kYXJpby5hc3B4P2c9NzMmYW1wO3Q9MjAyNSZhbXA7bm09Y29wYWVzcGFhTmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTczJmFtcDt0PTIwMjUmYW1wO25tPWNvcGFlc3BhYWQCCA9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0xOSZ0PTIwMjVkZAICDxUFEUNFIFNTQUEgTWluaSBNYXMuVmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0xOSZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFtaW5pbWFzVGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9MTkmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhbWluaW1hc1RodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTE5JmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYW1pbmltYXNSaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MTkmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhbWluaW1hc2QCCQ9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0yMCZ0PTIwMjVkZAICDxUFEUNFIFNTQUEgTWluaSBGZW0uVmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0yMCZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFtaW5pZmVtVGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9MjAmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhbWluaWZlbVRodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTIwJmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYW1pbmlmZW1SaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MjAmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhbWluaWZlbWQCCg9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz00MCZ0PTIwMjVkZAICDxUFE0NFIFNTQUEgQ2FkZXRlIE1hcy5YaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTQwJmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYWNhZGV0ZW1hc1ZodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTQwJmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYWNhZGV0ZW1hc1ZodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTQwJmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYWNhZGV0ZW1hc1RodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz00MCZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFjYWRldGVtYXNkAgsPZBYEAgEPDxYCHwIFL2h0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9NDEmdD0yMDI1ZGQCAg8VBRNDRSBTU0FBIENhZGV0ZSBGZW0uWGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz00MSZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFjYWRldGVmZW1WaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yZXN1bHRhZG9zLmFzcHg/Zz00MSZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFjYWRldGVmZW1WaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz00MSZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFjYWRldGVmZW1UaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9NDEmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhY2FkZXRlZmVtZAIMD2QWBAIBDw8WAh8CBS9odHRwczovL2ltYWdlbmVzLmZlYi5lcy9JbWFnZW4uYXNweD9nPTI1JnQ9MjAyNWRkAgIPFQUVQ0UgU1NBQSBJbmZhbnRpbCBNYXMuWmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0yNSZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFpbmZhbnRpbG1hc1hodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTI1JmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYWluZmFudGlsbWFzWGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvY2FsZW5kYXJpby5hc3B4P2c9MjUmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhaW5mYW50aWxtYXNWaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MjUmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhaW5mYW50aWxtYXNkAg0PZBYEAgEPDxYCHwIFL2h0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9MjYmdD0yMDI1ZGQCAg8VBRVDRSBTU0FBIEluZmFudGlsIEZlbS5aaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTI2JmFtcDt0PTIwMjUmYW1wO25tPWNlc3NhYWluZmFudGlsZmVtWGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9MjYmYW1wO3Q9MjAyNSZhbXA7bm09Y2Vzc2FhaW5mYW50aWxmZW1YaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz0yNiZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFpbmZhbnRpbGZlbVZodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz0yNiZhbXA7dD0yMDI1JmFtcDtubT1jZXNzYWFpbmZhbnRpbGZlbWQCDg9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz01NSZ0PTIwMjVkZAICDxUFEk1JTklDT1BBIExGIEVOREVTQVlodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9NTUmYW1wO3Q9MjAyNSZhbXA7bm09bWluaWNvcGFsZmVuZGVzYVdodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTU1JmFtcDt0PTIwMjUmYW1wO25tPW1pbmljb3BhbGZlbmRlc2FXaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz01NSZhbXA7dD0yMDI1JmFtcDtubT1taW5pY29wYWxmZW5kZXNhVWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTU1JmFtcDt0PTIwMjUmYW1wO25tPW1pbmljb3BhbGZlbmRlc2FkAg8PZBYEAgEPDxYCHwIFL2h0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9NDQmdD0yMDI1ZGQCAg8VBSBGYXNlIEZpbmFsIDHCqiBEaXZpc2nDs24gRmVtZW5pbmFodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9NDQmYW1wO3Q9MjAyNSZhbXA7bm09ZmFzZWZpbmFsMWRpdmlzaW5mZW1lbmluX2h0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9NDQmYW1wO3Q9MjAyNSZhbXA7bm09ZmFzZWZpbmFsMWRpdmlzaW5mZW1lbmluX2h0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvY2FsZW5kYXJpby5hc3B4P2c9NDQmYW1wO3Q9MjAyNSZhbXA7bm09ZmFzZWZpbmFsMWRpdmlzaW5mZW1lbmluXWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTQ0JmFtcDt0PTIwMjUmYW1wO25tPWZhc2VmaW5hbDFkaXZpc2luZmVtZW5pbmQCEA9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0yMSZ0PTIwMjVkZAICDxUFFEMgRVNQIENMVUJFUyBKUiBNQVNDWWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0yMSZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzanJtYXNjV2h0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9MjEmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2pybWFzY1dodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTIxJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNqcm1hc2NVaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MjEmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2pybWFzY2QCEQ9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0yMiZ0PTIwMjVkZAICDxUFE0MgRVNQIENMVUJFUyBKUiBGRU1YaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTIyJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNqcmZlbVZodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3Jlc3VsdGFkb3MuYXNweD9nPTIyJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNqcmZlbVZodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTIyJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNqcmZlbVRodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz0yMiZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzanJmZW1kAhIPZBYEAgEPDxYCHwIFL2h0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2c9MzUmdD0yMDI1ZGQCAg8VBRVDIEVTUCBDTFVCRVMgQ0FEIE1BU0NaaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTM1JmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNjYWRtYXNjWGh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9MzUmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2NhZG1hc2NYaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9jYWxlbmRhcmlvLmFzcHg/Zz0zNSZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzY2FkbWFzY1ZodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz0zNSZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzY2FkbWFzY2QCEw9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0zNiZ0PTIwMjVkZAICDxUFFEMgRVNQIENMVUJFUyBDQUQgRkVNWWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvZXN0YWRpc3RpY2FzLmFzcHg/Zz0zNiZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzY2FkZmVtV2h0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9MzYmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2NhZGZlbVdodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTM2JmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNjYWRmZW1VaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yYW5raW5ncy5hc3B4P2c9MzYmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2NhZGZlbWQCFA9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz0zNyZ0PTIwMjVkZAICDxUFFUMgRVNQIENMVUJFUyBJTkYgTUFTQ1podHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9MzcmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2luZm1hc2NYaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yZXN1bHRhZG9zLmFzcHg/Zz0zNyZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzaW5mbWFzY1hodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTM3JmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNpbmZtYXNjVmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTM3JmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNpbmZtYXNjZAIVD2QWBAIBDw8WAh8CBS9odHRwczovL2ltYWdlbmVzLmZlYi5lcy9JbWFnZW4uYXNweD9nPTM4JnQ9MjAyNWRkAgIPFQUUQyBFU1AgQ0xVQkVTIElORiBGRU1ZaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9lc3RhZGlzdGljYXMuYXNweD9nPTM4JmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNpbmZmZW1XaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yZXN1bHRhZG9zLmFzcHg/Zz0zOCZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzaW5mZmVtV2h0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvY2FsZW5kYXJpby5hc3B4P2c9MzgmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc2luZmZlbVVodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL3JhbmtpbmdzLmFzcHg/Zz0zOCZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzaW5mZmVtZAIWD2QWBAIBDw8WAh8CBS9odHRwczovL2ltYWdlbmVzLmZlYi5lcy9JbWFnZW4uYXNweD9nPTcxJnQ9MjAyNWRkAgIPFQUWQyBFU1AgQ0xVQkVTIE1JTkkgTUFTQ1todHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9NzEmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc21pbmltYXNjWWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmVzdWx0YWRvcy5hc3B4P2c9NzEmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc21pbmltYXNjWWh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvY2FsZW5kYXJpby5hc3B4P2c9NzEmYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc21pbmltYXNjV2h0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTcxJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNtaW5pbWFzY2QCFw9kFgQCAQ8PFgIfAgUvaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvSW1hZ2VuLmFzcHg/Zz03MiZ0PTIwMjVkZAICDxUFFUMgRVNQIENMVUJFUyBNSU5JIEZFTVpodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2VzdGFkaXN0aWNhcy5hc3B4P2c9NzImYW1wO3Q9MjAyNSZhbXA7bm09Y2VzcGNsdWJlc21pbmlmZW1YaHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9yZXN1bHRhZG9zLmFzcHg/Zz03MiZhbXA7dD0yMDI1JmFtcDtubT1jZXNwY2x1YmVzbWluaWZlbVhodHRwczovL2JhbG9uY2VzdG9lbnZpdm8uZmViLmVzL2NhbGVuZGFyaW8uYXNweD9nPTcyJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNtaW5pZmVtVmh0dHBzOi8vYmFsb25jZXN0b2Vudml2by5mZWIuZXMvcmFua2luZ3MuYXNweD9nPTcyJmFtcDt0PTIwMjUmYW1wO25tPWNlc3BjbHViZXNtaW5pZmVtZAICD2QWNAIBD2QWCAIBD2QWAmYPDxYCHwIFMWh0dHBzOi8vaW1hZ2VuZXMuZmViLmVzL0ltYWdlbi5hc3B4P2k9OTUyMTU4JnRpPTFkZAIDDxYCHgRUZXh0BRVDLkIuIE5BVFVSQVZJQSBNT1LDk05kAgUPFgIfAwUMQ09QQSBFU1BBw5FBZAIHDxYCHwMFCTIwMjQvMjAyNWQCBQ8PFgIfAgUqaHR0cHM6Ly9pbWFnZW5lcy5mZWIuZXMvRm90by5hc3B4P2M9MzMzODUyZGQCBw8WAh8DBRxEQU5JRUwgQU5HRUwgR0FSQ0lBIEdPTlpBTEVaZAIJDxYCHwMFCjI2LzA1LzE5NzBkAgsPFgIfAQILFhZmD2QWFmYPFQE/aHR0cHM6Ly9iYWxvbmNlc3RvZW52aXZvLmZlYi5lcy9KdWdhZG9yLmFzcHg/aT05NTIxNTgmYz0yMDQyNTY4ZAIBDw8WAh8CBStodHRwczovL2ltYWdlbmVz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" />
+
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="309A22F5" />
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAASXvEoPD29xkzzOkR76metTaTu7IOxh06lSkxFAxwGhEZOKsM2OVr0v5cDRZ0Nue6Tw98iDuv3o03bSfSM2148BczkythDI0ku6tVqg+/wcwQCB0Skgd47qpUlmyne4UN4=" />
+        <div id="contentToken">
+            <input type="hidden" name="_ctl0:token" id="_ctl0_token" value="eyJhbGciOiJSUzI1NiIsImtpZCI6ImQzOWE5MzlhZTQyZmFlMTM5NWJjODNmYjcwZjc1ZDc3IiwidHlwIjoiSldUIn0.eyJuYmYiOjE3ODIzMTM3ODMsImV4cCI6MTc4MjQwMDE4MywiaXNzIjoiaHR0cHM6Ly9pbnRyYWZlYi5mZWIuZXMvaWRlbnRpdHkuYXBpIiwiYXVkIjpbImh0dHBzOi8vaW50cmFmZWIuZmViLmVzL2lkZW50aXR5LmFwaS9yZXNvdXJjZXMiLCJsaXZlc3RhdHMuYXBpIl0sImNsaWVudF9pZCI6ImJhbG9uY2VzdG9lbnZpdm9hcHAiLCJpZGFtYml0byI6IjEiLCJyb2xlIjpbIk92ZXJWaWV3IiwiVGVhbVN0YXRzIiwiU2hvdENoYXJ0IiwiUmFua2luZyIsIktleUZhY3RzIiwiQm94U2NvcmUiXSwic2NvcGUiOlsibGl2ZXN0YXRzLmFwaSJdfQ.P6YU99sgLYbjxb8jxOqS2r1GU8MaJcfuuCT9ntVR7XfYGGdi3uHh3InPzIMgFTP_rGDlIoq7Y8GjzWbXuuGVWC3SK4ddAvcncH8A-JzpQUfD_H-BPrLuPxOUXoszThS_8G4LMjE3o4pSt0tqYOJRXWzGbSqR1MQbGRJcAjvm4bPSlvbOHneRZ9V8lkOgxHcAf6J25f7EgDgYe9bd6ZY5-dwJUuKN48sQvFPOqRRexKWz69kZZ-6XODYgiVx-uG1DdLYIeM3_KcDmk1zJVn7rakjNLDa5MAtN-y9pt2C8FzbiR7OzEQ7SJqyInERmkEAo83DHb-YoiZmLT91CGvE6bw" />
+        </div>
+        <div id="site-head">
+            <span id="site-btn-menu"><span class="icon"></span></span>
+            <a id="site-logo" href="https://baloncestoenvivo.feb.es/home.aspx">
+                <img src="https://baloncestoenvivo.feb.es/Imagenes/Estructura/feblivescore_logo negativo.png?v=01012019">
+            </a>
+        </div>
+        <div id="containermenu">
+            
+
+ <div class="wrapper-menu">
+    <div class="site-menu">
+        <div id="site-menu-caption"><img src="https://baloncestoenvivo.feb.es/Imagenes/Estructura/FEB-LOGO-HORIZONTAL-WEB-NEGATIVO.png"></div>
+          
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=4&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">LF ENDESA</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=4&amp;t=2025&amp;nm=lfendesa" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=4&amp;t=2025&amp;nm=lfendesa" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=4&amp;t=2025&amp;nm=lfendesa" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=4&amp;t=2025&amp;nm=lfendesa" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=1&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">PRIMERA FEB</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=1&amp;t=2025&amp;nm=primerafeb" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=1&amp;t=2025&amp;nm=primerafeb" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=1&amp;t=2025&amp;nm=primerafeb" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=1&amp;t=2025&amp;nm=primerafeb" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=67&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">LF CHALLENGE</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=67&amp;t=2025&amp;nm=lfchallenge" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=67&amp;t=2025&amp;nm=lfchallenge" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=67&amp;t=2025&amp;nm=lfchallenge" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=67&amp;t=2025&amp;nm=lfchallenge" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=2&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">SEGUNDA FEB</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=2&amp;t=2025&amp;nm=segundafeb" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=2&amp;t=2025&amp;nm=segundafeb" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=2&amp;t=2025&amp;nm=segundafeb" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=2&amp;t=2025&amp;nm=segundafeb" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=9&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">L.F.-2</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=9&amp;t=2025&amp;nm=lf2" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=9&amp;t=2025&amp;nm=lf2" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=9&amp;t=2025&amp;nm=lf2" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=9&amp;t=2025&amp;nm=lf2" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=3&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">TERCERA FEB</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=3&amp;t=2025&amp;nm=tercerafeb" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=3&amp;t=2025&amp;nm=tercerafeb" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=3&amp;t=2025&amp;nm=tercerafeb" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=3&amp;t=2025&amp;nm=tercerafeb" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=74&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">LIGA U</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=74&amp;t=2025&amp;nm=ligau" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=74&amp;t=2025&amp;nm=ligau" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=74&amp;t=2025&amp;nm=ligau" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=74&amp;t=2025&amp;nm=ligau" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=73&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">COPA ESPAÑA</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=73&amp;t=2025&amp;nm=copaespaa" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=73&amp;t=2025&amp;nm=copaespaa" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=73&amp;t=2025&amp;nm=copaespaa" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=73&amp;t=2025&amp;nm=copaespaa" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=19&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">CE SSAA Mini Mas.</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=19&amp;t=2025&amp;nm=cessaaminimas" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=19&amp;t=2025&amp;nm=cessaaminimas" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=19&amp;t=2025&amp;nm=cessaaminimas" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=19&amp;t=2025&amp;nm=cessaaminimas" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=20&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">CE SSAA Mini Fem.</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=20&amp;t=2025&amp;nm=cessaaminifem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=20&amp;t=2025&amp;nm=cessaaminifem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=20&amp;t=2025&amp;nm=cessaaminifem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=20&amp;t=2025&amp;nm=cessaaminifem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=40&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">CE SSAA Cadete Mas.</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=40&amp;t=2025&amp;nm=cessaacadetemas" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=40&amp;t=2025&amp;nm=cessaacadetemas" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=40&amp;t=2025&amp;nm=cessaacadetemas" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=40&amp;t=2025&amp;nm=cessaacadetemas" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=41&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">CE SSAA Cadete Fem.</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=41&amp;t=2025&amp;nm=cessaacadetefem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=41&amp;t=2025&amp;nm=cessaacadetefem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=41&amp;t=2025&amp;nm=cessaacadetefem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=41&amp;t=2025&amp;nm=cessaacadetefem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=25&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">CE SSAA Infantil Mas.</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=25&amp;t=2025&amp;nm=cessaainfantilmas" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=25&amp;t=2025&amp;nm=cessaainfantilmas" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=25&amp;t=2025&amp;nm=cessaainfantilmas" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=25&amp;t=2025&amp;nm=cessaainfantilmas" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=26&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">CE SSAA Infantil Fem.</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=26&amp;t=2025&amp;nm=cessaainfantilfem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=26&amp;t=2025&amp;nm=cessaainfantilfem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=26&amp;t=2025&amp;nm=cessaainfantilfem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=26&amp;t=2025&amp;nm=cessaainfantilfem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=55&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">MINICOPA LF ENDESA</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=55&amp;t=2025&amp;nm=minicopalfendesa" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=55&amp;t=2025&amp;nm=minicopalfendesa" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=55&amp;t=2025&amp;nm=minicopalfendesa" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=55&amp;t=2025&amp;nm=minicopalfendesa" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=44&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">Fase Final 1ª División Femenin</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=44&amp;t=2025&amp;nm=fasefinal1divisinfemenin" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=44&amp;t=2025&amp;nm=fasefinal1divisinfemenin" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=44&amp;t=2025&amp;nm=fasefinal1divisinfemenin" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=44&amp;t=2025&amp;nm=fasefinal1divisinfemenin" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=21&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES JR MASC</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=21&amp;t=2025&amp;nm=cespclubesjrmasc" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=21&amp;t=2025&amp;nm=cespclubesjrmasc" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=21&amp;t=2025&amp;nm=cespclubesjrmasc" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=21&amp;t=2025&amp;nm=cespclubesjrmasc" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=22&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES JR FEM</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=22&amp;t=2025&amp;nm=cespclubesjrfem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=22&amp;t=2025&amp;nm=cespclubesjrfem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=22&amp;t=2025&amp;nm=cespclubesjrfem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=22&amp;t=2025&amp;nm=cespclubesjrfem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=35&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES CAD MASC</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=35&amp;t=2025&amp;nm=cespclubescadmasc" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=35&amp;t=2025&amp;nm=cespclubescadmasc" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=35&amp;t=2025&amp;nm=cespclubescadmasc" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=35&amp;t=2025&amp;nm=cespclubescadmasc" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=36&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES CAD FEM</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=36&amp;t=2025&amp;nm=cespclubescadfem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=36&amp;t=2025&amp;nm=cespclubescadfem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=36&amp;t=2025&amp;nm=cespclubescadfem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=36&amp;t=2025&amp;nm=cespclubescadfem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=37&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES INF MASC</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=37&amp;t=2025&amp;nm=cespclubesinfmasc" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=37&amp;t=2025&amp;nm=cespclubesinfmasc" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=37&amp;t=2025&amp;nm=cespclubesinfmasc" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=37&amp;t=2025&amp;nm=cespclubesinfmasc" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=38&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES INF FEM</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=38&amp;t=2025&amp;nm=cespclubesinffem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=38&amp;t=2025&amp;nm=cespclubesinffem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=38&amp;t=2025&amp;nm=cespclubesinffem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=38&amp;t=2025&amp;nm=cespclubesinffem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=71&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES MINI MASC</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=71&amp;t=2025&amp;nm=cespclubesminimasc" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=71&amp;t=2025&amp;nm=cespclubesminimasc" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=71&amp;t=2025&amp;nm=cespclubesminimasc" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=71&amp;t=2025&amp;nm=cespclubesminimasc" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+                <div class="menu-item">
+                    <div class="menu-item-logo"><img src="https://imagenes.feb.es/Imagen.aspx?g=72&amp;t=2025" border="0" /></div>
+                    <span class="menu-item-liga">C ESP CLUBES MINI FEM</span>
+
+
+                    
+
+                    <div class="menu-item-links">
+                        <a href="https://baloncestoenvivo.feb.es/estadisticas.aspx?g=72&amp;t=2025&amp;nm=cespclubesminifem" class="link">Estadisticas</a>
+                        <a href="https://baloncestoenvivo.feb.es/resultados.aspx?g=72&amp;t=2025&amp;nm=cespclubesminifem" class="link">Resultados</a>
+                        <a href="https://baloncestoenvivo.feb.es/calendario.aspx?g=72&amp;t=2025&amp;nm=cespclubesminifem" class="link">Calendario</a>
+                        <a href="https://baloncestoenvivo.feb.es/rankings.aspx?g=72&amp;t=2025&amp;nm=cespclubesminifem" class="link">Rankings</a>
+                    </div>
+                </div>
+              
+    </div>
+</div> 
+
+
+
+
+
+        </div>
+        <div id="wrapper-seccion">
+            
+            
+
+    
+
+<div class="wrapper-tituloSeccion">
+    <div class="tituloSeccion">
+        <div id="_ctl0_MainContentPlaceHolderMaster_ControlTituloSeccion_logoCategoriaPanel" class="wrapper-logo">
+	<img id="logoCategoriaImage" src="https://imagenes.feb.es/Imagen.aspx?i=952158&amp;ti=1" border="0" />
+</div>
+        <div class="wrapper-text">
+            <span class="titulo">C.B. NATURAVIA MORÓN</span>
+            <span class="liga">COPA ESPAÑA </span>
+            <span class="temporada">2024/2025</span>
+        </div>
+    </div>
+</div>
+
+
+
+    <div class="wrapper-seccion-contents" id="page-equipo">
+
+
+        <div class="menu contextual tipo tabs de tres botones">
+            <a href="#" id="js_plantilla-btn" class="btn-tab js_activo" data-action="keyfacts">Plantilla</a>
+            <a href="#" id="js_trayectoria-btn" class="btn-tab" data-action="boxscore">Trayectoria Equipo</a>        
+            <a href="#" id="js_club-btn" class="btn-tab" data-action="ranking">Información del Club</a>
+        </div>
+
+
+        <div id="js_plantilla">
+            
+            <div class="tableLayout de dos columnas">
+                <div class="fila">
+                    <div class="columna">
+
+                        <div class="context-navigation">
+                            <span class="titulo">Consultar</span>
+                            <a id="_ctl0_MainContentPlaceHolderMaster_estadAcumLinkButton" class="linkbutton" href="javascript:__doPostBack(&#39;_ctl0$MainContentPlaceHolderMaster$estadAcumLinkButton&#39;,&#39;&#39;)">Estadísticas acumuladas de la plantilla</a>
+                        </div>        
+
+                        <div class="box-entrenador">
+                            <div class="foto"><img id="_ctl0_MainContentPlaceHolderMaster_fotoEntrenadorImage" src="https://imagenes.feb.es/Foto.aspx?c=333852" border="0" /></div>
+                            <div class="titulo">Entrenador</div>
+                            <div class="nombre">DANIEL ANGEL GARCIA GONZALEZ</div>
+                            <div class="fecha nacimiento">26/05/1970</div>
+                        </div>
+
+                        <div class="responsive-scroll">
+                        <table cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <th></th>
+                                <th class="nombre jugador">Nombre</th>
+                                <th class="puesto">Puesto</th>
+                                <th class="dorsal">Dorsal</th>
+                                <th class="fecha nacimiento">Nacimiento</th>
+                                <th class="nacionalidad">Nacionalidad</th>
+				<th class="formacion">Formación</th>
+                                <th class="altura">Altura</th>
+                                <th class="peso">Peso</th>
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2042568' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl0_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=2042568" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2042568'>ANTONIO BURGOS CABALLERO</a></td>
+                                <td class="puesto">          </td>
+                                <td class="dorsal">-</td>
+                                <td class="fecha nacimiento">27/11/2000</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">202</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2293254' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl1_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=2293254" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2293254'>VINICIUS LUCIO DA SILVA</a></td>
+                                <td class="puesto">          </td>
+                                <td class="dorsal">-</td>
+                                <td class="fecha nacimiento">04/03/2001</td>
+                                <td class="nacionalidad">BRASIL</td>
+                                <td class="formacion">NO</td>
+				<td class="altura">213</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1825944' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl2_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=1825944" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1825944'>RAFAEL GARCIA SALAME</a></td>
+                                <td class="puesto">          </td>
+                                <td class="dorsal">-</td>
+                                <td class="fecha nacimiento">27/06/2000</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">185</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1447521' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl3_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=1447521" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1447521'>JOSE ALBERTO JIMÉNEZ GONZÁLEZ</a></td>
+                                <td class="puesto">Alero     </td>
+                                <td class="dorsal">7</td>
+                                <td class="fecha nacimiento">18/06/1996 Coín (Málaga)</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">198</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2469585' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl4_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=2469585" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2469585'>LIONEL NATHAN KOUADIO</a></td>
+                                <td class="puesto">Escolta   </td>
+                                <td class="dorsal">20</td>
+                                <td class="fecha nacimiento">01/09/2001 A Coruña</td>
+                                <td class="nacionalidad">COSTA DE MARFIL</td>
+                                <td class="formacion">NO</td>
+				<td class="altura">192</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1356913' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl5_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=1356913" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1356913'>JAVIER  MARIN ORTEGA</a></td>
+                                <td class="puesto">Base      </td>
+                                <td class="dorsal">6</td>
+                                <td class="fecha nacimiento">21/12/1992 San Fernando (Cádiz)</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">193</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2733682' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl6_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=2733682" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2733682'>MATHIAS M'MADI</a></td>
+                                <td class="puesto">Base      </td>
+                                <td class="dorsal">4</td>
+                                <td class="fecha nacimiento">02/06/2005</td>
+                                <td class="nacionalidad">FRANCIA</td>
+                                <td class="formacion">NO</td>
+				<td class="altura">196</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2481791' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl7_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=2481791" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=2481791'>ANDRE LAZAR NORRIS JR</a></td>
+                                <td class="puesto">          </td>
+                                <td class="dorsal">-</td>
+                                <td class="fecha nacimiento">20/06/1994</td>
+                                <td class="nacionalidad">ESTADOS UNIDOS</td>
+                                <td class="formacion">NO</td>
+				<td class="altura">201</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=718637' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl8_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=718637" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=718637'>LUIS MARIA PAREJO CAMACHO</a></td>
+                                <td class="puesto">Escolta   </td>
+                                <td class="dorsal">33</td>
+                                <td class="fecha nacimiento">05/02/1989 Almería (Almería)</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">193</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1374871' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl9_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=1374871" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1374871'>FABIO DAVID SANTANA ROSALES</a></td>
+                                <td class="puesto">          </td>
+                                <td class="dorsal">-</td>
+                                <td class="fecha nacimiento">09/06/1992</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">188</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+                            <tr>
+                                <td class="foto jugador">
+                                    <a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1997161' class="table-data-foto"><img id="_ctl0_MainContentPlaceHolderMaster_componentesDataList__ctl10_componenteImage" src="https://imagenes.feb.es/Foto.aspx?c=1997161" border="0" /></a>
+                                </td>
+                                <td class="nombre jugador"><a href='https://baloncestoenvivo.feb.es/Jugador.aspx?i=952158&c=1997161'>ISMAEL TAMBA VILLEN</a></td>
+                                <td class="puesto">Pívot     </td>
+                                <td class="dorsal">14</td>
+                                <td class="fecha nacimiento">19/07/2001 Puente Genil (Córdoba)</td>
+                                <td class="nacionalidad">ESPAÑA</td>
+                                <td class="formacion">SI</td>
+				<td class="altura">204</td>
+                                <td class="peso">-</td>
+             
+                            </tr>
+                            
+
+                        </table>
+                        </div>
+
+                    </div>
+                    <div class="columna">
+                        <img id="fotoEquipoImage" src="https://imagenes.feb.es/Imagen.aspx?i=952158&amp;ti=2" border="0" />
+                    </div>
+                </div>
+            </div>
+			
+			
+        </div>
+        
+
+
+        <div id="js_infoClub">
+
+            <div class="box-club">
+                <div class="logo"><img id="_ctl0_MainContentPlaceHolderMaster_logoEquipoImage" src="https://imagenes.feb.es/Imagen.aspx?i=952158&amp;ti=1" border="0" /></div>
+                <div class="nombre">CB MORON</div>
+                <hr style="clear:both; visibility:hidden; " />
+                <div class="info">
+                    <div class="titulo">Datos del Club</div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaDireccionLabel" class="label">Dirección</span><span id="_ctl0_MainContentPlaceHolderMaster_direccionLabel" class="string">C/ La Carrera 21 41530 Morón de la Frontera (Sevilla)</span></div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaTelefonoLabel" class="label">Teléfono</span><span id="_ctl0_MainContentPlaceHolderMaster_telefonoLabel" class="string">607198934</span></div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_faxLabel" class="string"></span></div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaWebLabel" class="label">Web</span><span id="_ctl0_MainContentPlaceHolderMaster_webLabel" class="string"><a href="https://                                                  " id="_ctl0_MainContentPlaceHolderMaster_webAnchor" target="_blank">                                                  </a></span></div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaEmailLabel" class="label">E-mail</span><span id="_ctl0_MainContentPlaceHolderMaster_mailLabel" class="string"><a href="mailto:cbmoron@gmail.com" id="_ctl0_MainContentPlaceHolderMaster_emailAnchor" target="_blank">cbmoron@gmail.com</a></span></div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaPresidenteLabel" class="label">Presidente</span><span id="_ctl0_MainContentPlaceHolderMaster_presidenteLabel" class="string">PEDRO CASTRO ALVAREZ</span></div>
+                </div>
+                <div class="info">
+                    <div class="titulo">Campo de Juego</div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaPabellonLabel" class="label">Nombre</span><span id="_ctl0_MainContentPlaceHolderMaster_pabellonLabel" class="string">PABELLÓN ALAMEDA</span></div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaDirPabellonLabel" class="label">Dirección</span><span id="_ctl0_MainContentPlaceHolderMaster_dirPabellonLabel" class="string">AV. ALAMEDA SN 41530 Morón de la Frontera (Sevilla)</span></div>
+                </div>
+                <div class="info">
+                    <div class="titulo">Datos de Juego</div>
+                    <div class="nodo"><span id="_ctl0_MainContentPlaceHolderMaster_etiquetaHoraJuegoLabel" class="label">Hora de juego como local</span><span id="_ctl0_MainContentPlaceHolderMaster_horaJuegoLabel" class="string">Sábado 18:00</span></div>
+                    <div class="nodo">
+                        <span id="_ctl0_MainContentPlaceHolderMaster_etiquetaCamisetaTitLabel" class="label">Equipación Titular</span>
+                        
+                        
+                        <svg width="150" height="auto" viewBox="0 0 1014 1232" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path id="_ctl0_MainContentPlaceHolderMaster_camiseta_titular_principal" d="M497.391 0H531.221C550.102 10.4463 562.353 18.2762 568.647 40.4362C569.886 44.8551 570.731 49.375 571.172 53.9429C571.558 58.3405 570.154 69.842 572.097 72.4269C573.682 73.0856 576.418 73.9633 576.898 75.5538C579.58 84.4534 577.261 98.1016 573.31 106.283C570.767 111.549 567.526 114.104 562.472 116.27C556.365 133.88 552.888 152.962 554.743 171.611C556.557 189.848 572.247 183.136 579.908 191.374C589.806 195.697 599.017 197.54 608.588 201.217L608.678 202.065C609.875 213.706 609.033 224.563 610.639 237.233C612.449 250.82 614.801 264.329 617.687 277.727C619.438 285.455 622.962 297.638 624.087 304.862C625.975 317.001 626.709 329.468 628.802 341.992C628.784 353.819 627.737 365.87 628.279 377.776C629.866 412.53 632.254 447.279 633.288 482.052C633.385 485.424 633.006 488.661 632.958 492.012C632.777 505.044 629.746 518.617 630.414 531.52C631.045 543.702 638.112 554.982 639.712 567.06C640.926 574.169 640.325 581.46 640.541 588.631C640.782 596.79 642.117 605.256 642.869 613.299C644.367 629.216 645.563 643.768 650.916 659C652.51 663.529 646.237 665.803 642.64 666.7C642.677 677.089 643.26 693.042 642.64 703.04C644.24 710.951 644.192 727.475 644.938 736.222C647.464 766.547 647.68 796.884 646.652 827.281C646.273 838.343 646.7 848.618 644.186 859.561C639.164 881.391 631.424 885.049 610.446 882.955C607.457 882.366 591.888 882.751 587.177 882.462C574.275 881.662 561.566 878.492 549.244 877.397C545.668 876.651 533.315 874.491 532.442 872.458C530.292 867.441 530.624 848.185 530.276 843.078C528.438 816.074 527.69 787.746 522.946 761.199C520.105 788.119 521.187 818.414 520.214 845.622C519.836 856.174 520.696 867.309 520.274 877.836C505.964 882.817 494.553 885.626 479.323 887.287C459.897 889.26 441.47 892.111 421.937 889.488C420.411 889.284 416.305 888.797 414.887 888.893C405.536 884.243 400.752 876.705 393.6 869.703C392.899 869.017 388.138 866.659 387 866.106C387.338 853.371 388.762 840.22 388.584 827.389C388.383 812.903 387.297 798.725 387.778 784.209C388.09 774.8 389.177 765.41 389.594 756.056C390.517 733.666 391.091 711.263 391.318 688.855C390.738 683.754 391.012 671.771 391.182 666.375L388.351 662.314C397.679 627.568 399.094 589.303 402.231 553.477C403.164 542.82 404.882 531.239 404.67 520.658C404.553 514.84 402.179 506.475 400.939 500.505C399.344 492.567 398.561 484.488 398.599 476.392C398.686 466.635 401.908 456.876 402.502 446.569C403.455 430.032 400.695 414.973 399.146 398.843C398.328 390.326 400.417 385.554 398.416 374.696C398.785 373.056 400.375 368.641 401.033 366.962C408.426 348.093 405.208 328.97 407.812 309.735C409.446 297.659 414.437 283.457 417.272 271.292C422.806 247.546 426.477 224.829 423.811 200.403C432 196.653 443.278 192.561 451.988 188.906C463.16 184.314 480.443 183.101 479.779 168.091C478.989 150.25 474.551 131.059 468.347 114.3C467.834 112.916 461.835 110.331 460.938 108.679C457.054 102.43 455.398 86.0463 455.853 79.3244C457.267 77.0421 458.759 75.6002 460.578 73.6487C460.956 56.5976 458.129 42.9115 467.187 27.3333C477.727 9.20733 477.204 6.08673 497.391 0Z" stroke="#000" stroke-width="2" fill="#FF6600"></path>
+                            <path id="_ctl0_MainContentPlaceHolderMaster_camiseta_titular_secundaria" d="M 514.306,0 H 531.221 C 550.102,10.4463 562.353,18.2762 568.647,40.4362 C 569.886,44.8551 570.731,49.375 571.172,53.9429 C 571.558,58.3405 570.154,69.842 572.097,72.4269 C 573.682,73.0856 576.418,73.9633 576.898,75.5538 C 579.58,84.4534 577.261,98.1016 573.31,106.283 C 570.767,111.549 567.526,114.104 562.472,116.27 C 556.365,133.88 552.888,152.962 554.743,171.611 C 556.557,189.848 572.247,183.136 579.908,191.374 C 589.806,195.697 599.017,197.54 608.588,201.217 L 608.678,202.065 C 609.875,213.706 609.033,224.563 610.639,237.233 C 612.449,250.82 614.801,264.329 617.687,277.727 C 619.438,285.455 622.962,297.638 624.087,304.862 C 625.975,317.001 626.709,329.468 628.802,341.992 C 628.784,353.819 627.737,365.87 628.279,377.776 C 629.866,412.53 632.254,447.279 633.288,482.052 C 633.385,485.424 633.006,488.661 632.958,492.012 C 632.777,505.044 629.746,518.617 630.414,531.52 C 631.045,543.702 638.112,554.982 639.712,567.06 C 640.926,574.169 640.325,581.46 640.541,588.631 C 640.782,596.79 642.117,605.256 642.869,613.299 C 644.367,629.216 645.563,643.768 650.916,659 C 652.51,663.529 646.237,665.803 642.64,666.7 C 642.677,677.089 643.26,693.042 642.64,703.04 C 644.24,710.951 644.192,727.475 644.938,736.222 C 647.464,766.547 647.68,796.884 646.652,827.281 C 646.273,838.343 646.7,848.618 644.186,859.561 C 639.164,881.391 631.424,885.049 610.446,882.955 C 607.457,882.366 591.888,882.751 587.177,882.462 C 574.275,881.662 561.566,878.492 549.244,877.397 C 545.668,876.651 533.315,874.491 532.442,872.458 C 530.292,867.441 530.624,848.185 530.276,843.078 C 528.438,816.074 527.69,787.746 522.946,761.199 L 514.306,761.199 Z" display="none" style="display: none;"></path>
+                            <path id="_ctl0_MainContentPlaceHolderMaster_pantalon_titular_principal" d="M391.935 665.978C418.331 673.509 433.296 675.952 460.158 677.666C505.907 680.584 548.207 676.12 593.419 669.659C608.54 667.494 626.51 668.011 642.49 666.279C642.556 672.529 642.322 698.901 643.134 703.04C644.733 710.951 644.685 727.476 645.431 736.222C647.957 766.547 648.174 796.884 647.145 827.281C646.766 838.343 647.193 848.618 644.679 859.561C639.657 881.391 631.917 885.049 610.939 882.955C607.95 882.366 592.381 882.751 587.67 882.462C574.768 881.662 562.059 878.492 549.737 877.397C546.161 876.651 533.808 874.491 532.935 872.458C530.785 867.441 531.117 848.185 530.769 843.078C528.931 816.074 528.183 787.746 523.439 761.199C520.598 788.119 521.68 818.414 520.707 845.622C520.33 856.174 521.19 867.309 520.767 877.836C506.457 882.817 495.046 885.626 479.816 887.287C460.39 889.26 441.963 892.111 422.43 889.488C420.904 889.284 416.798 888.797 415.38 888.893C406.029 884.243 401.245 876.705 394.093 869.703C393.392 869.017 388.631 866.659 387.493 866.106C387.831 853.371 389.255 840.22 389.077 827.389C388.876 812.903 387.79 798.725 388.271 784.209C388.583 774.8 389.67 765.41 390.087 756.056C391.01 733.666 391.585 711.263 391.811 688.855C392.172 681.384 391.989 673.491 391.935 665.978Z" stroke="#000" stroke-width="2" fill="#FF6600"></path>
+                            <path id="_ctl0_MainContentPlaceHolderMaster_pantalon_titular_secundario" d="M 517.185,675.25 C 548.207,676.12 593.419,669.659 608.54,667.494 C 626.51,668.011 642.49,666.279 642.49,666.279 C 642.556,672.529 642.322,698.901 643.134,703.04 C 644.733,710.951 644.685,727.476 645.431,736.222 C 647.957,766.547 648.174,796.884 647.145,827.281 C 646.766,838.343 647.193,848.618 644.679,859.561 C 639.657,881.391 631.917,885.049 610.939,882.955 C 607.95,882.366 592.381,882.751 587.67,882.462 C 574.768,881.662 562.059,878.492 549.737,877.397 C 546.161,876.651 533.808,874.491 532.935,872.458 C 530.785,867.441 531.117,848.185 530.769,843.078 C 528.931,816.074 528.183,787.746 523.439,761.199 L 517.185,761.199 Z" display="none" style="display: none;"></path>
+                            <path d="M496.885 0H530.714C549.595 10.4463 561.847 18.2762 568.141 40.4362C569.379 44.8551 570.224 49.375 570.666 53.9429C571.051 58.3405 569.647 69.842 571.59 72.4269C573.175 73.0856 575.912 73.9633 576.391 75.5538C579.073 84.4534 576.754 98.1016 572.804 106.283C570.261 111.549 567.02 114.104 561.965 116.27C555.859 133.88 552.382 152.962 554.236 171.611C556.05 189.848 571.741 183.136 579.402 191.374C575.966 210.896 574.039 224.291 561.039 240.447C538.793 268.094 504.085 271.157 477.3 247.848C459.063 231.977 453.49 212.204 451.481 188.906C462.653 184.314 479.936 183.101 479.272 168.091C478.482 150.25 474.044 131.059 467.84 114.3C467.328 112.916 461.329 110.331 460.432 108.679C456.548 102.43 454.892 86.0463 455.347 79.3244C456.761 77.0421 458.253 75.6002 460.072 73.6487C460.45 56.5976 457.622 42.9115 466.681 27.3333C477.221 9.20733 476.697 6.08673 496.885 0Z" fill="#222021"/>
+                            <path d="M423.304 200.403C425.971 224.829 422.3 247.546 416.765 271.292C413.93 283.457 408.94 297.659 407.305 309.736C404.701 328.97 407.92 348.093 400.526 366.962C399.868 368.641 398.279 373.056 397.91 374.696C395.296 375.739 388.209 389.075 385.322 392.153C376.239 401.837 365.839 409.609 356.239 418.698C347.99 426.195 339.516 437.399 331.128 444.316C327.241 447.522 313.278 446.5 308.275 447.951C279.199 456.386 249.364 461.691 219.099 463.219C210.957 463.631 202.051 462.939 193.841 463.657C183.055 464.705 172.601 467.036 161.808 468.143C156.188 468.719 149.99 467.578 144.653 468.056C133.13 469.254 121.94 469.347 110.377 469.426C105.047 469.461 99.9945 472.522 94.1565 471.026C82.3716 468.007 70.3239 466.781 58.3716 464.892C54.7081 464.313 49.7224 460.971 46.2716 459.428C41.814 456.945 36.5887 454.453 33.2392 450.608C31.7981 448.953 33.9189 446.533 34.8574 445.133C34.2998 442.683 29.505 440.098 27.1878 438.59C26.4873 437.441 22.7879 434.639 21.4983 433.538C10.5068 424.156 6.45724 411.304 0 399.063V369.494C1.03373 367.701 1.90558 363.062 2.7004 360.679C6.4745 349.365 9.90334 341.332 18.6682 333.148L20.0092 331.279C24.5292 322.893 36.9124 316.934 45.3451 313.584C54.6652 309.88 63.5416 309.233 73.3983 309.116L76.1625 309.254C93.4095 308.864 110.596 316.489 122.949 328.34C137.241 341.81 145.576 360.423 146.109 380.058C146.17 383.13 145.765 385.735 145.145 388.751L145.011 390.386C143.373 402.495 140.115 413.283 132.672 423.214C141.143 428.385 144.187 429.962 150.625 437.487C164.353 434.818 176.405 432.723 189.767 428.047C197.331 425.399 206.235 424.128 213.833 421.193C229.314 415.212 244.442 408.46 260.172 403.123C273.428 398.521 285.931 395.21 299.121 391.226C312.659 387.136 311.346 363.904 315.338 353.715C323.67 332.451 340.349 314.625 349.614 294.059C351.214 290.507 352.815 279.895 353.921 275.194C356.615 263.986 360.477 253.092 365.444 242.691C374.752 223.476 380.563 217.725 399.748 209.48C407.49 206.177 415.347 203.149 423.304 200.403Z" fill="#222021"/>
+                            <path d="M76.1625 309.254C93.4095 308.864 110.596 316.489 122.949 328.34C137.241 341.81 145.576 360.423 146.109 380.058C146.17 383.13 145.765 385.734 145.145 388.751L145.011 390.386C127.577 412.296 92.52 417.535 65.9798 417.637C66.1199 421.242 66.1824 425.255 66.423 428.817C80.4693 429.451 89.0636 433.268 102.453 436.53C106.278 437.461 112.241 436.609 115.957 437.939L115.932 438.735C113.078 440.623 104.104 439.556 100.913 438.749C88.0165 435.486 80.8187 432.244 67.1483 431.312C67.348 434.377 67.8658 437.186 66.7412 439.947L65.821 440.5C63.6378 438.808 63.5476 435.992 63.2066 433.348C63.1332 432.78 63.0641 432.212 62.9973 431.643C51.3544 432.17 32.7414 438.813 27.1878 438.59C26.4873 437.441 22.7879 434.639 21.4983 433.538C10.5068 424.156 6.45724 411.304 0 399.063V369.494C1.03373 367.701 1.90558 363.062 2.7004 360.679C6.4745 349.365 9.90334 341.332 18.6682 333.148L20.0092 331.279C24.5292 322.893 36.9124 316.934 45.3451 313.584C54.6652 309.88 63.5416 309.233 73.3983 309.116L76.1625 309.254Z" fill="#222021"/>
+                            <path d="M0 369.494C1.03373 367.701 1.90558 363.062 2.7004 360.679C6.4745 349.365 9.90334 341.332 18.6682 333.148C19.3301 363.543 29.7026 390.625 61.4059 399.762L61.4895 414.445C45.6871 412.408 32.254 411.06 17.4995 403.676C12.1693 401.008 5.38476 395.714 0.735132 393.699C11.1452 411.649 42.9851 416.063 61.8823 417.826C62.1072 421.602 62.3508 425.377 62.6136 429.15C55.9943 429.759 30.5956 433.678 27.1878 438.59C26.4873 437.441 22.7879 434.639 21.4983 433.538C10.5068 424.156 6.45724 411.304 0 399.063V369.494Z" fill="#222021"/>
+                            <path d="M20.0088 331.279C24.5288 322.893 36.912 316.934 45.3447 313.584C54.6648 309.88 63.5411 309.233 73.3979 309.116C63.0353 326.9 61.358 375.488 61.4374 397.047C38.3814 390.251 26.6613 372.385 22.2507 349.235C21.2453 343.958 22.1834 336.143 20.0088 331.279Z" fill="#222021"/>
+                            <path d="M73.3985 309.116L76.1627 309.254C67.7891 335.275 63.5352 370.466 65.2619 397.624C82.3297 395.621 92.6543 389.784 103.666 375.947C110.582 367.317 115.605 357.329 118.409 346.63C119.336 343.006 120.938 330.716 122.066 329.133L123.009 329.44C123.886 332.038 123.093 335.853 122.714 338.575C119.225 363.614 101.693 390.149 76.8453 398.069C73.0467 399.252 69.114 399.952 65.1404 400.154C65.2138 404.731 65.1849 409.804 65.5494 414.328C94.1122 413.649 122.003 409.958 142.585 388.25C143.326 387.468 144.006 387.472 144.858 387.894L145.145 388.751L145.011 390.386C127.577 412.296 92.5202 417.535 65.98 417.637C66.1201 421.242 66.1827 425.255 66.4232 428.817C80.4695 429.451 89.0638 433.268 102.453 436.53C106.278 437.461 112.241 436.609 115.958 437.939L115.932 438.735C113.078 440.623 104.104 439.556 100.914 438.749C88.0167 435.486 80.8189 432.244 67.1486 431.312C67.3482 434.377 67.8661 437.186 66.7414 439.947L65.8212 440.5C63.638 438.808 63.5478 435.992 63.2068 433.348C63.1334 432.78 63.0643 432.212 62.9975 431.643C51.3546 432.17 32.7417 438.813 27.188 438.59C30.5958 433.678 55.9946 429.759 62.6138 429.15C62.351 425.377 62.1074 421.602 61.8825 417.826C42.9853 416.063 11.1454 411.649 0.735352 393.699C5.38497 395.714 12.1695 401.008 17.4997 403.676C32.2543 411.06 45.6873 412.408 61.4898 414.445L61.4062 399.762C29.7028 390.625 19.3303 363.543 18.6685 333.148L20.0095 331.279C22.184 336.143 21.246 343.958 22.2513 349.235C26.6619 372.385 38.3821 390.251 61.438 397.047C61.3586 375.488 63.036 326.9 73.3985 309.116Z" fill="#FEFEFD"/>
+                            <path d="M608.081 201.217C625.949 207.638 642.741 206.544 657.795 219.87C671.537 232.029 684.642 249.969 691.294 266.938C701.747 293.601 720.229 302.406 739.697 320.839C747.413 328.142 753.223 341.69 762.418 348.162C772.39 355.178 786.938 355.848 798.792 361.738C814.111 369.347 826.332 380.702 839.737 389.333C855.392 399.412 892.133 419.405 909.671 418.914C918.77 412.187 925.572 408.592 936.615 405.367C942.118 403.758 954.699 394.977 959.487 399.963C960.623 403.23 960.425 405.222 959.234 408.259C956.786 414.505 942.424 416.04 945.546 423.889C948.523 431.398 951.157 435.239 958.218 438.611C969.284 443.898 980.675 445.253 992.433 441.695C995.777 440.684 1000.44 438.962 1003.8 438.865C1006.07 438.798 1007.47 439.823 1008.28 441.899C1007.95 444.348 1006.79 445.553 1005.35 447.599C1008.12 449.157 1009.77 447.504 1014 450.745V453.389C1006.93 460.123 1004.15 461.818 995.596 466.321C985.101 471.841 983.442 475.514 970.806 475.732C943.862 476.198 924.977 460.275 901.071 451.309C898.695 450.418 892.855 451.315 890.203 450.532C884.634 448.367 880.273 446.479 874.409 445.091C838.029 436.485 798.907 433.678 766.61 413.157C759.928 408.908 753.397 405.632 745.5 404.969C735.21 404.105 731.096 394.434 722.995 389.669C716.349 386.055 707.033 384.548 700.009 381.526C681.978 373.327 659.214 362.043 645.153 348.115C641.743 344.74 634.844 333.245 631.747 328.753C630.442 333.124 629.293 337.54 628.295 341.993C626.202 329.468 625.468 317.001 623.58 304.862C622.455 297.638 618.931 285.455 617.181 277.727C614.294 264.329 611.942 250.82 610.132 237.233C608.526 224.563 609.368 213.706 608.171 202.065L608.081 201.217Z" fill="#222021"/>
+                            <path d="M998.099 451.225L998.983 451.323L998.928 452.02C995.182 454.67 989.57 455.969 985.138 456.931L983.917 456.61L983.941 456.019C987.351 453.884 994.093 452.258 998.099 451.225Z" fill="#F0EDEE"/>
+                            <path d="M414.38 888.893C415.798 888.797 419.904 889.284 421.43 889.488C440.963 892.111 459.39 889.26 478.816 887.287C471.391 914.008 480.026 943.316 475.252 972.167C472.291 990.064 465.944 997.168 462.295 1011.08C456.864 1031.78 455.97 1061.15 453.426 1082.61C452.494 1090.48 450.164 1108.6 451.22 1115.9C450.975 1120.02 451.095 1125.59 451.055 1129.82C447.727 1129.25 442.432 1128.27 439.134 1129.28C437.937 1129.65 436.745 1130.04 435.558 1130.44C433.735 1127.65 436.141 1121.79 432.029 1117.57C426.344 1111.73 417.522 1111.57 410.127 1111.18C410.183 1104.98 411.096 1099.46 411.722 1093.36C413.158 1079.34 411.001 1066.1 410.195 1052.25L407.019 987.471C406.658 979.987 405.41 972.029 405.832 964.473C406.782 947.431 408.575 930.028 410.741 913.124C411.717 905.508 414.51 896.593 414.38 888.893Z" fill="#222021"/>
+                            <path d="M548.738 877.397C561.06 878.492 573.769 881.662 586.671 882.462C591.382 882.751 606.951 882.366 609.94 882.955C609.802 898.157 613.398 911.451 614.932 926.292C617.319 949.368 615.563 973.671 613.422 996.621C611.985 1011.89 610.463 1027.16 608.857 1042.41C606.524 1063.02 604.052 1082.98 603.673 1103.81C592.107 1104.68 575.566 1106.06 577.593 1122.44C577.726 1123.49 577.88 1124.53 578.056 1125.57C574.838 1125.23 571.584 1124.82 568.354 1124.82C568.378 1122.3 568.911 1112.56 568.709 1111.04C572.051 1103.02 569.138 1092.17 568.313 1083.53C566.087 1060.21 563.778 1037.42 558.619 1014.52C555.127 999.316 551.126 984.385 548.209 969.045C543.147 942.42 551.81 916.21 549.447 889.639C549.087 885.584 548.933 881.464 548.738 877.397Z" fill="#222021"/>
+                            <path d="M410.127 1111.18C417.522 1111.57 426.344 1111.73 432.029 1117.57C436.141 1121.79 433.735 1127.65 435.558 1130.44C436.745 1130.04 437.937 1129.65 439.134 1129.28C442.432 1128.27 447.727 1129.25 451.056 1129.82C451.095 1125.59 450.976 1120.02 451.221 1115.9C462.705 1127.07 457.219 1138.45 459.309 1152.37C459.838 1155.9 462.434 1162.23 463.538 1165.83C470.813 1189.55 446.015 1193.22 430.76 1201.49C424.855 1204.79 418.881 1210.37 413.913 1214.83C400.921 1226.48 385.412 1230.06 368.838 1229.72C338.773 1229.1 339.164 1219.61 353.411 1196.33C355.101 1193.57 357.133 1191.58 359.47 1189.34C363.279 1183.87 369.259 1184.09 373.636 1175.98C380.045 1163.39 378.819 1159.31 383.373 1148.58C385.715 1142.69 386.859 1140.45 390.496 1135.24C396.293 1122.17 392.486 1113.46 410.127 1111.18Z" fill="#FEFEFD"/>
+                            <path d="M359.471 1189.34C363.279 1183.87 369.259 1184.09 373.637 1175.98C374.387 1180.52 372.703 1182.55 370.422 1186.51C376.383 1187.71 383.401 1189.43 389.442 1188.61C395.373 1187.81 410.768 1175.6 415.255 1184.57C412.135 1189 385.35 1205.44 378.169 1206.33C371.899 1207.1 364.487 1205.09 359.032 1201.84C359.179 1199.06 359.793 1191.73 359.471 1189.34Z" fill="#222021"/>
+                            <path d="M390.496 1135.24L391.837 1137.47C404.679 1133.06 421.355 1137.92 431.101 1147.11C423.509 1146.23 416.457 1145.19 408.78 1145.37C414.041 1148.67 415.492 1149.42 419.163 1154.42C412.497 1151.68 406.867 1148.15 400.118 1146.1C405.159 1149.99 411.488 1154.6 415.358 1159.56C411.808 1160.08 408.244 1160.5 404.67 1160.83L409.84 1167.44C402.83 1165.69 400.355 1163.63 394.633 1161.73C391.38 1161.04 389.142 1162.16 386.094 1159.93C384.586 1159.28 383.201 1158.93 382.31 1157.63C385.012 1155.49 401.964 1156.34 406.554 1156.35C403.354 1153.55 400.177 1150.72 397.025 1147.87C393.44 1148.42 390.281 1148.92 386.742 1149.71L386.067 1150.09C385.003 1149.35 384.525 1149.15 383.373 1148.58C385.715 1142.69 386.859 1140.45 390.496 1135.24Z" fill="#222021"/>
+                            <path d="M390.496 1135.24L391.837 1137.47L392.091 1138.3C398.015 1139.75 411.09 1138.58 415.656 1141.03L415.86 1141.62C410.609 1144.35 391.021 1139.34 388.531 1142.26C389 1143.77 389.164 1143.86 390.065 1145.12C389.519 1146.65 388.494 1147.2 387.196 1148.24L386.742 1149.71L386.067 1150.09C385.003 1149.35 384.525 1149.15 383.373 1148.58C385.715 1142.69 386.859 1140.45 390.496 1135.24Z" fill="#F0EDEE"/>
+                            <path d="M386.095 1159.93C389.143 1162.16 391.38 1161.04 394.633 1161.73C392.323 1161.85 389.558 1161.7 387.705 1162.85C388.692 1164.19 398.011 1166.55 401.691 1168.46L402.491 1168.88C397.81 1171.87 393.628 1173.3 388.493 1175.3C390.786 1176.23 394.08 1177.39 395.203 1179.7L394.105 1180.05C391.132 1179.78 388.34 1177.86 385.699 1176.35C382.682 1177.22 379.205 1177.91 376.105 1178.59C378.92 1176.45 379.176 1175.89 380.286 1172.62C382.066 1171.69 383.113 1172.42 385.527 1172.97C387.833 1171.98 390.688 1171.09 391.667 1168.88C389.42 1167.11 385.738 1168.25 382.008 1166.37L381.698 1165.26C382.413 1162.77 384.823 1162.52 386.095 1159.93Z" fill="#393838"/>
+                            <path d="M603.672 1103.81C621.12 1107.17 615.118 1118.15 622.659 1128.34C625.125 1131.97 628.632 1136.92 629.564 1141.26C633.1 1153.15 632.793 1156.99 641.117 1166.38L644.912 1170.57C652.183 1178.8 667.892 1196.73 663.917 1209.06C662.991 1211.95 659.196 1215.1 656.093 1216.06C645.038 1221.34 607.492 1220.84 600.037 1209.32C588.185 1191 587.266 1190.35 564.418 1183.52C547.417 1178.44 561.556 1158.4 561.999 1148.82C562.781 1131.88 560.649 1127.64 568.708 1111.04C568.91 1112.56 568.377 1122.3 568.353 1124.82C571.583 1124.82 574.838 1125.23 578.055 1125.57C577.88 1124.53 577.725 1123.49 577.592 1122.44C575.566 1106.06 592.106 1104.68 603.672 1103.81Z" fill="#FEFEFD"/>
+                            <path d="M601.01 1137.5C597.067 1137.57 585.321 1138.43 582.872 1135.77C586.048 1128.42 614.282 1127.88 621.842 1129.49L622.66 1128.34C625.126 1131.97 628.632 1136.92 629.564 1141.26L628.379 1143.71C624.867 1143.6 618.492 1140.74 614.998 1139.36C610.722 1142.55 608.538 1144.59 604.755 1148.36C609.813 1148.72 624.163 1147.16 627.598 1149.52L628.025 1149.06L627.995 1149.21C626.726 1149.98 625.499 1150.49 624.843 1151.76C625.865 1152.95 628.013 1155.37 628.428 1156.52C629.39 1159.23 617.524 1160.35 615.9 1163.33C621.673 1167.91 629.179 1159.58 632.271 1163.25C631.368 1164.45 631.104 1164.5 631.008 1165.94C632.036 1167.04 632.71 1167.51 632.968 1169C631.182 1169.63 626.84 1168.54 624.596 1168.17C619.731 1169.86 615.75 1172.43 610.12 1174.28C612.52 1172.06 615.383 1170.08 618.029 1168.13C614.757 1167.51 606.482 1167.25 607.672 1162.7C611.347 1159.42 619.953 1157.59 624.987 1156.15C608.959 1149.52 610.944 1159.15 603.017 1158.47L602.482 1157.6C603.186 1155.7 603.511 1155.4 605.014 1154.04C601.911 1152.65 598.119 1153.37 597.769 1149.71C600.02 1144.62 608.232 1141.06 612.267 1136.41C607.648 1137.96 595.175 1145.62 592.145 1144.65L592.15 1143.55C594.704 1140.86 597.79 1139.35 601.01 1137.5Z" fill="#222021"/>
+                            <path d="M622.66 1128.34C625.126 1131.97 628.632 1136.92 629.564 1141.26L628.379 1143.71C626.262 1138.79 623.869 1140.42 621.71 1137.16L623.839 1135.64L623.977 1134.41C620.38 1129.65 607.859 1136.65 597.7 1133.02L597.855 1132.42C605.489 1130.01 616.177 1131.97 621.601 1130.49L621.842 1129.49L622.66 1128.34Z" fill="#F0EDEE"/>
+                            <path d="M641.117 1166.38L644.912 1170.57C644.955 1175.68 650.139 1180.7 649.05 1186.9C647.517 1195.65 631.056 1196.95 624.422 1194.81C614.835 1191.7 599.041 1182.62 593.836 1173.7C596.876 1173.06 600.524 1172.68 603.655 1172.28C621.048 1184.46 623.075 1180.46 641.821 1175.65C639.987 1171.31 638.02 1170.3 641.117 1166.38Z" fill="#222021"/>
+                        </svg>
+                    </div>
+                    
+                    <div class="nodo">
+                        <span id="_ctl0_MainContentPlaceHolderMaster_etiquetaCamisetaResLabel" class="label">Equipación Reserva</span>
+                                                
+                        
+                        <svg width="150" height="auto" viewBox="0 0 1014 1232" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path id="_ctl0_MainContentPlaceHolderMaster_camiseta_reserva_principal" d="M497.391 0H531.221C550.102 10.4463 562.353 18.2762 568.647 40.4362C569.886 44.8551 570.731 49.375 571.172 53.9429C571.558 58.3405 570.154 69.842 572.097 72.4269C573.682 73.0856 576.418 73.9633 576.898 75.5538C579.58 84.4534 577.261 98.1016 573.31 106.283C570.767 111.549 567.526 114.104 562.472 116.27C556.365 133.88 552.888 152.962 554.743 171.611C556.557 189.848 572.247 183.136 579.908 191.374C589.806 195.697 599.017 197.54 608.588 201.217L608.678 202.065C609.875 213.706 609.033 224.563 610.639 237.233C612.449 250.82 614.801 264.329 617.687 277.727C619.438 285.455 622.962 297.638 624.087 304.862C625.975 317.001 626.709 329.468 628.802 341.992C628.784 353.819 627.737 365.87 628.279 377.776C629.866 412.53 632.254 447.279 633.288 482.052C633.385 485.424 633.006 488.661 632.958 492.012C632.777 505.044 629.746 518.617 630.414 531.52C631.045 543.702 638.112 554.982 639.712 567.06C640.926 574.169 640.325 581.46 640.541 588.631C640.782 596.79 642.117 605.256 642.869 613.299C644.367 629.216 645.563 643.768 650.916 659C652.51 663.529 646.237 665.803 642.64 666.7C642.677 677.089 643.26 693.042 642.64 703.04C644.24 710.951 644.192 727.475 644.938 736.222C647.464 766.547 647.68 796.884 646.652 827.281C646.273 838.343 646.7 848.618 644.186 859.561C639.164 881.391 631.424 885.049 610.446 882.955C607.457 882.366 591.888 882.751 587.177 882.462C574.275 881.662 561.566 878.492 549.244 877.397C545.668 876.651 533.315 874.491 532.442 872.458C530.292 867.441 530.624 848.185 530.276 843.078C528.438 816.074 527.69 787.746 522.946 761.199C520.105 788.119 521.187 818.414 520.214 845.622C519.836 856.174 520.696 867.309 520.274 877.836C505.964 882.817 494.553 885.626 479.323 887.287C459.897 889.26 441.47 892.111 421.937 889.488C420.411 889.284 416.305 888.797 414.887 888.893C405.536 884.243 400.752 876.705 393.6 869.703C392.899 869.017 388.138 866.659 387 866.106C387.338 853.371 388.762 840.22 388.584 827.389C388.383 812.903 387.297 798.725 387.778 784.209C388.09 774.8 389.177 765.41 389.594 756.056C390.517 733.666 391.091 711.263 391.318 688.855C390.738 683.754 391.012 671.771 391.182 666.375L388.351 662.314C397.679 627.568 399.094 589.303 402.231 553.477C403.164 542.82 404.882 531.239 404.67 520.658C404.553 514.84 402.179 506.475 400.939 500.505C399.344 492.567 398.561 484.488 398.599 476.392C398.686 466.635 401.908 456.876 402.502 446.569C403.455 430.032 400.695 414.973 399.146 398.843C398.328 390.326 400.417 385.554 398.416 374.696C398.785 373.056 400.375 368.641 401.033 366.962C408.426 348.093 405.208 328.97 407.812 309.735C409.446 297.659 414.437 283.457 417.272 271.292C422.806 247.546 426.477 224.829 423.811 200.403C432 196.653 443.278 192.561 451.988 188.906C463.16 184.314 480.443 183.101 479.779 168.091C478.989 150.25 474.551 131.059 468.347 114.3C467.834 112.916 461.835 110.331 460.938 108.679C457.054 102.43 455.398 86.0463 455.853 79.3244C457.267 77.0421 458.759 75.6002 460.578 73.6487C460.956 56.5976 458.129 42.9115 467.187 27.3333C477.727 9.20733 477.204 6.08673 497.391 0Z" stroke="#000" stroke-width="2" fill="#404040"></path>
+                            <path id="_ctl0_MainContentPlaceHolderMaster_camiseta_reserva_secundaria" d="M 514.306,0 H 531.221 C 550.102,10.4463 562.353,18.2762 568.647,40.4362 C 569.886,44.8551 570.731,49.375 571.172,53.9429 C 571.558,58.3405 570.154,69.842 572.097,72.4269 C 573.682,73.0856 576.418,73.9633 576.898,75.5538 C 579.58,84.4534 577.261,98.1016 573.31,106.283 C 570.767,111.549 567.526,114.104 562.472,116.27 C 556.365,133.88 552.888,152.962 554.743,171.611 C 556.557,189.848 572.247,183.136 579.908,191.374 C 589.806,195.697 599.017,197.54 608.588,201.217 L 608.678,202.065 C 609.875,213.706 609.033,224.563 610.639,237.233 C 612.449,250.82 614.801,264.329 617.687,277.727 C 619.438,285.455 622.962,297.638 624.087,304.862 C 625.975,317.001 626.709,329.468 628.802,341.992 C 628.784,353.819 627.737,365.87 628.279,377.776 C 629.866,412.53 632.254,447.279 633.288,482.052 C 633.385,485.424 633.006,488.661 632.958,492.012 C 632.777,505.044 629.746,518.617 630.414,531.52 C 631.045,543.702 638.112,554.982 639.712,567.06 C 640.926,574.169 640.325,581.46 640.541,588.631 C 640.782,596.79 642.117,605.256 642.869,613.299 C 644.367,629.216 645.563,643.768 650.916,659 C 652.51,663.529 646.237,665.803 642.64,666.7 C 642.677,677.089 643.26,693.042 642.64,703.04 C 644.24,710.951 644.192,727.475 644.938,736.222 C 647.464,766.547 647.68,796.884 646.652,827.281 C 646.273,838.343 646.7,848.618 644.186,859.561 C 639.164,881.391 631.424,885.049 610.446,882.955 C 607.457,882.366 591.888,882.751 587.177,882.462 C 574.275,881.662 561.566,878.492 549.244,877.397 C 545.668,876.651 533.315,874.491 532.442,872.458 C 530.292,867.441 530.624,848.185 530.276,843.078 C 528.438,816.074 527.69,787.746 522.946,761.199 L 514.306,761.199 Z" display="none" style="display: none;"></path>
+                            <path id="_ctl0_MainContentPlaceHolderMaster_pantalon_reserva_principal" d="M391.935 665.978C418.331 673.509 433.296 675.952 460.158 677.666C505.907 680.584 548.207 676.12 593.419 669.659C608.54 667.494 626.51 668.011 642.49 666.279C642.556 672.529 642.322 698.901 643.134 703.04C644.733 710.951 644.685 727.476 645.431 736.222C647.957 766.547 648.174 796.884 647.145 827.281C646.766 838.343 647.193 848.618 644.679 859.561C639.657 881.391 631.917 885.049 610.939 882.955C607.95 882.366 592.381 882.751 587.67 882.462C574.768 881.662 562.059 878.492 549.737 877.397C546.161 876.651 533.808 874.491 532.935 872.458C530.785 867.441 531.117 848.185 530.769 843.078C528.931 816.074 528.183 787.746 523.439 761.199C520.598 788.119 521.68 818.414 520.707 845.622C520.33 856.174 521.19 867.309 520.767 877.836C506.457 882.817 495.046 885.626 479.816 887.287C460.39 889.26 441.963 892.111 422.43 889.488C420.904 889.284 416.798 888.797 415.38 888.893C406.029 884.243 401.245 876.705 394.093 869.703C393.392 869.017 388.631 866.659 387.493 866.106C387.831 853.371 389.255 840.22 389.077 827.389C388.876 812.903 387.79 798.725 388.271 784.209C388.583 774.8 389.67 765.41 390.087 756.056C391.01 733.666 391.585 711.263 391.811 688.855C392.172 681.384 391.989 673.491 391.935 665.978Z" stroke="#000" stroke-width="2" fill="#404040"></path>
+                            <path id="_ctl0_MainContentPlaceHolderMaster_pantalon_reserva_secundario" d="M 517.185,675.25 C 548.207,676.12 593.419,669.659 608.54,667.494 C 626.51,668.011 642.49,666.279 642.49,666.279 C 642.556,672.529 642.322,698.901 643.134,703.04 C 644.733,710.951 644.685,727.476 645.431,736.222 C 647.957,766.547 648.174,796.884 647.145,827.281 C 646.766,838.343 647.193,848.618 644.679,859.561 C 639.657,881.391 631.917,885.049 610.939,882.955 C 607.95,882.366 592.381,882.751 587.67,882.462 C 574.768,881.662 562.059,878.492 549.737,877.397 C 546.161,876.651 533.808,874.491 532.935,872.458 C 530.785,867.441 531.117,848.185 530.769,843.078 C 528.931,816.074 528.183,787.746 523.439,761.199 L 517.185,761.199 Z" display="none" style="display: none;"></path>
+                            <path d="M496.885 0H530.714C549.595 10.4463 561.847 18.2762 568.141 40.4362C569.379 44.8551 570.224 49.375 570.666 53.9429C571.051 58.3405 569.647 69.842 571.59 72.4269C573.175 73.0856 575.912 73.9633 576.391 75.5538C579.073 84.4534 576.754 98.1016 572.804 106.283C570.261 111.549 567.02 114.104 561.965 116.27C555.859 133.88 552.382 152.962 554.236 171.611C556.05 189.848 571.741 183.136 579.402 191.374C575.966 210.896 574.039 224.291 561.039 240.447C538.793 268.094 504.085 271.157 477.3 247.848C459.063 231.977 453.49 212.204 451.481 188.906C462.653 184.314 479.936 183.101 479.272 168.091C478.482 150.25 474.044 131.059 467.84 114.3C467.328 112.916 461.329 110.331 460.432 108.679C456.548 102.43 454.892 86.0463 455.347 79.3244C456.761 77.0421 458.253 75.6002 460.072 73.6487C460.45 56.5976 457.622 42.9115 466.681 27.3333C477.221 9.20733 476.697 6.08673 496.885 0Z" fill="#222021"/>
+                            <path d="M423.304 200.403C425.971 224.829 422.3 247.546 416.765 271.292C413.93 283.457 408.94 297.659 407.305 309.736C404.701 328.97 407.92 348.093 400.526 366.962C399.868 368.641 398.279 373.056 397.91 374.696C395.296 375.739 388.209 389.075 385.322 392.153C376.239 401.837 365.839 409.609 356.239 418.698C347.99 426.195 339.516 437.399 331.128 444.316C327.241 447.522 313.278 446.5 308.275 447.951C279.199 456.386 249.364 461.691 219.099 463.219C210.957 463.631 202.051 462.939 193.841 463.657C183.055 464.705 172.601 467.036 161.808 468.143C156.188 468.719 149.99 467.578 144.653 468.056C133.13 469.254 121.94 469.347 110.377 469.426C105.047 469.461 99.9945 472.522 94.1565 471.026C82.3716 468.007 70.3239 466.781 58.3716 464.892C54.7081 464.313 49.7224 460.971 46.2716 459.428C41.814 456.945 36.5887 454.453 33.2392 450.608C31.7981 448.953 33.9189 446.533 34.8574 445.133C34.2998 442.683 29.505 440.098 27.1878 438.59C26.4873 437.441 22.7879 434.639 21.4983 433.538C10.5068 424.156 6.45724 411.304 0 399.063V369.494C1.03373 367.701 1.90558 363.062 2.7004 360.679C6.4745 349.365 9.90334 341.332 18.6682 333.148L20.0092 331.279C24.5292 322.893 36.9124 316.934 45.3451 313.584C54.6652 309.88 63.5416 309.233 73.3983 309.116L76.1625 309.254C93.4095 308.864 110.596 316.489 122.949 328.34C137.241 341.81 145.576 360.423 146.109 380.058C146.17 383.13 145.765 385.735 145.145 388.751L145.011 390.386C143.373 402.495 140.115 413.283 132.672 423.214C141.143 428.385 144.187 429.962 150.625 437.487C164.353 434.818 176.405 432.723 189.767 428.047C197.331 425.399 206.235 424.128 213.833 421.193C229.314 415.212 244.442 408.46 260.172 403.123C273.428 398.521 285.931 395.21 299.121 391.226C312.659 387.136 311.346 363.904 315.338 353.715C323.67 332.451 340.349 314.625 349.614 294.059C351.214 290.507 352.815 279.895 353.921 275.194C356.615 263.986 360.477 253.092 365.444 242.691C374.752 223.476 380.563 217.725 399.748 209.48C407.49 206.177 415.347 203.149 423.304 200.403Z" fill="#222021"/>
+                            <path d="M76.1625 309.254C93.4095 308.864 110.596 316.489 122.949 328.34C137.241 341.81 145.576 360.423 146.109 380.058C146.17 383.13 145.765 385.734 145.145 388.751L145.011 390.386C127.577 412.296 92.52 417.535 65.9798 417.637C66.1199 421.242 66.1824 425.255 66.423 428.817C80.4693 429.451 89.0636 433.268 102.453 436.53C106.278 437.461 112.241 436.609 115.957 437.939L115.932 438.735C113.078 440.623 104.104 439.556 100.913 438.749C88.0165 435.486 80.8187 432.244 67.1483 431.312C67.348 434.377 67.8658 437.186 66.7412 439.947L65.821 440.5C63.6378 438.808 63.5476 435.992 63.2066 433.348C63.1332 432.78 63.0641 432.212 62.9973 431.643C51.3544 432.17 32.7414 438.813 27.1878 438.59C26.4873 437.441 22.7879 434.639 21.4983 433.538C10.5068 424.156 6.45724 411.304 0 399.063V369.494C1.03373 367.701 1.90558 363.062 2.7004 360.679C6.4745 349.365 9.90334 341.332 18.6682 333.148L20.0092 331.279C24.5292 322.893 36.9124 316.934 45.3451 313.584C54.6652 309.88 63.5416 309.233 73.3983 309.116L76.1625 309.254Z" fill="#222021"/>
+                            <path d="M0 369.494C1.03373 367.701 1.90558 363.062 2.7004 360.679C6.4745 349.365 9.90334 341.332 18.6682 333.148C19.3301 363.543 29.7026 390.625 61.4059 399.762L61.4895 414.445C45.6871 412.408 32.254 411.06 17.4995 403.676C12.1693 401.008 5.38476 395.714 0.735132 393.699C11.1452 411.649 42.9851 416.063 61.8823 417.826C62.1072 421.602 62.3508 425.377 62.6136 429.15C55.9943 429.759 30.5956 433.678 27.1878 438.59C26.4873 437.441 22.7879 434.639 21.4983 433.538C10.5068 424.156 6.45724 411.304 0 399.063V369.494Z" fill="#222021"/>
+                            <path d="M20.0088 331.279C24.5288 322.893 36.912 316.934 45.3447 313.584C54.6648 309.88 63.5411 309.233 73.3979 309.116C63.0353 326.9 61.358 375.488 61.4374 397.047C38.3814 390.251 26.6613 372.385 22.2507 349.235C21.2453 343.958 22.1834 336.143 20.0088 331.279Z" fill="#222021"/>
+                            <path d="M73.3985 309.116L76.1627 309.254C67.7891 335.275 63.5352 370.466 65.2619 397.624C82.3297 395.621 92.6543 389.784 103.666 375.947C110.582 367.317 115.605 357.329 118.409 346.63C119.336 343.006 120.938 330.716 122.066 329.133L123.009 329.44C123.886 332.038 123.093 335.853 122.714 338.575C119.225 363.614 101.693 390.149 76.8453 398.069C73.0467 399.252 69.114 399.952 65.1404 400.154C65.2138 404.731 65.1849 409.804 65.5494 414.328C94.1122 413.649 122.003 409.958 142.585 388.25C143.326 387.468 144.006 387.472 144.858 387.894L145.145 388.751L145.011 390.386C127.577 412.296 92.5202 417.535 65.98 417.637C66.1201 421.242 66.1827 425.255 66.4232 428.817C80.4695 429.451 89.0638 433.268 102.453 436.53C106.278 437.461 112.241 436.609 115.958 437.939L115.932 438.735C113.078 440.623 104.104 439.556 100.914 438.749C88.0167 435.486 80.8189 432.244 67.1486 431.312C67.3482 434.377 67.8661 437.186 66.7414 439.947L65.8212 440.5C63.638 438.808 63.5478 435.992 63.2068 433.348C63.1334 432.78 63.0643 432.212 62.9975 431.643C51.3546 432.17 32.7417 438.813 27.188 438.59C30.5958 433.678 55.9946 429.759 62.6138 429.15C62.351 425.377 62.1074 421.602 61.8825 417.826C42.9853 416.063 11.1454 411.649 0.735352 393.699C5.38497 395.714 12.1695 401.008 17.4997 403.676C32.2543 411.06 45.6873 412.408 61.4898 414.445L61.4062 399.762C29.7028 390.625 19.3303 363.543 18.6685 333.148L20.0095 331.279C22.184 336.143 21.246 343.958 22.2513 349.235C26.6619 372.385 38.3821 390.251 61.438 397.047C61.3586 375.488 63.036 326.9 73.3985 309.116Z" fill="#FEFEFD"/>
+                            <path d="M608.081 201.217C625.949 207.638 642.741 206.544 657.795 219.87C671.537 232.029 684.642 249.969 691.294 266.938C701.747 293.601 720.229 302.406 739.697 320.839C747.413 328.142 753.223 341.69 762.418 348.162C772.39 355.178 786.938 355.848 798.792 361.738C814.111 369.347 826.332 380.702 839.737 389.333C855.392 399.412 892.133 419.405 909.671 418.914C918.77 412.187 925.572 408.592 936.615 405.367C942.118 403.758 954.699 394.977 959.487 399.963C960.623 403.23 960.425 405.222 959.234 408.259C956.786 414.505 942.424 416.04 945.546 423.889C948.523 431.398 951.157 435.239 958.218 438.611C969.284 443.898 980.675 445.253 992.433 441.695C995.777 440.684 1000.44 438.962 1003.8 438.865C1006.07 438.798 1007.47 439.823 1008.28 441.899C1007.95 444.348 1006.79 445.553 1005.35 447.599C1008.12 449.157 1009.77 447.504 1014 450.745V453.389C1006.93 460.123 1004.15 461.818 995.596 466.321C985.101 471.841 983.442 475.514 970.806 475.732C943.862 476.198 924.977 460.275 901.071 451.309C898.695 450.418 892.855 451.315 890.203 450.532C884.634 448.367 880.273 446.479 874.409 445.091C838.029 436.485 798.907 433.678 766.61 413.157C759.928 408.908 753.397 405.632 745.5 404.969C735.21 404.105 731.096 394.434 722.995 389.669C716.349 386.055 707.033 384.548 700.009 381.526C681.978 373.327 659.214 362.043 645.153 348.115C641.743 344.74 634.844 333.245 631.747 328.753C630.442 333.124 629.293 337.54 628.295 341.993C626.202 329.468 625.468 317.001 623.58 304.862C622.455 297.638 618.931 285.455 617.181 277.727C614.294 264.329 611.942 250.82 610.132 237.233C608.526 224.563 609.368 213.706 608.171 202.065L608.081 201.217Z" fill="#222021"/>
+                            <path d="M998.099 451.225L998.983 451.323L998.928 452.02C995.182 454.67 989.57 455.969 985.138 456.931L983.917 456.61L983.941 456.019C987.351 453.884 994.093 452.258 998.099 451.225Z" fill="#F0EDEE"/>
+                            <path d="M414.38 888.893C415.798 888.797 419.904 889.284 421.43 889.488C440.963 892.111 459.39 889.26 478.816 887.287C471.391 914.008 480.026 943.316 475.252 972.167C472.291 990.064 465.944 997.168 462.295 1011.08C456.864 1031.78 455.97 1061.15 453.426 1082.61C452.494 1090.48 450.164 1108.6 451.22 1115.9C450.975 1120.02 451.095 1125.59 451.055 1129.82C447.727 1129.25 442.432 1128.27 439.134 1129.28C437.937 1129.65 436.745 1130.04 435.558 1130.44C433.735 1127.65 436.141 1121.79 432.029 1117.57C426.344 1111.73 417.522 1111.57 410.127 1111.18C410.183 1104.98 411.096 1099.46 411.722 1093.36C413.158 1079.34 411.001 1066.1 410.195 1052.25L407.019 987.471C406.658 979.987 405.41 972.029 405.832 964.473C406.782 947.431 408.575 930.028 410.741 913.124C411.717 905.508 414.51 896.593 414.38 888.893Z" fill="#222021"/>
+                            <path d="M548.738 877.397C561.06 878.492 573.769 881.662 586.671 882.462C591.382 882.751 606.951 882.366 609.94 882.955C609.802 898.157 613.398 911.451 614.932 926.292C617.319 949.368 615.563 973.671 613.422 996.621C611.985 1011.89 610.463 1027.16 608.857 1042.41C606.524 1063.02 604.052 1082.98 603.673 1103.81C592.107 1104.68 575.566 1106.06 577.593 1122.44C577.726 1123.49 577.88 1124.53 578.056 1125.57C574.838 1125.23 571.584 1124.82 568.354 1124.82C568.378 1122.3 568.911 1112.56 568.709 1111.04C572.051 1103.02 569.138 1092.17 568.313 1083.53C566.087 1060.21 563.778 1037.42 558.619 1014.52C555.127 999.316 551.126 984.385 548.209 969.045C543.147 942.42 551.81 916.21 549.447 889.639C549.087 885.584 548.933 881.464 548.738 877.397Z" fill="#222021"/>
+                            <path d="M410.127 1111.18C417.522 1111.57 426.344 1111.73 432.029 1117.57C436.141 1121.79 433.735 1127.65 435.558 1130.44C436.745 1130.04 437.937 1129.65 439.134 1129.28C442.432 1128.27 447.727 1129.25 451.056 1129.82C451.095 1125.59 450.976 1120.02 451.221 1115.9C462.705 1127.07 457.219 1138.45 459.309 1152.37C459.838 1155.9 462.434 1162.23 463.538 1165.83C470.813 1189.55 446.015 1193.22 430.76 1201.49C424.855 1204.79 418.881 1210.37 413.913 1214.83C400.921 1226.48 385.412 1230.06 368.838 1229.72C338.773 1229.1 339.164 1219.61 353.411 1196.33C355.101 1193.57 357.133 1191.58 359.47 1189.34C363.279 1183.87 369.259 1184.09 373.636 1175.98C380.045 1163.39 378.819 1159.31 383.373 1148.58C385.715 1142.69 386.859 1140.45 390.496 1135.24C396.293 1122.17 392.486 1113.46 410.127 1111.18Z" fill="#FEFEFD"/>
+                            <path d="M359.471 1189.34C363.279 1183.87 369.259 1184.09 373.637 1175.98C374.387 1180.52 372.703 1182.55 370.422 1186.51C376.383 1187.71 383.401 1189.43 389.442 1188.61C395.373 1187.81 410.768 1175.6 415.255 1184.57C412.135 1189 385.35 1205.44 378.169 1206.33C371.899 1207.1 364.487 1205.09 359.032 1201.84C359.179 1199.06 359.793 1191.73 359.471 1189.34Z" fill="#222021"/>
+                            <path d="M390.496 1135.24L391.837 1137.47C404.679 1133.06 421.355 1137.92 431.101 1147.11C423.509 1146.23 416.457 1145.19 408.78 1145.37C414.041 1148.67 415.492 1149.42 419.163 1154.42C412.497 1151.68 406.867 1148.15 400.118 1146.1C405.159 1149.99 411.488 1154.6 415.358 1159.56C411.808 1160.08 408.244 1160.5 404.67 1160.83L409.84 1167.44C402.83 1165.69 400.355 1163.63 394.633 1161.73C391.38 1161.04 389.142 1162.16 386.094 1159.93C384.586 1159.28 383.201 1158.93 382.31 1157.63C385.012 1155.49 401.964 1156.34 406.554 1156.35C403.354 1153.55 400.177 1150.72 397.025 1147.87C393.44 1148.42 390.281 1148.92 386.742 1149.71L386.067 1150.09C385.003 1149.35 384.525 1149.15 383.373 1148.58C385.715 1142.69 386.859 1140.45 390.496 1135.24Z" fill="#222021"/>
+                            <path d="M390.496 1135.24L391.837 1137.47L392.091 1138.3C398.015 1139.75 411.09 1138.58 415.656 1141.03L415.86 1141.62C410.609 1144.35 391.021 1139.34 388.531 1142.26C389 1143.77 389.164 1143.86 390.065 1145.12C389.519 1146.65 388.494 1147.2 387.196 1148.24L386.742 1149.71L386.067 1150.09C385.003 1149.35 384.525 1149.15 383.373 1148.58C385.715 1142.69 386.859 1140.45 390.496 1135.24Z" fill="#F0EDEE"/>
+                            <path d="M386.095 1159.93C389.143 1162.16 391.38 1161.04 394.633 1161.73C392.323 1161.85 389.558 1161.7 387.705 1162.85C388.692 1164.19 398.011 1166.55 401.691 1168.46L402.491 1168.88C397.81 1171.87 393.628 1173.3 388.493 1175.3C390.786 1176.23 394.08 1177.39 395.203 1179.7L394.105 1180.05C391.132 1179.78 388.34 1177.86 385.699 1176.35C382.682 1177.22 379.205 1177.91 376.105 1178.59C378.92 1176.45 379.176 1175.89 380.286 1172.62C382.066 1171.69 383.113 1172.42 385.527 1172.97C387.833 1171.98 390.688 1171.09 391.667 1168.88C389.42 1167.11 385.738 1168.25 382.008 1166.37L381.698 1165.26C382.413 1162.77 384.823 1162.52 386.095 1159.93Z" fill="#393838"/>
+                            <path d="M603.672 1103.81C621.12 1107.17 615.118 1118.15 622.659 1128.34C625.125 1131.97 628.632 1136.92 629.564 1141.26C633.1 1153.15 632.793 1156.99 641.117 1166.38L644.912 1170.57C652.183 1178.8 667.892 1196.73 663.917 1209.06C662.991 1211.95 659.196 1215.1 656.093 1216.06C645.038 1221.34 607.492 1220.84 600.037 1209.32C588.185 1191 587.266 1190.35 564.418 1183.52C547.417 1178.44 561.556 1158.4 561.999 1148.82C562.781 1131.88 560.649 1127.64 568.708 1111.04C568.91 1112.56 568.377 1122.3 568.353 1124.82C571.583 1124.82 574.838 1125.23 578.055 1125.57C577.88 1124.53 577.725 1123.49 577.592 1122.44C575.566 1106.06 592.106 1104.68 603.672 1103.81Z" fill="#FEFEFD"/>
+                            <path d="M601.01 1137.5C597.067 1137.57 585.321 1138.43 582.872 1135.77C586.048 1128.42 614.282 1127.88 621.842 1129.49L622.66 1128.34C625.126 1131.97 628.632 1136.92 629.564 1141.26L628.379 1143.71C624.867 1143.6 618.492 1140.74 614.998 1139.36C610.722 1142.55 608.538 1144.59 604.755 1148.36C609.813 1148.72 624.163 1147.16 627.598 1149.52L628.025 1149.06L627.995 1149.21C626.726 1149.98 625.499 1150.49 624.843 1151.76C625.865 1152.95 628.013 1155.37 628.428 1156.52C629.39 1159.23 617.524 1160.35 615.9 1163.33C621.673 1167.91 629.179 1159.58 632.271 1163.25C631.368 1164.45 631.104 1164.5 631.008 1165.94C632.036 1167.04 632.71 1167.51 632.968 1169C631.182 1169.63 626.84 1168.54 624.596 1168.17C619.731 1169.86 615.75 1172.43 610.12 1174.28C612.52 1172.06 615.383 1170.08 618.029 1168.13C614.757 1167.51 606.482 1167.25 607.672 1162.7C611.347 1159.42 619.953 1157.59 624.987 1156.15C608.959 1149.52 610.944 1159.15 603.017 1158.47L602.482 1157.6C603.186 1155.7 603.511 1155.4 605.014 1154.04C601.911 1152.65 598.119 1153.37 597.769 1149.71C600.02 1144.62 608.232 1141.06 612.267 1136.41C607.648 1137.96 595.175 1145.62 592.145 1144.65L592.15 1143.55C594.704 1140.86 597.79 1139.35 601.01 1137.5Z" fill="#222021"/>
+                            <path d="M622.66 1128.34C625.126 1131.97 628.632 1136.92 629.564 1141.26L628.379 1143.71C626.262 1138.79 623.869 1140.42 621.71 1137.16L623.839 1135.64L623.977 1134.41C620.38 1129.65 607.859 1136.65 597.7 1133.02L597.855 1132.42C605.489 1130.01 616.177 1131.97 621.601 1130.49L621.842 1129.49L622.66 1128.34Z" fill="#F0EDEE"/>
+                            <path d="M641.117 1166.38L644.912 1170.57C644.955 1175.68 650.139 1180.7 649.05 1186.9C647.517 1195.65 631.056 1196.95 624.422 1194.81C614.835 1191.7 599.041 1182.62 593.836 1173.7C596.876 1173.06 600.524 1172.68 603.655 1172.28C621.048 1184.46 623.075 1180.46 641.821 1175.65C639.987 1171.31 638.02 1170.3 641.117 1166.38Z" fill="#222021"/>
+                        </svg>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+
+        <div id="js_trayectoria">
+
+            <div class="context-navigation">
+                <span class="titulo">Consultar</span>
+                <a id="_ctl0_MainContentPlaceHolderMaster_rachasLinkButton" class="linkbutton" href="javascript:__doPostBack(&#39;_ctl0$MainContentPlaceHolderMaster$rachasLinkButton&#39;,&#39;&#39;)">Todos los Resultados del equipo</a>                
+            </div>   
+                        
+            <div class="grafica-en-bandera tableLayout de una columnas">
+
+                    <!--
+                            <div class="fila">
+                            <div class="columna">
+                                    <span class="label">
+                                        25/26
+                                        SEGUNDA FEB
+                                    </span>
+                                <div class="data">
+                                    <span style='width: 92%;'>
+                                        8º puesto
+                                    </span></div>
+                                </div>
+                            </div>
+                        
+                            <div class="fila">
+                            <div class="columna">
+                                    <span class="label">
+                                        24/25
+                                        PRIMERA FEB
+                                    </span>
+                                <div class="data">
+                                    <span style='width: 82%;'>
+                                        18º puesto
+                                    </span></div>
+                                </div>
+                            </div>
+                        
+                            <div class="fila">
+                            <div class="columna">
+                                    <span class="label">
+                                        23/24
+                                        LEB PLATA
+                                    </span>
+                                <div class="data">
+                                    <span style='width: 97%;'>
+                                        3º puesto
+                                    </span></div>
+                                </div>
+                            </div>
+                        
+                            <div class="fila">
+                            <div class="columna">
+                                    <span class="label">
+                                        22/23
+                                        LEB PLATA
+                                    </span>
+                                <div class="data">
+                                    <span style='width: 81%;'>
+                                        19º puesto
+                                    </span></div>
+                                </div>
+                            </div>
+                        
+                            <div class="fila">
+                            <div class="columna">
+                                    <span class="label">
+                                        21/22
+                                        LEB PLATA
+                                    </span>
+                                <div class="data">
+                                    <span style='width: 83%;'>
+                                        17º puesto
+                                    </span></div>
+                                </div>
+                            </div>
+                        -->
+            </div>			
+        </div>
+
+    </div>
+
+
+        </div>
+        <div id="wrap-footer">
+            <div id="page-footer">
+                <div class="textoPie">
+			&copy; <span id="year"></span>&nbsp;Federación Española de Baloncesto · <a href="contacto.html" target="_blank">Contacto</a> · <a href="politicaPrivacidad.html" target="_blank">Política de privacidad</a> · <a href="politicaCookies.html" target="_blank">Política de cookies</a> · <a href="avisoLegal.html" target="_blank">Aviso Legal</a>
+    		</div>
+            </div>
+                        
+        </div>
+        <div class="wrap-rrss">
+            <a href="http://www.youtube.com/feb" class="link-rrss youtube" target="_blank" title="Youtube FEB"><span class="content">Youtube</span>
+            </a><a href="http://www.facebook.com/BaloncestoFEB" class="link-rrss facebook" target="_blank" title="Facebook FEB"><span class="content">Facebook</span>
+            </a><a href="http://www.flickr.com/photos/febgaleriaphotos/" class="link-rrss flickr" target="_blank" title="flickr FEB"><span class="content">flickr</span>
+            </a><a href="https://www.instagram.com/baloncestoesp/" class="link-rrss instagram" target="_blank" title="Instagram FEB"><span class="content">Instagram</span>
+            </a><a href="https://twitter.com/BaloncestoESP" class="link-rrss twitter" target="_blank" title="Twitter baloncestoFEB"><span class="content">Twitter</span>
+            </a>
+        </div>
+    </form>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    
+	<!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-N0CZQG3TNR"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'G-N0CZQG3TNR');
+	</script>
+
+</body>
+</html>
+

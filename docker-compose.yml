@@ -1,0 +1,90 @@
+# Project name: prefixes containers, networks and the default volume with
+# "basquets" (e.g. basquets-backend-1, basquets_default).
+name: basquets
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: basketball_stats
+      POSTGRES_USER: basketball_stats
+      POSTGRES_PASSWORD: basketball_stats
+    ports:
+      # Host port 5433 (container 5432) to avoid clashing with other local
+      # Postgres instances. Containers still reach it internally at db:5432.
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basketball_stats"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      # Host port 6380 (container 6379) to avoid clashing with other local
+      # Redis instances. Containers still reach it internally at redis:6379.
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: basquets-backend
+    build:
+      context: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    # Reuses the backend image (same code/dependencies) instead of building a
+    # second identical image; `make build` builds basquets-backend once.
+    image: basquets-backend
+    # Single process running both the Celery worker and Celery Beat scheduler,
+    # appropriate for a low-traffic, non-commercial deployment.
+    command: celery -A config worker --beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: basquets-frontend
+    build:
+      context: ./frontend
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.local
+    environment:
+      # Server-side (SSR) fetches reach the backend over the compose network.
+      # The browser still uses NEXT_PUBLIC_API_BASE_URL from .env.local.
+      - API_INTERNAL_BASE_URL=http://backend:8000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

@@ -1,0 +1,129 @@
+<!--
+Representative FEB box-score (baloncestoenvivo.feb.es/partido/<id>) fixture.
+Mirrors the REAL structure validated against a live page (2026-06-21):
+  - two header rows: a grouping row (Rebotes/Tapones/Faltas) + a detail row
+    starting with I (starter), D (dorsal), Jugador, then the stat columns;
+  - shooting cells render made/att with the percentage in a <span> (so reading
+    text with a separator yields "5/9 55%");
+  - the team totals row carries class="row-total" with empty I/D/Jugador cells;
+  - the duplicate "TC" header (field goals + tapones-contra).
+NOT real data — used only to pin the parser contract.
+-->
+<html>
+<body>
+  <div class="cabecera-partido">
+    <span class="fecha">18/01/2025 18:00</span>
+    <h2>CB ALFA 23 - CB BETA 30</h2>
+  </div>
+
+  <table cellpadding="0" cellspacing="0">
+    <caption>CB ALFA</caption>
+    <thead>
+      <tr>
+        <th class="empty" colspan="9"></th>
+        <th class="rebotes" colspan="3">Rebotes</th>
+        <th class="empty" colspan="3"></th>
+        <th class="tapones" colspan="2">Tapones</th>
+        <th class="empty"></th>
+        <th class="faltas" colspan="2">Faltas</th>
+        <th class="empty" colspan="2"></th>
+      </tr>
+      <tr>
+        <th>I</th><th>D</th><th>Jugador</th><th>MIN</th><th>PT</th><th>T2</th>
+        <th>T3</th><th>TC</th><th>TL</th><th>RO</th><th>RD</th><th>RT</th><th>AS</th>
+        <th>BR</th><th>BP</th><th>TF</th><th>TC</th><th>MT</th><th>FC</th><th>FR</th>
+        <th>VA</th><th>+/-</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>*</td><td>4</td>
+        <td><a href="Jugador.aspx?i=100&c=11">GIL, ANDRES</a></td>
+        <td>30:00</td><td>15</td>
+        <td>5/9 <span class="porcentaje">55%</span></td>
+        <td>1/3 <span class="porcentaje">33%</span></td>
+        <td>6/12 <span class="porcentaje">50%</span></td>
+        <td>2/2 <span class="porcentaje">100%</span></td>
+        <td>1</td><td>4</td><td>5</td><td>3</td><td>2</td><td>1</td><td>0</td>
+        <td>0</td><td>0</td><td>2</td><td>3</td><td>18</td><td>5</td>
+      </tr>
+      <tr>
+        <td></td><td>5</td>
+        <td><a href="Jugador.aspx?i=100&c=12">ROCA, IVAN</a></td>
+        <td>25:00</td><td>8</td>
+        <td>2/5 <span class="porcentaje">40%</span></td>
+        <td>0/2 <span class="porcentaje">0%</span></td>
+        <td>2/7 <span class="porcentaje">28,6%</span></td>
+        <td>4/4 <span class="porcentaje">100%</span></td>
+        <td>0</td><td>2</td><td>2</td><td>1</td><td>0</td><td>2</td><td>1</td>
+        <td>0</td><td>0</td><td>3</td><td>1</td><td>7</td><td>-3</td>
+      </tr>
+      <tr class="row-total">
+        <td></td><td></td><td></td>
+        <td></td><td>23</td>
+        <td>7/14 <span class="porcentaje">50%</span></td>
+        <td>1/5 <span class="porcentaje">20%</span></td>
+        <td>8/19 <span class="porcentaje">42,1%</span></td>
+        <td>6/6 <span class="porcentaje">100%</span></td>
+        <td>1</td><td>6</td><td>7</td><td>4</td><td>2</td><td>3</td><td>1</td>
+        <td>0</td><td>0</td><td>5</td><td>4</td><td>25</td><td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table cellpadding="0" cellspacing="0">
+    <caption>CB BETA</caption>
+    <thead>
+      <tr>
+        <th class="empty" colspan="9"></th>
+        <th class="rebotes" colspan="3">Rebotes</th>
+        <th class="empty" colspan="3"></th>
+        <th class="tapones" colspan="2">Tapones</th>
+        <th class="empty"></th>
+        <th class="faltas" colspan="2">Faltas</th>
+        <th class="empty" colspan="2"></th>
+      </tr>
+      <tr>
+        <th>I</th><th>D</th><th>Jugador</th><th>MIN</th><th>PT</th><th>T2</th>
+        <th>T3</th><th>TC</th><th>TL</th><th>RO</th><th>RD</th><th>RT</th><th>AS</th>
+        <th>BR</th><th>BP</th><th>TF</th><th>TC</th><th>MT</th><th>FC</th><th>FR</th>
+        <th>VA</th><th>+/-</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>*</td><td>7</td>
+        <td><a href="Jugador.aspx?i=200&c=21">SOLER, MARC</a></td>
+        <td>28:00</td><td>20</td>
+        <td>6/10 <span class="porcentaje">60%</span></td>
+        <td>2/4 <span class="porcentaje">50%</span></td>
+        <td>8/14 <span class="porcentaje">57,1%</span></td>
+        <td>2/2 <span class="porcentaje">100%</span></td>
+        <td>2</td><td>5</td><td>7</td><td>5</td><td>1</td><td>2</td><td>2</td>
+        <td>0</td><td>1</td><td>1</td><td>2</td><td>24</td><td>8</td>
+      </tr>
+      <tr>
+        <td></td><td>9</td>
+        <td><a href="Jugador.aspx?i=200&c=22">PENA, LUIS</a></td>
+        <td>22:00</td><td>10</td>
+        <td>3/6 <span class="porcentaje">50%</span></td>
+        <td>1/2 <span class="porcentaje">50%</span></td>
+        <td>4/8 <span class="porcentaje">50%</span></td>
+        <td>1/2 <span class="porcentaje">50%</span></td>
+        <td>1</td><td>3</td><td>4</td><td>2</td><td>0</td><td>1</td><td>0</td>
+        <td>0</td><td>0</td><td>4</td><td>1</td><td>9</td><td>-2</td>
+      </tr>
+      <tr class="row-total">
+        <td></td><td></td><td></td>
+        <td></td><td>30</td>
+        <td>9/16 <span class="porcentaje">56%</span></td>
+        <td>3/6 <span class="porcentaje">50%</span></td>
+        <td>12/22 <span class="porcentaje">54,5%</span></td>
+        <td>3/4 <span class="porcentaje">75%</span></td>
+        <td>3</td><td>8</td><td>11</td><td>7</td><td>1</td><td>3</td><td>2</td>
+        <td>0</td><td>1</td><td>5</td><td>3</td><td>33</td><td></td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

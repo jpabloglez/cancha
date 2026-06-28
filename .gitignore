@@ -1,0 +1,29 @@
+# Python / backend
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.sqlite3
+backend/staticfiles/
+
+# Node / frontend
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+
+# Environment files (never commit secrets — see *.example variants)
+.env
+.env.local
+backend/.env
+frontend/.env.local
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

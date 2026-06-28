@@ -1,4 +1,4 @@
-# basquetestads
+# Cancha (Basquet Stats)
 
 Open, non-commercial web app for visualizing **advanced basketball statistics**
 for the Spanish leagues: **ACB**, **LEB Oro (Primera FEB)** and
