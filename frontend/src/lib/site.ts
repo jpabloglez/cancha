@@ -5,3 +5,7 @@
 // The fallback is a clearly-placeholder value to replace before going public.
 export const CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "derechos@basketstats.example";
+
+export const GITHUB_URL =
+  process.env.NEXT_PUBLIC_GITHUB_URL ??
+  "https://github.com/jpablogg/basquetestads";

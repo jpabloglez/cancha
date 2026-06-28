@@ -56,12 +56,57 @@ class MediaAssetSerializer(serializers.ModelSerializer):
         return obj.file.url
 
 
+_LEAGUE_LOGO_FILES: dict[str, str] = {
+    "acb": "acb_logo.jpg",
+    "primera-feb": "feb_logo.png",
+    "segunda-feb": "feb_logo.png",
+}
+
+
 class LeagueSerializer(serializers.ModelSerializer):
-    """Serialize a :class:`~teams.models.League`."""
+    """Serialize a :class:`~teams.models.League`.
+
+    ``seasons_count`` and ``teams_count`` are populated by annotations on the
+    viewset queryset, not by ORM relations, so they are declared as read-only
+    integer fields rather than relational fields.
+
+    ``logo`` is resolved from a slug→filename map pointing at static files
+    already present under ``media/media_assets/leagues/``.
+    """
+
+    seasons_count = serializers.IntegerField(read_only=True, default=0)
+    teams_count = serializers.IntegerField(read_only=True, default=0)
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = League
-        fields = ["id", "name", "slug", "level", "country"]
+        fields = [
+            "id", "name", "slug", "level", "country",
+            "seasons_count", "teams_count", "logo",
+        ]
+
+    def get_logo(self, obj: League) -> dict | None:
+        """Return a MediaAsset-shaped dict for the league logo, or None.
+
+        Parameters
+        ----------
+        obj : League
+            The league being serialized.
+
+        Returns
+        -------
+        dict or None
+            ``{url, attribution, license}`` matching the MediaAsset shape, or
+            None when no logo file is registered for this slug.
+        """
+        filename = _LEAGUE_LOGO_FILES.get(obj.slug)
+        if not filename:
+            return None
+        return {
+            "url": f"/media/media_assets/leagues/{filename}",
+            "attribution": "",
+            "license": "",
+        }
 
 
 class SeasonSerializer(serializers.ModelSerializer):

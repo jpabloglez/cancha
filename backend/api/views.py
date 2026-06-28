@@ -102,7 +102,10 @@ def health(request: Request) -> Response:
 class LeagueViewSet(viewsets.ReadOnlyModelViewSet):
     """List and retrieve covered leagues (``/leagues``)."""
 
-    queryset = League.objects.all()
+    queryset = League.objects.annotate(
+        seasons_count=Count("seasons", distinct=True),
+        teams_count=Count("team_seasons__team", distinct=True),
+    )
     serializer_class = LeagueSerializer
     lookup_field = "slug"
 

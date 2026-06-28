@@ -7,6 +7,9 @@ export interface League {
   slug: string;
   level: number;
   country: string;
+  seasonsCount: number;
+  teamsCount: number;
+  logo: MediaAsset | null;
 }
 
 export interface Season {

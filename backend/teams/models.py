@@ -168,6 +168,26 @@ class TeamSeason(models.Model):
         return f"{self.team.short_name} @ {self.season.name}"
 
 
+def _media_asset_upload_path(instance: "MediaAsset", filename: str) -> str:
+    """Route uploaded files to the correct subfolder based on asset kind.
+
+    Parameters
+    ----------
+    instance : MediaAsset
+        The asset being saved (``kind`` must already be set).
+    filename : str
+        Original filename provided by the uploader.
+
+    Returns
+    -------
+    str
+        Relative path under ``MEDIA_ROOT``, e.g.
+        ``media_assets/players/player_photo_1.jpg``.
+    """
+    subdir = "teams" if instance.kind == "team_logo" else "players"
+    return f"media_assets/{subdir}/{filename}"
+
+
 class MediaAsset(models.Model):
     """An external image (team logo, player or staff photo) with provenance.
 
@@ -215,7 +235,7 @@ class MediaAsset(models.Model):
     kind = models.CharField(max_length=20, choices=Kind.choices)
     source = models.CharField(max_length=50, db_index=True)
     source_url = models.URLField(max_length=500, unique=True)
-    file = models.FileField(upload_to="media_assets/", blank=True)
+    file = models.FileField(upload_to=_media_asset_upload_path, blank=True)
     license = models.CharField(max_length=200, blank=True, default="")
     attribution = models.CharField(max_length=200, blank=True, default="")
     checksum = models.CharField(max_length=64, blank=True, default="")

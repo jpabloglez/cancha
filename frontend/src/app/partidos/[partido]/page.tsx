@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GameComparisonRadar } from "@/components/GameComparisonRadar";
 import { MediaImage } from "@/components/MediaImage";
+import { TeamGameSummaryTable } from "@/components/TeamGameSummaryTable";
 import { getBoxscore } from "@/lib/api";
 import type { BoxScore, PlayerBoxScore, Team } from "@/types/api";
 
@@ -49,6 +51,9 @@ export default async function BoxScorePage({
         </div>
         <TeamHeading team={game.awayTeam} align="left" />
       </header>
+
+      <TeamGameSummaryTable box={box} />
+      <GameComparisonRadar box={box} />
 
       <PlayerTable team={game.homeTeam} lines={linesFor(game.homeTeamSeason)} />
       <PlayerTable team={game.awayTeam} lines={linesFor(game.awayTeamSeason)} />
