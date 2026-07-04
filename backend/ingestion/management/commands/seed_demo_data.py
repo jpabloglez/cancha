@@ -15,7 +15,7 @@ statistics. Re-running the command is idempotent (upserts keyed by external id).
 import random
 from datetime import date, datetime, timedelta
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -123,6 +123,11 @@ class Command(BaseCommand):
         parser.add_argument(
             "--seed", type=int, default=42, help="RNG seed for reproducibility."
         )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Allow seeding even when real ingested games exist (not recommended).",
+        )
 
     def handle(self, *args, **options) -> None:
         """Generate and persist the demo dataset.
@@ -139,6 +144,17 @@ class Command(BaseCommand):
         None
             Writes to the database and prints a summary.
         """
+        from games.models import Game  # local import avoids circular at module level
+
+        real_game_count = Game.objects.exclude(source="seed").count()
+        if real_game_count and not options["force"]:
+            raise CommandError(
+                f"Database already contains {real_game_count} real game(s). "
+                "Seeding on top of real data pollutes leaders/standings with "
+                "fictional players. Run `purge_seed_data` first, or pass "
+                "--force to override this check."
+            )
+
         rng = random.Random(options["seed"])
 
         for league_cfg in LEAGUES:
