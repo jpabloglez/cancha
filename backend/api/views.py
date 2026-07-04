@@ -9,6 +9,7 @@ implemented as viewset ``@action``s or standalone views.
 from django.db.models import Count, Max, QuerySet, Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -329,6 +330,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Team.objects.select_related("logo").all()
     serializer_class = TeamSerializer
     lookup_field = "slug"
+    filter_backends = [SearchFilter]
+    search_fields = ["name", "short_name", "city"]
 
     @action(detail=True)
     def roster(self, request: Request, slug: str | None = None) -> Response:
@@ -520,6 +523,8 @@ class PersonViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Person.objects.select_related("photo").all()
     serializer_class = PersonSerializer
     lookup_field = "slug"
+    filter_backends = [SearchFilter]
+    search_fields = ["first_name", "last_name", "display_name"]
 
     def get_serializer_class(self):
         """Use the detail serializer (with career timeline) on retrieve.

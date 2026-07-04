@@ -157,7 +157,12 @@ export function getLeaders(
   );
 }
 
-/** List players, optionally filtered by a search term (for the comparator). */
-export function getPlayers(limit = 50): Promise<Paginated<Person>> {
-  return apiFetch<Paginated<Person>>(`/players/?limit=${limit}`);
+/** List players with optional full-text search and limit. */
+export function getPlayers(
+  limit = 50,
+  search?: string,
+): Promise<Paginated<Person>> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (search) params.set("search", search);
+  return apiFetch<Paginated<Person>>(`/players/?${params.toString()}`);
 }

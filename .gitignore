@@ -17,6 +17,7 @@ node_modules/
 out/
 npm-debug.log*
 yarn-debug.log*
+frontend/tsconfig.tsbuildinfo
 
 # Environment files (never commit secrets — see *.example variants)
 .env
