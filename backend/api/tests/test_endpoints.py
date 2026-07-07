@@ -107,7 +107,7 @@ def test_global_search(db, client) -> None:
     assert acb.status_code == 200
     data = acb.json()
     assert "teams" in data and "players" in data and "leagues" in data
-    assert any("ACB" in l["name"].upper() for l in data["leagues"])
+    assert any("ACB" in league["name"].upper() for league in data["leagues"])
 
     # A query for a seeded team name surfaces it in the teams bucket.
     team = client.get("/api/v1/search/?q=CB")

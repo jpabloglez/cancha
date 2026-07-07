@@ -69,7 +69,7 @@ class Command(BaseCommand):
         career  = CareerEntry.objects.filter(source="seed")
         roster  = RosterEntry.objects.filter(person__source="seed")
 
-        self.stdout.write(f"Seed entities found:")
+        self.stdout.write("Seed entities found:")
         self.stdout.write(f"  Teams:        {teams.count()}")
         self.stdout.write(f"  Persons:      {persons.count()}")
         self.stdout.write(f"  Games:        {games.count()}")
