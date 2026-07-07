@@ -84,8 +84,14 @@ export function getStandings(seasonId: number): Promise<Standing[]> {
 }
 
 /** Fetch finished games for a season. */
-export function getGames(seasonId: number): Promise<Paginated<Game>> {
-  return apiFetch<Paginated<Game>>(`/games/?season=${seasonId}`);
+export function getGames(
+  seasonId: number,
+  opts: { limit?: number; offset?: number } = {},
+): Promise<Paginated<Game>> {
+  const params = new URLSearchParams({ season: String(seasonId) });
+  if (opts.limit) params.set("limit", String(opts.limit));
+  if (opts.offset) params.set("offset", String(opts.offset));
+  return apiFetch<Paginated<Game>>(`/games/?${params.toString()}`);
 }
 
 /** Fetch the full box score (teams + player lines) for a game. */

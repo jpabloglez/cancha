@@ -16,9 +16,23 @@ class DataSourceAdmin(admin.ModelAdmin):
 class IngestionRunAdmin(admin.ModelAdmin):
     """Admin listing for ingestion audit runs."""
 
-    list_display = ("data_source", "started_at", "finished_at", "status", "records_processed")
+    list_display = (
+        "data_source",
+        "started_at",
+        "finished_at",
+        "status",
+        "records_processed",
+        "parser_version",
+        "short_error",
+    )
     list_filter = ("status", "data_source")
-    readonly_fields = ("started_at",)
+    readonly_fields = ("started_at", "error_log")
+    search_fields = ("data_source__name", "error_log")
+
+    @admin.display(description="Error")
+    def short_error(self, obj: IngestionRun) -> str:
+        """Return the first 100 chars of error_log (empty string when clean)."""
+        return obj.error_log[:100] if obj.error_log else ""
 
 
 @admin.register(RawDocument)

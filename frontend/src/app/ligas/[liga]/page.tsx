@@ -219,7 +219,17 @@ export default async function LeaguePage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Últimos partidos</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Últimos partidos</h2>
+          {games.length > 0 && (
+            <Link
+              href={`/ligas/${liga}/partidos?season=${selected.id}&page=1`}
+              className="text-sm text-court hover:underline"
+            >
+              Ver todos →
+            </Link>
+          )}
+        </div>
         <ul className="space-y-1 text-sm">
           {games.slice(0, 10).map((game) => (
             <li
