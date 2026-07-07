@@ -166,3 +166,14 @@ export function getPlayers(
   if (search) params.set("search", search);
   return apiFetch<Paginated<Person>>(`/players/?${params.toString()}`);
 }
+
+export interface SearchResults {
+  teams: Team[];
+  players: Person[];
+  leagues: League[];
+}
+
+/** Global cross-entity search (min 2 chars). */
+export function globalSearch(q: string): Promise<SearchResults> {
+  return apiFetch<SearchResults>(`/search/?q=${encodeURIComponent(q)}`);
+}
