@@ -204,10 +204,10 @@ def enrich_feb_season(
     for person_c, team_i in _season_player_team_pairs(season):
         try:
             payload = connector.fetch_player_profile(person_c, team_i)
-            profile = parse_player_profile(
+            person_profile = parse_player_profile(
                 payload.data, source=connector_id, person_external_id=person_c
             )
-            upsert_person_profile(profile)
+            upsert_person_profile(person_profile)
             players += 1
         except Exception as exc:  # noqa: BLE001 - log and continue
             logger.warning("Skipping FEB player profile %s: %s", person_c, exc)
