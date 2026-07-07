@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { MediaImage } from "@/components/MediaImage";
 import { SeasonSelector } from "@/components/SeasonSelector";
+import { TeamHistoryChart } from "@/components/TeamHistoryChart";
 import type { RadarAxis } from "@/components/TeamRadar";
 import { TeamRadar } from "@/components/TeamRadar";
 import {
@@ -157,6 +158,7 @@ export default async function TeamPage({
       {history.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Historial por temporada</h2>
+          <TeamHistoryChart history={history} />
           <HistoryTable history={history} selectedSeasonId={selectedSeason?.id} />
         </section>
       )}
