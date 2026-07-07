@@ -48,9 +48,14 @@ export default async function LeagueGamesPage({
     return `/ligas/${liga}/partidos?${params.toString()}`;
   }
 
-  // Group games by round for visual structure.
-  const byRound = games.reduce<Record<string, Game[]>>((acc, g) => {
-    const key = g.round ?? "Sin jornada";
+  // Group by round label if available, otherwise by month.
+  const groupKey = (g: Game) => {
+    if (g.round) return g.round;
+    const d = new Date(g.date);
+    return d.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+  };
+  const byGroup = games.reduce<Record<string, Game[]>>((acc, g) => {
+    const key = groupKey(g);
     (acc[key] ??= []).push(g);
     return acc;
   }, {});
@@ -71,13 +76,13 @@ export default async function LeagueGamesPage({
         <SeasonSelector seasons={seasons} selectedId={selected.id} />
       </header>
 
-      {Object.entries(byRound).map(([round, roundGames]) => (
-        <section key={round} className="space-y-1">
+      {Object.entries(byGroup).map(([group, groupGames]) => (
+        <section key={group} className="space-y-1">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-            {round}
+            {group}
           </h2>
           <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {roundGames.map((game) => (
+            {groupGames.map((game) => (
               <li key={game.id}>
                 <Link
                   href={`/partidos/${game.id}`}
