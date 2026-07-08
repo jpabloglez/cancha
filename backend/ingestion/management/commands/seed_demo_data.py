@@ -14,6 +14,7 @@ statistics. Re-running the command is idempotent (upserts keyed by external id).
 
 import random
 from datetime import date, datetime, timedelta
+from typing import TypedDict
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
@@ -47,8 +48,28 @@ from stats.aggregation import recompute_player_season_aggregates
 
 SOURCE = "seed"
 
+
+class _LeagueCfg(TypedDict):
+    name: str
+    slug: str
+    level: int
+    cities: list[str]
+
+
+class _SeasonCfg(TypedDict):
+    name: str
+    start: datetime
+    end: datetime
+
+
+class _RosterMember(TypedDict):
+    ext: str
+    number: int
+    position: str
+
+
 # Each league: (name, slug, level) plus the fictional cities of its clubs.
-LEAGUES = [
+LEAGUES: list[_LeagueCfg] = [
     {
         "name": "Liga ACB",
         "slug": "acb",
@@ -69,7 +90,7 @@ LEAGUES = [
     },
 ]
 
-SEASONS = [
+SEASONS: list[_SeasonCfg] = [
     {"name": "2023-2024", "start": datetime(2023, 9, 15), "end": datetime(2024, 5, 30)},
     {"name": "2024-2025", "start": datetime(2024, 9, 15), "end": datetime(2025, 5, 30)},
 ]
@@ -185,7 +206,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Seed complete."))
 
-    def _seed_teams(self, league_cfg: dict) -> list[dict]:
+    def _seed_teams(self, league_cfg: _LeagueCfg) -> list[dict]:
         """Upsert the clubs of a league and return their descriptors.
 
         Parameters
@@ -250,7 +271,7 @@ class Command(BaseCommand):
         for team in teams:
             # Build a stable 10-player roster reused across both seasons so
             # season-over-season trends exist for the same Person.
-            roster = []
+            roster: list[_RosterMember] = []
             # Deterministic name index from a stable string sum — Python's
             # built-in hash() is salted per-process (PYTHONHASHSEED) and would
             # make slugs differ between runs, breaking idempotency.
@@ -380,10 +401,10 @@ class Command(BaseCommand):
 
     def _seed_games(
         self,
-        league_cfg: dict,
+        league_cfg: _LeagueCfg,
         teams: list[dict],
         season,
-        season_cfg: dict,
+        season_cfg: _SeasonCfg,
         rng: random.Random,
     ) -> None:
         """Generate a single round-robin of finished games for a season.

@@ -86,6 +86,9 @@ class FakeAcbConnector(SourceConnector):
         data = (FIXTURES / "acb_api_boxscore.json").read_text(encoding="utf-8")
         return self._payload(data)
 
+    def fetch_current_schedule(self) -> RawSourcePayload:
+        return self._payload(json.dumps(_SCHEDULE))
+
 
 @pytest.mark.django_db
 def test_ingest_acb_season_persists_full_graph() -> None:
