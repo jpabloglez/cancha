@@ -28,7 +28,9 @@ COPY . .
 
 # Run as a non-root user (defence-in-depth; containers that run as root are a
 # security risk if the process is compromised).
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
+    && mkdir -p /app/media /app/staticfiles \
+    && chown -R appuser:appgroup /app/media /app/staticfiles
 USER appuser
 
 EXPOSE 8000
