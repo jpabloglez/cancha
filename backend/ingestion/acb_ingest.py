@@ -14,10 +14,8 @@ than hardcoded.
 import json
 import logging
 from dataclasses import dataclass
-
 from typing import Protocol, cast
 
-from connectors.base import SourceConnector
 from connectors.parsers.acb import (
     MatchHeader,
     ParserError,
@@ -32,7 +30,6 @@ from players.models import PlayerGameStats, RosterEntry
 from stats.aggregation import recompute_player_season_aggregates
 
 from .catalog import ACB_CONNECTOR_ID, ensure_acb_league_and_season
-from .schemas import NormalizedPersonProfile, NormalizedTeam, NormalizedTeamProfile
 from .media import download_media_asset
 from .persistence import (
     upsert_game_with_boxscore,
@@ -42,6 +39,7 @@ from .persistence import (
     upsert_team_profile,
     upsert_team_season,
 )
+from .schemas import NormalizedPersonProfile, NormalizedTeam, NormalizedTeamProfile
 
 logger = logging.getLogger(__name__)
 
