@@ -9,6 +9,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     GameViewSet,
+    GlobalSearchView,
     LeadersView,
     LeagueViewSet,
     PersonViewSet,
@@ -33,5 +34,6 @@ router.register("games", GameViewSet, basename="game")
 urlpatterns = [
     path("health/", health, name="health"),
     path("stats/leaders/", LeadersView.as_view(), name="leaders"),
+    path("search/", GlobalSearchView.as_view(), name="search"),
     path("", include(router.urls)),
 ]

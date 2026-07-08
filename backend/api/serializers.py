@@ -144,7 +144,7 @@ class TeamSeasonSerializer(serializers.ModelSerializer):
 class CareerEntrySerializer(serializers.ModelSerializer):
     """Serialize a single career-timeline (trajectory) entry."""
 
-    team_slug = serializers.SlugRelatedField(
+    team_slug: serializers.SlugRelatedField = serializers.SlugRelatedField(
         source="team", slug_field="slug", read_only=True
     )
 

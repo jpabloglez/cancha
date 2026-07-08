@@ -9,6 +9,7 @@ Separate from the *profile* upserts, which only record provenance + attribution.
 
 import hashlib
 import logging
+from typing import Any, Protocol, runtime_checkable
 
 from celery import shared_task
 from django.conf import settings
@@ -17,6 +18,12 @@ from django.utils import timezone
 
 from connectors.http import RateLimitedClient
 from teams.models import MediaAsset
+
+
+@runtime_checkable
+class _HttpClient(Protocol):
+    def get(self, url: str) -> Any: ...
+    def close(self) -> None: ...
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +41,7 @@ _MAX_BYTES = 5 * 1024 * 1024
 
 
 def download_media_asset(
-    asset_id: int, *, client: RateLimitedClient | None = None, force: bool = False
+    asset_id: int, *, client: "_HttpClient | None" = None, force: bool = False
 ) -> bool:
     """Download and store one media asset's binary (idempotent).
 
@@ -66,9 +73,9 @@ def download_media_asset(
         return False  # already stored
 
     owns_client = client is None
-    client = client or RateLimitedClient(min_interval_seconds=2.0)
+    active_client: _HttpClient = client or RateLimitedClient(min_interval_seconds=2.0)
     try:
-        response = client.get(asset.source_url)
+        response = active_client.get(asset.source_url)
         content_type = (
             response.headers.get("content-type", "").split(";")[0].strip().lower()
         )
@@ -101,7 +108,7 @@ def download_media_asset(
         return True
     finally:
         if owns_client:
-            client.close()
+            active_client.close()
 
 
 @shared_task(

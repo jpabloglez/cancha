@@ -9,6 +9,7 @@ this module so the "validate → persist" boundary is identical for both.
 
 from datetime import date
 
+import numpy as np
 from django.db import transaction
 
 from games.models import Game, TeamGameStats
@@ -294,11 +295,11 @@ def _upsert_team_game_stats(
     team_season = _resolve_team_season(team_box.team_ref, season=season)
     possessions = float(
         estimate_possessions(
-            float(team_box.field_goals_att),
-            float(team_box.free_throws_att),
-            float(team_box.turnovers),
-            float(team_box.rebounds_off),
-        )
+            np.array([float(team_box.field_goals_att)]),
+            np.array([float(team_box.free_throws_att)]),
+            np.array([float(team_box.turnovers)]),
+            np.array([float(team_box.rebounds_off)]),
+        )[0]
     )
     team_stats, _ = TeamGameStats.objects.update_or_create(
         game=game,

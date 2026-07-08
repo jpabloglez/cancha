@@ -63,6 +63,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -188,6 +189,32 @@ REST_FRAMEWORK = {
 
 # CORS: read-only public API restricted to the frontend origin (spec §6.4).
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
+
+# Static files served by whitenoise in production (spec §6.1).
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# HTTPS security — only effective in production (DEBUG=False). Header set by
+# the reverse proxy / load balancer upstream of gunicorn (spec §6.1).
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Sentry error tracking (spec §6.1). DSN is set via SENTRY_DSN env var;
+# when unset (dev, CI) the SDK no-ops.
+_sentry_dsn = env("SENTRY_DSN")
+if _sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
 
 # Structured logging to stdout (captured by the platform / Sentry).
 LOGGING = {

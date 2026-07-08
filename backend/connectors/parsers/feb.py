@@ -409,7 +409,10 @@ def _parse_trajectory(
             if club_idx is not None and club_idx < len(cells):
                 link = cells[club_idx].find("a", href=_TEAM_LINK_RE)
                 if link is not None:
-                    team_i = _TEAM_LINK_RE.search(link["href"]).group(1)
+                    m = _TEAM_LINK_RE.search(link["href"])
+                    team_i = m.group(1) if m else None
+                    if team_i is None:
+                        continue
                     team_ref = ExternalRef(source=source, external_id=team_i)
             suffix = team_ref.external_id if team_ref else slugify(club)[:20]
             external_id = f"{person_external_id}:{season}:{suffix}"[:100]
@@ -505,7 +508,10 @@ def _parse_team_table(
                 totals_cells = values
             continue
 
-        team_id, player_id = _PLAYER_LINK_RE.search(link["href"]).groups()
+        m = _PLAYER_LINK_RE.search(link["href"])
+        if m is None:
+            continue
+        team_id, player_id = m.groups()
         team_external_id = team_external_id or team_id
         player_boxes.append(
             _player_box(

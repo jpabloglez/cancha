@@ -11,6 +11,7 @@ from collections import defaultdict
 
 import numpy as np
 
+from games.models import TeamGameStats
 from players.models import PlayerGameStats, PlayerSeasonAggregate
 from teams.models import Season
 
@@ -57,8 +58,6 @@ def recompute_player_season_aggregates(season_id: int) -> int:
         player_lines[line.person_id].append(line)
 
     # Team totals per (game, team_season) for the Usage Rate denominator.
-    from games.models import TeamGameStats
-
     team_stats_map = {
         (t.game_id, t.team_season_id): t
         for t in TeamGameStats.objects.filter(game__season=season)
@@ -112,7 +111,7 @@ def _scale_per(built: list[tuple[int, dict[str, float]]]) -> None:
 
 def _build_aggregate(
     person_lines: list[PlayerGameStats],
-    team_stats_map: dict[tuple[int, int], "object"],
+    team_stats_map: dict[tuple[int, int], "TeamGameStats"],
 ) -> dict[str, float]:
     """Compute the aggregate field values for one player in a season.
 

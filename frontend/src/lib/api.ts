@@ -84,8 +84,14 @@ export function getStandings(seasonId: number): Promise<Standing[]> {
 }
 
 /** Fetch finished games for a season. */
-export function getGames(seasonId: number): Promise<Paginated<Game>> {
-  return apiFetch<Paginated<Game>>(`/games/?season=${seasonId}`);
+export function getGames(
+  seasonId: number,
+  opts: { limit?: number; offset?: number } = {},
+): Promise<Paginated<Game>> {
+  const params = new URLSearchParams({ season: String(seasonId) });
+  if (opts.limit) params.set("limit", String(opts.limit));
+  if (opts.offset) params.set("offset", String(opts.offset));
+  return apiFetch<Paginated<Game>>(`/games/?${params.toString()}`);
 }
 
 /** Fetch the full box score (teams + player lines) for a game. */
@@ -157,7 +163,23 @@ export function getLeaders(
   );
 }
 
-/** List players, optionally filtered by a search term (for the comparator). */
-export function getPlayers(limit = 50): Promise<Paginated<Person>> {
-  return apiFetch<Paginated<Person>>(`/players/?limit=${limit}`);
+/** List players with optional full-text search and limit. */
+export function getPlayers(
+  limit = 50,
+  search?: string,
+): Promise<Paginated<Person>> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (search) params.set("search", search);
+  return apiFetch<Paginated<Person>>(`/players/?${params.toString()}`);
+}
+
+export interface SearchResults {
+  teams: Team[];
+  players: Person[];
+  leagues: League[];
+}
+
+/** Global cross-entity search (min 2 chars). */
+export function globalSearch(q: string): Promise<SearchResults> {
+  return apiFetch<SearchResults>(`/search/?q=${encodeURIComponent(q)}`);
 }

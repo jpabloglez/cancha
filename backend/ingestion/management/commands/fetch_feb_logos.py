@@ -17,7 +17,7 @@ Examples
 
 from django.core.management.base import BaseCommand
 
-from ingestion.feb_logo_scraper import fetch_feb_logos, _STANDINGS_PAGES
+from ingestion.feb_logo_scraper import _STANDINGS_PAGES, fetch_feb_logos
 
 
 class Command(BaseCommand):

@@ -63,7 +63,9 @@ def test_upsert_team_updates_changed_fields() -> None:
     )
     teams = Team.objects.filter(source="seed", external_id="t1")
     assert teams.count() == 1
-    assert teams.first().name == "CB Renamed"
+    first = teams.first()
+    assert first is not None
+    assert first.name == "CB Renamed"
 
 
 @pytest.mark.django_db

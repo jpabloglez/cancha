@@ -15,8 +15,14 @@ from connectors.parsers.acb import ACB_PARSER_VERSION
 from connectors.parsers.feb import FEB_PARSER_VERSION
 from stats.aggregation import recompute_player_season_aggregates
 
+from .acb_ingest import IngestResult as AcbIngestResult
 from .acb_ingest import ingest_acb_season, resolve_current_edition_id
-from .catalog import ACB_CONNECTOR_ID, FEB_COMPETITIONS, LATEST_SEASON_START_YEAR
+from .catalog import (
+    ACB_CONNECTOR_ID,
+    FEB_COMPETITIONS,
+    resolve_current_feb_season,
+)
+from .feb_ingest import IngestResult as FebIngestResult
 from .feb_ingest import enrich_feb_season, ingest_feb_season
 from .models import DataSource, IngestionRun
 
@@ -75,6 +81,7 @@ def run_ingest_season(connector_id: str, season_external_id: str) -> int:
         )
         # FEB seasons are keyed by start year; ACB by the source's editionId.
         # Both flows persist, rebuild rosters and recompute aggregates.
+        result: FebIngestResult | AcbIngestResult
         if connector_id in FEB_COMPETITIONS:
             result = ingest_feb_season(connector_id, season_external_id)
         elif connector_id == ACB_CONNECTOR_ID:
@@ -147,9 +154,10 @@ def ingest_current_feb_season() -> dict[str, int]:
     dict of str to int
         Games ingested per connector id.
     """
-    season = str(LATEST_SEASON_START_YEAR)
     return {
-        connector_id: run_ingest_season(connector_id, season)
+        connector_id: run_ingest_season(
+            connector_id, resolve_current_feb_season(connector_id)
+        )
         for connector_id in FEB_COMPETITIONS
     }
 
@@ -263,9 +271,10 @@ def enrich_current_feb_profiles() -> dict[str, int]:
     dict of str to int
         Entities enriched per connector id.
     """
-    season = str(LATEST_SEASON_START_YEAR)
     return {
-        connector_id: run_enrich_season(connector_id, season)
+        connector_id: run_enrich_season(
+            connector_id, resolve_current_feb_season(connector_id)
+        )
         for connector_id in FEB_COMPETITIONS
     }
 

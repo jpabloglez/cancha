@@ -32,6 +32,7 @@ def test_seeded_endpoints(db, client) -> None:
     assert leagues.json()["count"] == 3
 
     season = Season.objects.first()
+    assert season is not None
     standings = client.get(f"/api/v1/seasons/{season.pk}/standings/")
     assert standings.status_code == 200
     standings_data = standings.json()
@@ -40,6 +41,7 @@ def test_seeded_endpoints(db, client) -> None:
 
     # Derive a matching player+season from an aggregate so they share a league.
     aggregate = PlayerSeasonAggregate.objects.select_related("person").first()
+    assert aggregate is not None
     stats = client.get(
         f"/api/v1/players/{aggregate.person.slug}/stats/?season={aggregate.season_id}"
     )
@@ -60,11 +62,9 @@ def test_seeded_endpoints(db, client) -> None:
 def test_leaders_filters_and_qualifier(db, client) -> None:
     """League filtering and the games-played qualifier both apply."""
     call_command("seed_demo_data")
-    season = (
-        PlayerSeasonAggregate.objects.select_related("season__league")
-        .first()
-        .season
-    )
+    first_agg = PlayerSeasonAggregate.objects.select_related("season__league").first()
+    assert first_agg is not None
+    season = first_agg.season
     league_id = season.league_id
 
     # League filter: every returned player belongs to the requested league.
@@ -90,3 +90,35 @@ def test_roster_requires_season(db, client) -> None:
     """The roster endpoint rejects a missing season before any DB access."""
     response = client.get("/api/v1/teams/acb-almendro/roster/")
     assert response.status_code == 400
+
+
+def test_global_search(db, client) -> None:
+    """Global search returns teams, players and leagues across entity types."""
+    call_command("seed_demo_data")
+
+    # A query below the 2-char minimum returns empty results, not an error.
+    short = client.get("/api/v1/search/?q=a")
+    assert short.status_code == 200
+    body = short.json()
+    assert body == {"teams": [], "players": [], "leagues": []}
+
+    # A query that matches league names returns hits in the leagues bucket.
+    acb = client.get("/api/v1/search/?q=ACB")
+    assert acb.status_code == 200
+    data = acb.json()
+    assert "teams" in data and "players" in data and "leagues" in data
+    assert any("ACB" in league["name"].upper() for league in data["leagues"])
+
+    # A query for a seeded team name surfaces it in the teams bucket.
+    team = client.get("/api/v1/search/?q=CB")
+    assert team.status_code == 200
+    team_data = team.json()
+    assert len(team_data["teams"]) > 0
+
+    # An unmatched query returns empty lists (not a 404/500).
+    empty = client.get("/api/v1/search/?q=zzznomatch999")
+    assert empty.status_code == 200
+    empty_data = empty.json()
+    assert empty_data["teams"] == []
+    assert empty_data["players"] == []
+    assert empty_data["leagues"] == []

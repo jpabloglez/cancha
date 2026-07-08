@@ -14,8 +14,8 @@ than hardcoded.
 import json
 import logging
 from dataclasses import dataclass
+from typing import Protocol, cast
 
-from connectors.base import SourceConnector
 from connectors.parsers.acb import (
     MatchHeader,
     ParserError,
@@ -39,8 +39,18 @@ from .persistence import (
     upsert_team_profile,
     upsert_team_season,
 )
+from .schemas import NormalizedPersonProfile, NormalizedTeam, NormalizedTeamProfile
 
 logger = logging.getLogger(__name__)
+
+
+class _AcbConnectorLike(Protocol):
+    """Structural type for connectors that implement the full ACB method set."""
+
+    def fetch_completed_games(self, season_external_id: str) -> object: ...
+    def fetch_box_score(self, game_external_id: str) -> object: ...
+    def fetch_current_schedule(self) -> object: ...
+    def fetch_round_matches(self, edition_id: str, round_id: int) -> object: ...
 
 
 @dataclass
@@ -74,7 +84,7 @@ class IngestResult:
 def ingest_acb_season(
     edition_id: str,
     *,
-    connector: SourceConnector | None = None,
+    connector: _AcbConnectorLike | None = None,
     store_media: bool = True,
 ) -> IngestResult:
     """Ingest all finished games of one ACB edition (season).
@@ -108,9 +118,9 @@ def ingest_acb_season(
     enrichment rides along on the box-score payload that is fetched anyway, so it
     needs no extra requests (plan: ACB Phase 2).
     """
-    connector = connector or get_connector(ACB_CONNECTOR_ID)
+    acb = cast(_AcbConnectorLike, connector or get_connector(ACB_CONNECTOR_ID))
 
-    schedule_payload = _json(connector.fetch_completed_games(edition_id))
+    schedule_payload = _json(acb.fetch_completed_games(edition_id))
     schedule = parse_matches(schedule_payload, source=ACB_CONNECTOR_ID)
     start_year = schedule.seasons.get(int(edition_id))
     if start_year is None:
@@ -120,7 +130,7 @@ def ingest_acb_season(
     league, season = ensure_acb_league_and_season(start_year)
 
     headers, teams, team_profiles = _collect_finished_games(
-        connector, edition_id, schedule, schedule_payload
+        acb, edition_id, schedule, schedule_payload
     )
     logger.info(
         "ACB edition %s (%s): %d finished games across %d rounds",
@@ -136,10 +146,10 @@ def ingest_acb_season(
 
     ingested = 0
     failed = 0
-    profiles: dict[str, object] = {}
+    profiles: dict[str, NormalizedPersonProfile] = {}
     for header in headers:
         try:
-            payload = _json(connector.fetch_box_score(header.external_id))
+            payload = _json(acb.fetch_box_score(header.external_id))
             parsed = parse_boxscore(
                 payload, source=ACB_CONNECTOR_ID, header=header
             )
@@ -257,7 +267,7 @@ def _enrich_players(profiles, *, store_media: bool) -> tuple[int, int]:
 
 
 def resolve_current_edition_id(
-    connector: SourceConnector | None = None,
+    connector: _AcbConnectorLike | None = None,
 ) -> str:
     """Resolve ACB's current edition id from the schedule API.
 
@@ -276,10 +286,10 @@ def resolve_current_edition_id(
     ParserError
         If the current edition cannot be determined.
     """
-    connector = connector or get_connector(ACB_CONNECTOR_ID)
+    acb_connector = cast(_AcbConnectorLike, connector or get_connector(ACB_CONNECTOR_ID))
     # Omitting editionId makes the API return the live edition (selectedFilters).
     schedule = parse_matches(
-        _json(connector.fetch_current_schedule()), source=ACB_CONNECTOR_ID
+        _json(acb_connector.fetch_current_schedule()), source=ACB_CONNECTOR_ID
     )
     if schedule.current_edition_id is None:
         raise ParserError("Could not resolve ACB current edition id")
@@ -287,11 +297,11 @@ def resolve_current_edition_id(
 
 
 def _collect_finished_games(
-    connector: SourceConnector,
+    connector: _AcbConnectorLike,
     edition_id: str,
     schedule: SeasonMatches,
     schedule_payload: dict,
-) -> tuple[list[MatchHeader], dict[str, object], dict[str, object]]:
+) -> tuple[list[MatchHeader], dict[str, NormalizedTeam], dict[str, NormalizedTeamProfile]]:
     """Gather finished-game headers, teams and branding across all rounds.
 
     Parameters
@@ -319,8 +329,8 @@ def _collect_finished_games(
     fetched explicitly; a round that fails to fetch is logged and skipped.
     """
     headers: dict[str, MatchHeader] = {h.external_id: h for h in schedule.headers}
-    teams: dict[str, object] = {t.ref.external_id: t for t in schedule.teams}
-    team_profiles: dict[str, object] = {
+    teams: dict[str, NormalizedTeam] = {t.ref.external_id: t for t in schedule.teams}
+    team_profiles: dict[str, NormalizedTeamProfile] = {
         p.ref.external_id: p
         for p in parse_team_profiles(schedule_payload, source=ACB_CONNECTOR_ID)
     }
@@ -370,6 +380,8 @@ def _rebuild_rosters(season) -> None:
 def _json(payload) -> dict:
     """Decode a connector payload's JSON-text body into a dict."""
     data = payload.data
-    if isinstance(data, dict | list):
+    if isinstance(data, dict):
         return data
-    return json.loads(data)
+    parsed = json.loads(data)
+    assert isinstance(parsed, dict), f"Expected JSON object, got {type(parsed).__name__}"
+    return parsed

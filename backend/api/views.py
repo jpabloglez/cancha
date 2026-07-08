@@ -6,9 +6,10 @@ single model (standings, roster, player stats, compare, boxscore, leaders) are
 implemented as viewset ``@action``s or standalone views.
 """
 
-from django.db.models import Count, Max, QuerySet, Sum
+from django.db.models import Count, Max, Q, QuerySet, Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -329,6 +330,8 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Team.objects.select_related("logo").all()
     serializer_class = TeamSerializer
     lookup_field = "slug"
+    filter_backends = [SearchFilter]
+    search_fields = ["name", "short_name", "city"]
 
     @action(detail=True)
     def roster(self, request: Request, slug: str | None = None) -> Response:
@@ -520,6 +523,8 @@ class PersonViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Person.objects.select_related("photo").all()
     serializer_class = PersonSerializer
     lookup_field = "slug"
+    filter_backends = [SearchFilter]
+    search_fields = ["first_name", "last_name", "display_name"]
 
     def get_serializer_class(self):
         """Use the detail serializer (with career timeline) on retrieve.
@@ -775,3 +780,66 @@ class LeadersView(APIView):
         if threshold <= 1:
             return aggregates
         return aggregates.filter(games_played__gte=threshold)
+
+
+class GlobalSearchView(APIView):
+    """Cross-entity search: teams, players, leagues (``/search/``, plan §5.1).
+
+    Returns up to 5 hits per entity type for the ``?q=`` query string.
+    Results are sorted by relevance within each type (case-insensitive
+    containment on the most natural name fields).
+    """
+
+    MAX_PER_TYPE = 5
+
+    def get(self, request: Request) -> Response:
+        """Return mixed search results across teams, players and leagues.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Incoming request; query param ``q`` is required (min 2 chars).
+
+        Returns
+        -------
+        rest_framework.response.Response
+            ``{ teams: [...], players: [...], leagues: [...] }`` where each
+            list uses the standard serializer shape for that entity.
+        """
+        q = request.query_params.get("q", "").strip()
+        if len(q) < 2:
+            return Response({"teams": [], "players": [], "leagues": []})
+
+        teams = (
+            Team.objects.filter(name__icontains=q)
+            .select_related("logo")
+            .order_by("name")[: self.MAX_PER_TYPE]
+        )
+        players = (
+            Person.objects.filter(
+                Q(display_name__icontains=q)
+                | Q(last_name__icontains=q)
+                | Q(first_name__icontains=q)
+            )
+            .select_related("photo")
+            .order_by("last_name", "first_name")[: self.MAX_PER_TYPE]
+        )
+        leagues = (
+            League.objects.filter(name__icontains=q).order_by("level")[
+                : self.MAX_PER_TYPE
+            ]
+        )
+
+        return Response(
+            {
+                "teams": TeamSerializer(
+                    teams, many=True, context={"request": request}
+                ).data,
+                "players": PersonSerializer(
+                    players, many=True, context={"request": request}
+                ).data,
+                "leagues": LeagueSerializer(
+                    leagues, many=True, context={"request": request}
+                ).data,
+            }
+        )

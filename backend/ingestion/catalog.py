@@ -14,6 +14,7 @@ from teams.models import League, Season
 from .persistence import upsert_league, upsert_season
 
 #: Most recent season start year with finished games (2025 → 2025/2026).
+#: Used only as a fallback when no DB seasons exist yet (initial bootstrap).
 LATEST_SEASON_START_YEAR = 2025
 
 
@@ -113,6 +114,39 @@ def ensure_acb_league_and_season(start_year: int) -> tuple[League, Season]:
         end_date=date(start_year + 1, 6, 30),
     )
     return league, season
+
+
+def resolve_current_feb_season(connector_id: str) -> str:
+    """Return the start-year string for the active FEB season.
+
+    Queries the database for the most recently started season of the
+    competition's league. Falls back to :data:`LATEST_SEASON_START_YEAR`
+    during initial bootstrap when no seasons exist yet.
+
+    Parameters
+    ----------
+    connector_id : str
+        Registered FEB connector id (e.g. ``"feb-primera"``).
+
+    Returns
+    -------
+    str
+        Season start year as a string, e.g. ``"2025"`` for 2025/2026.
+
+    Raises
+    ------
+    KeyError
+        If *connector_id* is not a registered FEB competition.
+    """
+    competition = FEB_COMPETITIONS[connector_id]
+    season = (
+        Season.objects.filter(league__slug=competition.league_slug)
+        .order_by("-start_date")
+        .first()
+    )
+    if season is not None:
+        return str(season.start_date.year)
+    return str(LATEST_SEASON_START_YEAR)
 
 
 def backfill_start_years(count: int, latest: int = LATEST_SEASON_START_YEAR) -> list[int]:

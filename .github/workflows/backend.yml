@@ -51,6 +51,8 @@ jobs:
         run: pip install -r requirements-dev.txt
       - name: Ruff lint
         run: ruff check .
+      - name: Type check
+        run: mypy .
       - name: Django system check
         run: python manage.py check
       - name: Verify migrations are up to date
