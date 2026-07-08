@@ -20,14 +20,21 @@ interface StatDef {
 }
 
 const STATS: StatDef[] = [
-  { key: "ppg",           label: "PPG",             col: "ppg",           decimals: 1 },
-  { key: "rpg",           label: "RPG",             col: "rpg",           decimals: 1 },
-  { key: "apg",           label: "APG",             col: "apg",           decimals: 1 },
-  { key: "total_points",  label: "Puntos totales",  col: "totalPoints",   decimals: 0 },
-  { key: "total_rebounds",label: "Rebotes totales", col: "totalRebounds", decimals: 0 },
-  { key: "total_assists", label: "Asis. totales",   col: "totalAssists",  decimals: 0 },
-  { key: "per",           label: "PER",             col: "per",           decimals: 1 },
-  { key: "games",         label: "Partidos",        col: "totalGames",    decimals: 0 },
+  { key: "ppg",          label: "PPG",            col: "ppg",          decimals: 1 },
+  { key: "rpg",          label: "RPG",            col: "rpg",          decimals: 1 },
+  { key: "apg",          label: "APG",            col: "apg",          decimals: 1 },
+  { key: "spg",          label: "Robos/PJ",       col: "spg",          decimals: 1 },
+  { key: "bpg",          label: "Tapones/PJ",     col: "bpg",          decimals: 1 },
+  { key: "topg",         label: "Pérdidas/PJ",    col: "topg",         decimals: 1 },
+  { key: "two_pct",      label: "T2%",            col: "twoPercent",   decimals: 1 },
+  { key: "three_pct",    label: "T3%",            col: "threePercent", decimals: 1 },
+  { key: "ft_pct",       label: "TL%",            col: "ftPercent",    decimals: 1 },
+  { key: "total_points", label: "Pts. totales",   col: "totalPoints",  decimals: 0 },
+  { key: "total_rebounds",label:"Reb. totales",   col: "totalRebounds",decimals: 0 },
+  { key: "total_assists",label: "Asis. totales",  col: "totalAssists", decimals: 0 },
+  { key: "per",          label: "PER",            col: "per",          decimals: 1 },
+  { key: "ts",           label: "TS%",            col: "tsPercent",    decimals: 1 },
+  { key: "games",        label: "Partidos",       col: "totalGames",   decimals: 0 },
 ];
 
 const POSITIONS = ["PG", "SG", "SF", "PF", "C"];
@@ -35,8 +42,8 @@ const ROWS_OPTIONS = [10, 25, 50];
 const LEAGUE_OPTIONS = [
   { value: "",              label: "Todas las ligas" },
   { value: "acb",           label: "Liga ACB" },
-  { value: "feb-primera",   label: "Primera FEB" },
-  { value: "feb-segunda",   label: "Segunda FEB" },
+  { value: "primera-feb",   label: "Primera FEB" },
+  { value: "segunda-feb",   label: "Segunda FEB" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -62,7 +69,13 @@ function defaultFilters(): Filters {
 // ---------------------------------------------------------------------------
 
 function exportCsv(rows: AllTimeLeader[], stat: string) {
-  const headers = ["#", "Jugador", "Posición", "Nac.", "Partidos", "Temp.", "Ligas", "PPG", "RPG", "APG", "PER", "Pts tot.", "Reb. tot.", "Asis. tot."];
+  const headers = [
+    "#", "Jugador", "Posición", "Nac.", "Partidos", "Temp.", "Ligas",
+    "PPG", "RPG", "APG", "ROB/PJ", "TAP/PJ", "PÉR/PJ",
+    "T2%", "T3%", "TL%", "PER", "TS%",
+    "Pts tot.", "Reb. tot.", "Asis. tot.",
+  ];
+  const pct = (v: number) => (v * 100).toFixed(1) + "%";
   const lines = rows.map((r, i) =>
     [
       i + 1,
@@ -75,7 +88,14 @@ function exportCsv(rows: AllTimeLeader[], stat: string) {
       r.ppg.toFixed(1),
       r.rpg.toFixed(1),
       r.apg.toFixed(1),
+      r.spg.toFixed(1),
+      r.bpg.toFixed(1),
+      r.topg.toFixed(1),
+      pct(r.twoPercent),
+      pct(r.threePercent),
+      pct(r.ftPercent),
       r.per != null ? r.per.toFixed(1) : "",
+      pct(r.tsPercent),
       r.totalPoints.toFixed(0),
       r.totalRebounds.toFixed(0),
       r.totalAssists.toFixed(0),
@@ -273,31 +293,44 @@ export function AllTimeLeaderboard({ initialRows = [], initialCount = 0, seasons
               <th className="px-3 py-2 text-right">#</th>
               <th className="px-3 py-2">Jugador</th>
               <th className="px-3 py-2">Pos.</th>
-              <th className="px-3 py-2 text-right">{activeStat.label}</th>
-              <th className="px-3 py-2 text-right">Partidos</th>
+              <th className="px-3 py-2 text-right text-orange-600">{activeStat.label}</th>
+              <th className="px-3 py-2 text-right">PJ</th>
               <th className="px-3 py-2 text-right">Temp.</th>
-              <th className="hidden px-3 py-2 text-right md:table-cell">PPG</th>
-              <th className="hidden px-3 py-2 text-right md:table-cell">RPG</th>
-              <th className="hidden px-3 py-2 text-right md:table-cell">APG</th>
-              <th className="hidden px-3 py-2 lg:table-cell">Ligas</th>
+              <th className="px-3 py-2 text-right">PPG</th>
+              <th className="px-3 py-2 text-right">RPG</th>
+              <th className="px-3 py-2 text-right">APG</th>
+              <th className="px-3 py-2 text-right" title="Robos por partido">ROB</th>
+              <th className="px-3 py-2 text-right" title="Tapones por partido">TAP</th>
+              <th className="px-3 py-2 text-right" title="Pérdidas por partido">PÉR</th>
+              <th className="px-3 py-2 text-right" title="Porcentaje de tiro de 2">T2%</th>
+              <th className="px-3 py-2 text-right" title="Porcentaje de tiro de 3">T3%</th>
+              <th className="px-3 py-2 text-right" title="Porcentaje de tiro libre">TL%</th>
+              <th className="px-3 py-2 text-right" title="Player Efficiency Rating">PER</th>
+              <th className="px-3 py-2 text-right" title="True Shooting %">TS%</th>
+              <th className="px-3 py-2 text-right">Ligas</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {rows.length === 0 && !loading && (
               <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-zinc-400">
+                <td colSpan={18} className="px-4 py-8 text-center text-zinc-400">
                   Sin resultados para los filtros seleccionados.
                 </td>
               </tr>
             )}
             {rows.map((r, i) => {
               const val = r[activeStat.col as keyof AllTimeLeader] as number | null;
-              const displayVal = val != null ? val.toFixed(activeStat.decimals) : "—";
+              const isPct = ["twoPercent", "threePercent", "ftPercent", "tsPercent"].includes(activeStat.col as string);
+              const displayVal = val != null
+                ? isPct ? (val * 100).toFixed(activeStat.decimals) + "%" : val.toFixed(activeStat.decimals)
+                : "—";
+              const num = (v: number, d = 1) => v.toFixed(d);
+              const pct = (v: number) => (v * 100).toFixed(1) + "%";
               return (
                 <tr key={r.playerId} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
                   <td className="px-3 py-2 text-right text-xs text-zinc-400">{offset + i + 1}</td>
                   <td className="px-3 py-2">
-                    <Link href={`/jugadores/${r.playerSlug}`} className="flex items-center gap-2 hover:underline">
+                    <Link href={`/jugadores/${r.playerSlug}`} className="flex min-w-[140px] items-center gap-2 hover:underline">
                       <MediaImage asset={r.photo} alt={r.playerName} initials={r.playerName.slice(0, 2)} size={28} />
                       <span className="font-medium text-zinc-900 dark:text-zinc-100">{r.playerName}</span>
                     </Link>
@@ -306,14 +339,20 @@ export function AllTimeLeaderboard({ initialRows = [], initialCount = 0, seasons
                     <PositionBadge position={r.primaryPosition} short />
                   </td>
                   <td className="px-3 py-2 text-right font-mono font-semibold text-orange-600">{displayVal}</td>
-                  <td className="px-3 py-2 text-right text-zinc-600 dark:text-zinc-400">{r.totalGames}</td>
-                  <td className="px-3 py-2 text-right text-zinc-600 dark:text-zinc-400">{r.seasonsCount}</td>
-                  <td className="hidden px-3 py-2 text-right text-zinc-600 md:table-cell dark:text-zinc-400">{r.ppg.toFixed(1)}</td>
-                  <td className="hidden px-3 py-2 text-right text-zinc-600 md:table-cell dark:text-zinc-400">{r.rpg.toFixed(1)}</td>
-                  <td className="hidden px-3 py-2 text-right text-zinc-600 md:table-cell dark:text-zinc-400">{r.apg.toFixed(1)}</td>
-                  <td className="hidden px-3 py-2 lg:table-cell">
-                    <span className="text-xs text-zinc-400">{r.leagues.join(", ")}</span>
-                  </td>
+                  <td className="px-3 py-2 text-right tabular-nums text-zinc-600 dark:text-zinc-400">{r.totalGames}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-zinc-600 dark:text-zinc-400">{r.seasonsCount}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{num(r.ppg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{num(r.rpg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{num(r.apg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{num(r.spg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{num(r.bpg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{num(r.topg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{pct(r.twoPercent)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{pct(r.threePercent)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{pct(r.ftPercent)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{r.per != null ? num(r.per) : "—"}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{pct(r.tsPercent)}</td>
+                  <td className="px-3 py-2 text-xs text-zinc-400">{r.leagues.join(", ")}</td>
                 </tr>
               );
             })}

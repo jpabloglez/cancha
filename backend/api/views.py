@@ -66,10 +66,17 @@ ALLTIME_STATS = {
     "ppg": "ppg",
     "rpg": "rpg",
     "apg": "apg",
+    "spg": "spg",
+    "bpg": "bpg",
+    "topg": "topg",
     "total_points": "total_points",
     "total_rebounds": "total_rebounds",
     "total_assists": "total_assists",
     "per": "per_weighted",
+    "ts": "ts_weighted",
+    "two_pct": "two_pct_weighted",
+    "three_pct": "three_pct_weighted",
+    "ft_pct": "ft_pct_weighted",
     "games": "total_games",
 }
 
@@ -101,6 +108,13 @@ def _aggregate_to_stats(aggregate: PlayerSeasonAggregate) -> dict:
         "points_per_game": aggregate.points_per_game,
         "rebounds_per_game": aggregate.rebounds_per_game,
         "assists_per_game": aggregate.assists_per_game,
+        "steals_per_game": aggregate.steals_per_game,
+        "blocks_per_game": aggregate.blocks_per_game,
+        "turnovers_per_game": aggregate.turnovers_per_game,
+        "fouls_per_game": aggregate.fouls_per_game,
+        "two_percent": aggregate.two_percent,
+        "three_percent": aggregate.three_percent,
+        "ft_percent": aggregate.ft_percent,
         "advanced": {
             "true_shooting_percent": aggregate.ts_percent,
             "effective_field_goal_percent": aggregate.efg_percent,
@@ -920,21 +934,28 @@ class AllTimeLeadersView(APIView):
         if nationality:
             qs = qs.filter(person__nationality__icontains=nationality)
 
-        # Expressions for weighted-sum totals.
+        # Expressions for weighted-sum totals (weight = games_played).
         _f: FloatField = FloatField()
-        _pts = ExpressionWrapper(F("points_per_game") * F("games_played"), output_field=_f)
-        _reb = ExpressionWrapper(F("rebounds_per_game") * F("games_played"), output_field=_f)
-        _ast = ExpressionWrapper(F("assists_per_game") * F("games_played"), output_field=_f)
-        _per_w = ExpressionWrapper(F("per") * F("games_played"), output_field=_f)
+
+        def _w(field: str) -> ExpressionWrapper:
+            return ExpressionWrapper(F(field) * F("games_played"), output_field=_f)
 
         annotated = (
             qs.values("person_id")
             .annotate(
                 total_games=Sum("games_played"),
-                total_points=Sum(_pts),
-                total_rebounds=Sum(_reb),
-                total_assists=Sum(_ast),
-                per_total=Sum(_per_w),
+                total_points=Sum(_w("points_per_game")),
+                total_rebounds=Sum(_w("rebounds_per_game")),
+                total_assists=Sum(_w("assists_per_game")),
+                steals_total=Sum(_w("steals_per_game")),
+                blocks_total=Sum(_w("blocks_per_game")),
+                turnovers_total=Sum(_w("turnovers_per_game")),
+                fouls_total=Sum(_w("fouls_per_game")),
+                per_total=Sum(_w("per")),
+                ts_total=Sum(_w("ts_percent")),
+                two_pct_total=Sum(_w("two_percent")),
+                three_pct_total=Sum(_w("three_percent")),
+                ft_pct_total=Sum(_w("ft_percent")),
                 seasons_count=Count("season", distinct=True),
             )
             .annotate(
@@ -944,7 +965,14 @@ class AllTimeLeadersView(APIView):
                 ppg=ExpressionWrapper(F("total_points") / F("games_float"), output_field=_f),
                 rpg=ExpressionWrapper(F("total_rebounds") / F("games_float"), output_field=_f),
                 apg=ExpressionWrapper(F("total_assists") / F("games_float"), output_field=_f),
+                spg=ExpressionWrapper(F("steals_total") / F("games_float"), output_field=_f),
+                bpg=ExpressionWrapper(F("blocks_total") / F("games_float"), output_field=_f),
+                topg=ExpressionWrapper(F("turnovers_total") / F("games_float"), output_field=_f),
                 per_weighted=ExpressionWrapper(F("per_total") / F("games_float"), output_field=_f),
+                ts_weighted=ExpressionWrapper(F("ts_total") / F("games_float"), output_field=_f),
+                two_pct_weighted=ExpressionWrapper(F("two_pct_total") / F("games_float"), output_field=_f),
+                three_pct_weighted=ExpressionWrapper(F("three_pct_total") / F("games_float"), output_field=_f),
+                ft_pct_weighted=ExpressionWrapper(F("ft_pct_total") / F("games_float"), output_field=_f),
             )
             .filter(total_games__gte=min_games)
         )
@@ -996,7 +1024,14 @@ class AllTimeLeadersView(APIView):
                     "ppg": row["ppg"] or 0.0,
                     "rpg": row["rpg"] or 0.0,
                     "apg": row["apg"] or 0.0,
+                    "spg": row["spg"] or 0.0,
+                    "bpg": row["bpg"] or 0.0,
+                    "topg": row["topg"] or 0.0,
+                    "two_percent": row["two_pct_weighted"] or 0.0,
+                    "three_percent": row["three_pct_weighted"] or 0.0,
+                    "ft_percent": row["ft_pct_weighted"] or 0.0,
                     "per": row["per_weighted"],
+                    "ts_percent": row["ts_weighted"] or 0.0,
                     "stat_value": float(stat_val),
                 }
             )

@@ -59,6 +59,13 @@ export interface PlayerSeasonStats {
   pointsPerGame: number;
   reboundsPerGame: number;
   assistsPerGame: number;
+  stealsPerGame: number;
+  blocksPerGame: number;
+  turnoversPerGame: number;
+  foulsPerGame: number;
+  twoPercent: number;
+  threePercent: number;
+  ftPercent: number;
   advanced: AdvancedStats;
 }
 
@@ -193,7 +200,14 @@ export interface AllTimeLeader {
   ppg: number;
   rpg: number;
   apg: number;
+  spg: number;
+  bpg: number;
+  topg: number;
+  twoPercent: number;
+  threePercent: number;
+  ftPercent: number;
   per: number | null;
+  tsPercent: number;
   statValue: number;
 }
 

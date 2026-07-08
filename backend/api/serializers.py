@@ -444,8 +444,22 @@ class AllTimeLeaderSerializer(serializers.Serializer):
         Career rebounds per game.
     apg : float
         Career assists per game.
+    spg : float
+        Career steals per game.
+    bpg : float
+        Career blocks per game.
+    topg : float
+        Career turnovers per game.
+    two_percent : float
+        Games-weighted career two-point percentage.
+    three_percent : float
+        Games-weighted career three-point percentage.
+    ft_percent : float
+        Games-weighted career free-throw percentage.
     per : float or None
         Games-weighted career PER.
+    ts_percent : float
+        Games-weighted career True Shooting percentage.
     stat_value : float
         The primary ranked stat value (mirrors the sorted column).
     """
@@ -465,7 +479,14 @@ class AllTimeLeaderSerializer(serializers.Serializer):
     ppg = serializers.FloatField()
     rpg = serializers.FloatField()
     apg = serializers.FloatField()
+    spg = serializers.FloatField()
+    bpg = serializers.FloatField()
+    topg = serializers.FloatField()
+    two_percent = serializers.FloatField()
+    three_percent = serializers.FloatField()
+    ft_percent = serializers.FloatField()
     per = serializers.FloatField(allow_null=True)
+    ts_percent = serializers.FloatField()
     stat_value = serializers.FloatField()
 
 

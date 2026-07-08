@@ -220,6 +220,13 @@ export default async function PlayerPage({
                     <th className="px-2 text-right" title="Puntos por partido">PTS</th>
                     <th className="px-2 text-right" title="Rebotes por partido">REB</th>
                     <th className="px-2 text-right" title="Asistencias por partido">ASI</th>
+                    <th className="px-2 text-right" title="Robos por partido">ROB</th>
+                    <th className="px-2 text-right" title="Tapones por partido">TAP</th>
+                    <th className="px-2 text-right" title="Pérdidas por partido">PÉR</th>
+                    <th className="px-2 text-right" title="Faltas por partido">FLT</th>
+                    <th className="px-2 text-right" title="% tiro de 2">T2%</th>
+                    <th className="px-2 text-right" title="% tiro de 3">T3%</th>
+                    <th className="px-2 text-right" title="% tiros libres">TL%</th>
                     <th className="px-2 text-right" title="True Shooting %">TS%</th>
                     <th className="px-2 text-right" title="Effective Field Goal %">eFG%</th>
                     <th className="px-2 text-right" title="Usage rate">USO%</th>
@@ -244,6 +251,19 @@ export default async function PlayerPage({
                         <td className="px-2 text-right tabular-nums">{s.pointsPerGame.toFixed(1)}</td>
                         <td className="px-2 text-right tabular-nums">{s.reboundsPerGame.toFixed(1)}</td>
                         <td className="px-2 text-right tabular-nums">{s.assistsPerGame.toFixed(1)}</td>
+                        <td className="px-2 text-right tabular-nums">{(s.stealsPerGame ?? 0).toFixed(1)}</td>
+                        <td className="px-2 text-right tabular-nums">{(s.blocksPerGame ?? 0).toFixed(1)}</td>
+                        <td className="px-2 text-right tabular-nums">{(s.turnoversPerGame ?? 0).toFixed(1)}</td>
+                        <td className="px-2 text-right tabular-nums">{(s.foulsPerGame ?? 0).toFixed(1)}</td>
+                        <td className="px-2 text-right tabular-nums">
+                          {((s.twoPercent ?? 0) * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-2 text-right tabular-nums">
+                          {((s.threePercent ?? 0) * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-2 text-right tabular-nums">
+                          {((s.ftPercent ?? 0) * 100).toFixed(1)}%
+                        </td>
                         <td className="px-2 text-right tabular-nums">
                           {(s.advanced.trueShootingPercent * 100).toFixed(1)}%
                         </td>

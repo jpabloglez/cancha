@@ -146,11 +146,18 @@ def _build_aggregate(
     games_played = len(person_lines)
 
     # Season totals, fed to the metric functions as single-element arrays.
+    tpa = np.array([line.three_point_att for line in person_lines], dtype=float)
+    fouls = np.array([line.fouls for line in person_lines], dtype=float)
+    reb_off = np.array([line.rebounds_off for line in person_lines], dtype=float)
+    reb_def = np.array([line.rebounds_def for line in person_lines], dtype=float)
+
     tot_points = np.array([points.sum()])
     tot_fga = np.array([fga.sum()])
     tot_fta = np.array([fta.sum()])
     tot_fgm = np.array([fgm.sum()])
     tot_tpm = np.array([tpm.sum()])
+    tot_tpa = np.array([tpa.sum()])
+    tot_ftm = np.array([ftm.sum()])
     tot_minutes = np.array([minutes.sum()])
     tot_turnovers = np.array([turnovers.sum()])
 
@@ -196,12 +203,31 @@ def _build_aggregate(
         )[0]
     )
 
+    # Shooting percentages from season totals (accurate; not averages of averages).
+    s_two_att = float((tot_fga - tot_tpa)[0])
+    s_two_made = float((tot_fgm - tot_tpm)[0])
+    s_three_att = float(tot_tpa[0])
+    s_three_made = float(tot_tpm[0])
+    s_ft_att = float(tot_fta[0])
+    s_ft_made = float(tot_ftm[0])
+
+    two_percent = s_two_made / s_two_att if s_two_att > 0 else 0.0
+    three_percent = s_three_made / s_three_att if s_three_att > 0 else 0.0
+    ft_percent = s_ft_made / s_ft_att if s_ft_att > 0 else 0.0
+
     return {
         "games_played": games_played,
         "minutes_per_game": float(minutes.mean()),
         "points_per_game": float(points.mean()),
         "rebounds_per_game": float(rebounds.mean()),
         "assists_per_game": float(assists.mean()),
+        "steals_per_game": float(steals.mean()),
+        "blocks_per_game": float(blocks.mean()),
+        "turnovers_per_game": float(turnovers.mean()),
+        "fouls_per_game": float(fouls.mean()),
+        "two_percent": two_percent,
+        "three_percent": three_percent,
+        "ft_percent": ft_percent,
         "per": per,
         "ts_percent": ts_percent,
         "usage_rate": usage_rate,
