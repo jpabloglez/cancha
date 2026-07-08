@@ -8,6 +8,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    AllTimeLeadersView,
     GameViewSet,
     GlobalSearchView,
     LeadersView,
@@ -34,6 +35,7 @@ router.register("games", GameViewSet, basename="game")
 urlpatterns = [
     path("health/", health, name="health"),
     path("stats/leaders/", LeadersView.as_view(), name="leaders"),
+    path("stats/alltime/", AllTimeLeadersView.as_view(), name="alltime-leaders"),
     path("search/", GlobalSearchView.as_view(), name="search"),
     path("", include(router.urls)),
 ]

@@ -59,6 +59,13 @@ export interface PlayerSeasonStats {
   pointsPerGame: number;
   reboundsPerGame: number;
   assistsPerGame: number;
+  stealsPerGame: number;
+  blocksPerGame: number;
+  turnoversPerGame: number;
+  foulsPerGame: number;
+  twoPercent: number;
+  threePercent: number;
+  ftPercent: number;
   advanced: AdvancedStats;
 }
 
@@ -175,6 +182,43 @@ export interface BoxScore {
   game: Game;
   teamStats: TeamBoxScore[];
   playerStats: PlayerBoxScore[];
+}
+
+export interface AllTimeLeader {
+  playerId: number;
+  playerName: string;
+  playerSlug: string;
+  photo: MediaAsset | null;
+  nationality: string | null;
+  primaryPosition: string | null;
+  totalGames: number;
+  seasonsCount: number;
+  leagues: string[];
+  totalPoints: number;
+  totalRebounds: number;
+  totalAssists: number;
+  ppg: number;
+  rpg: number;
+  apg: number;
+  spg: number;
+  bpg: number;
+  topg: number;
+  twoPercent: number;
+  threePercent: number;
+  ftPercent: number;
+  per: number | null;
+  tsPercent: number;
+  statValue: number;
+}
+
+export interface AllTimeLeaderPage {
+  count: number;
+  results: AllTimeLeader[];
+}
+
+export interface PlayerOfTheDay {
+  player: PersonDetail;
+  latestStats: PlayerSeasonStats | null;
 }
 
 // Team statistics blocks returned by /teams/{slug}/season-stats/.

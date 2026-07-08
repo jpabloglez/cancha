@@ -276,8 +276,11 @@ class PlayerSeasonAggregate(models.Model):
     games_played : int
         Number of games included in the aggregate.
     minutes_per_game, points_per_game, rebounds_per_game,
-    assists_per_game : float
+    assists_per_game, steals_per_game, blocks_per_game,
+    turnovers_per_game, fouls_per_game : float
         Basic per-game averages.
+    two_percent, three_percent, ft_percent : float
+        Season shooting percentages (T2, T3, FT).
     per, ts_percent, usage_rate, efg_percent : float
         Derived advanced metrics (spec §4.4).
     """
@@ -293,6 +296,13 @@ class PlayerSeasonAggregate(models.Model):
     points_per_game = models.FloatField(default=0.0)
     rebounds_per_game = models.FloatField(default=0.0)
     assists_per_game = models.FloatField(default=0.0)
+    steals_per_game = models.FloatField(default=0.0)
+    blocks_per_game = models.FloatField(default=0.0)
+    turnovers_per_game = models.FloatField(default=0.0)
+    fouls_per_game = models.FloatField(default=0.0)
+    two_percent = models.FloatField(default=0.0)
+    three_percent = models.FloatField(default=0.0)
+    ft_percent = models.FloatField(default=0.0)
     per = models.FloatField(default=0.0)
     ts_percent = models.FloatField(default=0.0)
     usage_rate = models.FloatField(default=0.0)

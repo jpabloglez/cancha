@@ -4,6 +4,7 @@
 // local dev, preview and production deployments.
 
 import type {
+  AllTimeLeaderPage,
   BoxScore,
   Game,
   Leader,
@@ -11,6 +12,7 @@ import type {
   Paginated,
   Person,
   PersonDetail,
+  PlayerOfTheDay,
   PlayerSeasonStats,
   RosterEntry,
   Season,
@@ -182,4 +184,38 @@ export interface SearchResults {
 /** Global cross-entity search (min 2 chars). */
 export function globalSearch(q: string): Promise<SearchResults> {
   return apiFetch<SearchResults>(`/search/?q=${encodeURIComponent(q)}`);
+}
+
+export interface AllTimeLeadersParams {
+  stat?: string;
+  league?: string;
+  seasonFrom?: string;
+  seasonTo?: string;
+  position?: string;
+  nationality?: string;
+  minGames?: number;
+  limit?: number;
+  offset?: number;
+}
+
+/** Fetch cross-season cumulative/average statistical leaders. */
+export function getAllTimeLeaders(params: AllTimeLeadersParams = {}): Promise<AllTimeLeaderPage> {
+  const p = new URLSearchParams();
+  if (params.stat) p.set("stat", params.stat);
+  if (params.league) p.set("league", params.league);
+  if (params.seasonFrom) p.set("seasonFrom", params.seasonFrom);
+  if (params.seasonTo) p.set("seasonTo", params.seasonTo);
+  if (params.position) p.set("position", params.position);
+  if (params.nationality) p.set("nationality", params.nationality);
+  if (params.minGames !== undefined) p.set("minGames", String(params.minGames));
+  if (params.limit !== undefined) p.set("limit", String(params.limit));
+  if (params.offset !== undefined) p.set("offset", String(params.offset));
+  return apiFetch<AllTimeLeaderPage>(`/stats/alltime/?${p.toString()}`);
+}
+
+/** Fetch the deterministic player of the day (rotates at midnight Madrid time). */
+export function getPlayerOfTheDay(): Promise<PlayerOfTheDay> {
+  return apiFetch<PlayerOfTheDay>("/players/player-of-the-day/", {
+    next: { revalidate: 3600 },
+  });
 }

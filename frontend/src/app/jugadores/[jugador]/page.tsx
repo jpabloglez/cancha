@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AdvancedRadar } from "@/components/AdvancedRadar";
-import type { AdvancedRadarSeries } from "@/components/AdvancedRadar";
 import { MediaImage } from "@/components/MediaImage";
-import { TrendLine } from "@/components/TrendLine";
+import { PlayerStatsSection } from "@/components/PlayerStatsSection";
 import { getPlayer, getPlayerStats } from "@/lib/api";
 import type { PersonDetail, PlayerSeasonStats } from "@/types/api";
 
@@ -15,9 +13,6 @@ const POSITION_LABELS: Record<string, string> = {
   PF: "Ala-pívot",
   C: "Pívot",
 };
-
-// Up to 3 most-recent seasons shown as overlaid radar series.
-const RADAR_COLORS = ["#c0612b", "#3b82f6", "#16a34a"];
 
 export default async function PlayerPage({
   params,
@@ -45,18 +40,7 @@ export default async function PlayerPage({
     ? (POSITION_LABELS[player.primaryPosition] ?? player.primaryPosition)
     : null;
 
-  // Most recent season for header stats and radar; up to 3 for radar series.
   const latest = stats.at(-1);
-  const radarSeries: AdvancedRadarSeries[] = stats
-    .slice(-3)
-    .map((s, i) => ({
-      name: s.seasonName,
-      stats: s.advanced,
-      color: RADAR_COLORS[i],
-    }));
-
-  const makeTrend = (fn: (s: PlayerSeasonStats) => number) =>
-    stats.map((s) => ({ label: s.seasonName, value: Number(fn(s).toFixed(1)) }));
 
   return (
     <div className="space-y-8">
@@ -155,121 +139,49 @@ export default async function PlayerPage({
         </section>
       )}
 
-      {stats.length === 0 ? (
-        <p className="text-sm text-zinc-500">
-          No hay estadísticas disponibles para este jugador.
-        </p>
-      ) : (
-        <>
-          {/* ── Season stats table ──────────────────────────────────── */}
-          <section className="space-y-2">
-            <h2 className="text-lg font-semibold">Estadísticas por temporada</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs text-zinc-500">
-                  <tr>
-                    <th className="py-2 pr-4">Temporada</th>
-                    <th className="px-2 text-right" title="Partidos jugados">PJ</th>
-                    <th className="px-2 text-right" title="Minutos por partido">MIN</th>
-                    <th className="px-2 text-right" title="Puntos por partido">PTS</th>
-                    <th className="px-2 text-right" title="Rebotes por partido">REB</th>
-                    <th className="px-2 text-right" title="Asistencias por partido">ASI</th>
-                    <th className="px-2 text-right" title="True Shooting %">TS%</th>
-                    <th className="px-2 text-right" title="Effective Field Goal %">eFG%</th>
-                    <th className="px-2 text-right" title="Usage rate">USO%</th>
-                    <th className="px-2 text-right" title="Player Efficiency Rating">PER</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.map((s, i) => {
-                    const isLatest = i === stats.length - 1;
-                    return (
-                      <tr
-                        key={s.seasonId}
-                        className={`border-t border-zinc-200 dark:border-zinc-800 ${
-                          isLatest
-                            ? "bg-zinc-50 font-medium dark:bg-zinc-800/50"
-                            : ""
-                        }`}
-                      >
-                        <td className="py-2 pr-4">{s.seasonName}</td>
-                        <td className="px-2 text-right tabular-nums">{s.gamesPlayed}</td>
-                        <td className="px-2 text-right tabular-nums">{s.minutesPerGame.toFixed(1)}</td>
-                        <td className="px-2 text-right tabular-nums">{s.pointsPerGame.toFixed(1)}</td>
-                        <td className="px-2 text-right tabular-nums">{s.reboundsPerGame.toFixed(1)}</td>
-                        <td className="px-2 text-right tabular-nums">{s.assistsPerGame.toFixed(1)}</td>
-                        <td className="px-2 text-right tabular-nums">
-                          {(s.advanced.trueShootingPercent * 100).toFixed(1)}%
-                        </td>
-                        <td className="px-2 text-right tabular-nums">
-                          {(s.advanced.effectiveFieldGoalPercent * 100).toFixed(1)}%
-                        </td>
-                        <td className="px-2 text-right tabular-nums">
-                          {(s.advanced.usageRate * 100).toFixed(1)}%
-                        </td>
-                        <td className="px-2 text-right tabular-nums">
-                          {s.advanced.playerEfficiencyRating.toFixed(1)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* ── Advanced radar + trend sparklines ───────────────────── */}
-          <div className="grid gap-8 md:grid-cols-2">
-            <section className="space-y-2">
-              <h2 className="text-lg font-semibold">
-                Perfil avanzado
-                {radarSeries.length > 1
-                  ? ` · últimas ${radarSeries.length} temporadas`
-                  : latest
-                    ? ` · ${latest.seasonName}`
-                    : ""}
-              </h2>
-              {radarSeries.length > 1 && (
-                <div className="flex flex-wrap gap-3 text-xs">
-                  {radarSeries.map((s, i) => (
-                    <span key={s.name} className="flex items-center gap-1">
-                      <span
-                        className="inline-block h-2 w-4 rounded"
-                        style={{ backgroundColor: RADAR_COLORS[i] }}
-                      />
-                      {s.name}
-                    </span>
-                  ))}
+      {/* ── Career totals ─────────────────────────────────────────── */}
+      {stats.length > 0 && (() => {
+        const totalGames = stats.reduce((s, r) => s + r.gamesPlayed, 0);
+        const w = (fn: (s: PlayerSeasonStats) => number) =>
+          totalGames > 0
+            ? stats.reduce((acc, r) => acc + fn(r) * r.gamesPlayed, 0) / totalGames
+            : 0;
+        const totalPts = stats.reduce((s, r) => s + r.pointsPerGame * r.gamesPlayed, 0);
+        return (
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Totales históricos</h2>
+            <div className="flex flex-wrap gap-3">
+              {(
+                [
+                  ["Partidos", totalGames.toFixed(0)],
+                  ["Temporadas", String(stats.length)],
+                  ["Pts. totales", totalPts.toFixed(0)],
+                  ["PPG carrera", w((s) => s.pointsPerGame).toFixed(1)],
+                  ["RPG carrera", w((s) => s.reboundsPerGame).toFixed(1)],
+                  ["APG carrera", w((s) => s.assistsPerGame).toFixed(1)],
+                  ["PER carrera", w((s) => s.advanced.playerEfficiencyRating).toFixed(1)],
+                ] as [string, string][]
+              ).map(([label, val]) => (
+                <div
+                  key={label}
+                  className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 text-center dark:border-zinc-700 dark:bg-zinc-800"
+                >
+                  <p className="text-base font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{val}</p>
+                  <p className="text-[10px] text-zinc-500">{label}</p>
                 </div>
-              )}
-              <AdvancedRadar series={radarSeries} />
-            </section>
+              ))}
+            </div>
+            <p className="text-xs text-zinc-400">
+              Basado en {stats.length} temporada{stats.length !== 1 ? "s" : ""} con
+              datos disponibles
+              {stats.length === 1 && " — el jugador puede haber jugado en otras ligas o épocas sin datos ingresados"}.
+            </p>
+          </section>
+        );
+      })()}
 
-            <section className="space-y-2">
-              <h2 className="text-lg font-semibold">Evolución</h2>
-              <div className="space-y-1">
-                {(
-                  [
-                    { label: "PTS/PJ", color: "#c0612b", fn: (s: PlayerSeasonStats) => s.pointsPerGame },
-                    { label: "REB/PJ", color: "#3b82f6", fn: (s: PlayerSeasonStats) => s.reboundsPerGame },
-                    { label: "ASI/PJ", color: "#16a34a", fn: (s: PlayerSeasonStats) => s.assistsPerGame },
-                  ] as const
-                ).map(({ label, color, fn }) => (
-                  <div key={label}>
-                    <p className="text-xs font-medium text-zinc-500">{label}</p>
-                    <TrendLine
-                      points={makeTrend(fn)}
-                      metricLabel={label}
-                      color={color}
-                      compact
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        </>
-      )}
+      {/* ── Season stats table + radar + trends (interactive) ─────── */}
+      <PlayerStatsSection stats={stats} />
     </div>
   );
 }
