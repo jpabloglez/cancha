@@ -177,6 +177,36 @@ export interface BoxScore {
   playerStats: PlayerBoxScore[];
 }
 
+export interface AllTimeLeader {
+  playerId: number;
+  playerName: string;
+  playerSlug: string;
+  photo: MediaAsset | null;
+  nationality: string | null;
+  primaryPosition: string | null;
+  totalGames: number;
+  seasonsCount: number;
+  leagues: string[];
+  totalPoints: number;
+  totalRebounds: number;
+  totalAssists: number;
+  ppg: number;
+  rpg: number;
+  apg: number;
+  per: number | null;
+  statValue: number;
+}
+
+export interface AllTimeLeaderPage {
+  count: number;
+  results: AllTimeLeader[];
+}
+
+export interface PlayerOfTheDay {
+  player: PersonDetail;
+  latestStats: PlayerSeasonStats | null;
+}
+
 // Team statistics blocks returned by /teams/{slug}/season-stats/.
 export interface TeamStatsBlock {
   points: number;

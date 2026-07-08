@@ -8,11 +8,12 @@ import { globalSearch } from "@/lib/api";
 import type { SearchResults } from "@/lib/api";
 
 const NAV_LINKS = [
-  { href: "/ligas",    label: "Ligas" },
-  { href: "/comparar", label: "Comparar" },
-  { href: "/lideres",  label: "Líderes" },
-  { href: "/glosario", label: "Glosario" },
-  { href: "/acerca-de", label: "Acerca de" },
+  { href: "/ligas",      label: "Ligas" },
+  { href: "/jugadores",  label: "Jugadores" },
+  { href: "/comparar",   label: "Comparar" },
+  { href: "/lideres",    label: "Líderes" },
+  { href: "/glosario",   label: "Glosario" },
+  { href: "/acerca-de",  label: "Acerca de" },
 ];
 
 // ── Icons (inline SVG, no extra dependency) ───────────────────────────────────

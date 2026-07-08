@@ -6,7 +6,20 @@ single model (standings, roster, player stats, compare, boxscore, leaders) are
 implemented as viewset ``@action``s or standalone views.
 """
 
-from django.db.models import Count, Max, Q, QuerySet, Sum
+import hashlib
+
+from django.db.models import (
+    Count,
+    ExpressionWrapper,
+    F,
+    FloatField,
+    Max,
+    Q,
+    QuerySet,
+    Sum,
+)
+from django.db.models.functions import Cast
+from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
@@ -20,12 +33,14 @@ from players.models import Person, PlayerSeasonAggregate, RosterEntry
 from teams.models import League, Season, Team, TeamSeason
 
 from .serializers import (
+    AllTimeLeaderSerializer,
     BoxScoreSerializer,
     GameSerializer,
     LeaderSerializer,
     LeagueSerializer,
     PersonDetailSerializer,
     PersonSerializer,
+    PlayerOfTheDaySerializer,
     PlayerSeasonAggregateSerializer,
     RosterEntryWithStatsSerializer,
     SeasonSerializer,
@@ -44,6 +59,18 @@ LEADER_STATS = {
     "ts": "ts_percent",
     "efg": "efg_percent",
     "usage": "usage_rate",
+}
+
+# Public stat keys -> annotation names used by the all-time leaders endpoint.
+ALLTIME_STATS = {
+    "ppg": "ppg",
+    "rpg": "rpg",
+    "apg": "apg",
+    "total_points": "total_points",
+    "total_rebounds": "total_rebounds",
+    "total_assists": "total_assists",
+    "per": "per_weighted",
+    "games": "total_games",
 }
 
 # Leaderboard qualification: a player must have played at least this fraction of
@@ -607,6 +634,47 @@ class PersonViewSet(viewsets.ReadOnlyModelViewSet):
         ).select_related("season")
         return Response([_aggregate_to_stats(a) for a in aggregates])
 
+    @action(detail=False, url_path="player-of-the-day")
+    def player_of_the_day(self, request: Request) -> Response:
+        """Return a deterministic daily featured player with their latest stats.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Incoming request (no query params used).
+
+        Returns
+        -------
+        rest_framework.response.Response
+            ``{ player: PersonDetail, latestStats: dict | null }`` where the
+            player rotates once per calendar day (Madrid time).
+        """
+        total = Person.objects.count()
+        if total == 0:
+            return Response(
+                {"detail": "No players available."}, status=status.HTTP_404_NOT_FOUND
+            )
+        today = timezone.localdate().isoformat()
+        idx = int(hashlib.sha256(today.encode()).hexdigest(), 16) % total
+        person = (
+            Person.objects.select_related("photo")
+            .prefetch_related("career__team")
+            .order_by("id")[idx]
+        )
+        latest_agg = (
+            PlayerSeasonAggregate.objects.filter(person=person)
+            .select_related("season")
+            .order_by("-season__start_date")
+            .first()
+        )
+        payload = {
+            "player": person,
+            "latest_stats": _aggregate_to_stats(latest_agg) if latest_agg else None,
+        }
+        return Response(
+            PlayerOfTheDaySerializer(payload, context={"request": request}).data
+        )
+
 
 class PlayerSeasonAggregateViewSet(viewsets.ReadOnlyModelViewSet):
     """List player season aggregates, filterable by player/season."""
@@ -780,6 +848,167 @@ class LeadersView(APIView):
         if threshold <= 1:
             return aggregates
         return aggregates.filter(games_played__gte=threshold)
+
+
+class AllTimeLeadersView(APIView):
+    """Cross-season cumulative and average statistical ranking (``/stats/alltime/``)."""
+
+    _DEFAULT_MIN_GAMES = 20
+
+    def get(self, request: Request) -> Response:
+        """Return the top players ranked by a career statistic across all seasons.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Incoming request; supported query params:
+            ``stat`` (default "ppg"), ``league`` (slug), ``season_from``
+            (start year, inclusive), ``season_to`` (end year, inclusive),
+            ``position`` (PG/SG/SF/PF/C), ``nationality`` (ISO code,
+            case-insensitive substring), ``minGames`` (int, default 20),
+            ``limit`` (int, default 10, max 50), ``offset`` (int, default 0).
+
+        Returns
+        -------
+        rest_framework.response.Response
+            ``{ count, results: [AllTimeLeader] }`` ordered by the requested
+            stat descending, or HTTP 400 for an unknown stat key.
+        """
+        stat = request.query_params.get("stat", "ppg")
+        sort_field = ALLTIME_STATS.get(stat)
+        if sort_field is None:
+            return Response(
+                {
+                    "detail": (
+                        f"Unknown stat '{stat}'. Allowed: {sorted(ALLTIME_STATS)}."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            limit = min(int(request.query_params.get("limit", 10)), 50)
+        except ValueError:
+            limit = 10
+        try:
+            offset = max(int(request.query_params.get("offset", 0)), 0)
+        except ValueError:
+            offset = 0
+        try:
+            min_games = max(int(request.query_params.get("minGames", self._DEFAULT_MIN_GAMES)), 0)
+        except ValueError:
+            min_games = self._DEFAULT_MIN_GAMES
+
+        qs: QuerySet[PlayerSeasonAggregate] = PlayerSeasonAggregate.objects.all()
+
+        league_slug = request.query_params.get("league")
+        if league_slug:
+            qs = qs.filter(season__league__slug=league_slug)
+
+        season_from = request.query_params.get("seasonFrom")
+        season_to = request.query_params.get("seasonTo")
+        if season_from:
+            qs = qs.filter(season__start_date__year__gte=int(season_from))
+        if season_to:
+            qs = qs.filter(season__start_date__year__lte=int(season_to))
+
+        position = request.query_params.get("position")
+        if position:
+            qs = qs.filter(person__primary_position=position)
+
+        nationality = request.query_params.get("nationality")
+        if nationality:
+            qs = qs.filter(person__nationality__icontains=nationality)
+
+        # Expressions for weighted-sum totals.
+        _f: FloatField = FloatField()
+        _pts = ExpressionWrapper(F("points_per_game") * F("games_played"), output_field=_f)
+        _reb = ExpressionWrapper(F("rebounds_per_game") * F("games_played"), output_field=_f)
+        _ast = ExpressionWrapper(F("assists_per_game") * F("games_played"), output_field=_f)
+        _per_w = ExpressionWrapper(F("per") * F("games_played"), output_field=_f)
+
+        annotated = (
+            qs.values("person_id")
+            .annotate(
+                total_games=Sum("games_played"),
+                total_points=Sum(_pts),
+                total_rebounds=Sum(_reb),
+                total_assists=Sum(_ast),
+                per_total=Sum(_per_w),
+                seasons_count=Count("season", distinct=True),
+            )
+            .annotate(
+                games_float=Cast(F("total_games"), output_field=_f),
+            )
+            .annotate(
+                ppg=ExpressionWrapper(F("total_points") / F("games_float"), output_field=_f),
+                rpg=ExpressionWrapper(F("total_rebounds") / F("games_float"), output_field=_f),
+                apg=ExpressionWrapper(F("total_assists") / F("games_float"), output_field=_f),
+                per_weighted=ExpressionWrapper(F("per_total") / F("games_float"), output_field=_f),
+            )
+            .filter(total_games__gte=min_games)
+        )
+
+        total_count = annotated.count()
+        ranked = list(annotated.order_by(f"-{sort_field}", "person_id")[offset : offset + limit])
+
+        person_ids = [r["person_id"] for r in ranked]
+        persons = {
+            p.pk: p
+            for p in Person.objects.filter(pk__in=person_ids).select_related("photo")
+        }
+
+        from collections import defaultdict
+
+        league_map: dict[int, list[str]] = defaultdict(list)
+        for pid, slug in (
+            PlayerSeasonAggregate.objects.filter(person_id__in=person_ids)
+            .values_list("person_id", "season__league__slug")
+            .distinct()
+        ):
+            if slug not in league_map[pid]:
+                league_map[pid].append(slug)
+
+        rows = []
+        for row in ranked:
+            person = persons.get(row["person_id"])
+            if person is None:
+                continue
+            full_name = (
+                person.display_name
+                or f"{person.first_name} {person.last_name}"
+            )
+            stat_val = row.get(sort_field) or 0.0
+            rows.append(
+                {
+                    "player_id": person.pk,
+                    "player_name": full_name,
+                    "player_slug": person.slug,
+                    "photo": person.photo,
+                    "nationality": person.nationality,
+                    "primary_position": person.primary_position,
+                    "total_games": row["total_games"],
+                    "seasons_count": row["seasons_count"],
+                    "leagues": league_map[person.pk],
+                    "total_points": row["total_points"] or 0.0,
+                    "total_rebounds": row["total_rebounds"] or 0.0,
+                    "total_assists": row["total_assists"] or 0.0,
+                    "ppg": row["ppg"] or 0.0,
+                    "rpg": row["rpg"] or 0.0,
+                    "apg": row["apg"] or 0.0,
+                    "per": row["per_weighted"],
+                    "stat_value": float(stat_val),
+                }
+            )
+
+        return Response(
+            {
+                "count": total_count,
+                "results": AllTimeLeaderSerializer(
+                    rows, many=True, context={"request": request}
+                ).data,
+            }
+        )
 
 
 class GlobalSearchView(APIView):

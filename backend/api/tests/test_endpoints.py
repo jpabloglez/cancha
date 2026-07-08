@@ -122,3 +122,62 @@ def test_global_search(db, client) -> None:
     assert empty_data["teams"] == []
     assert empty_data["players"] == []
     assert empty_data["leagues"] == []
+
+
+def test_alltime_leaders(db, client) -> None:
+    """All-time leaders endpoint returns ranked rows with cumulative stats."""
+    call_command("seed_demo_data")
+
+    resp = client.get("/api/v1/stats/alltime/?stat=ppg&limit=5")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "count" in body and "results" in body
+    rows = body["results"]
+    assert len(rows) <= 5
+
+    if rows:
+        row = rows[0]
+        # Shape check: all expected keys present in camelCase.
+        for key in ("playerId", "playerName", "playerSlug", "totalGames",
+                    "seasonsCount", "ppg", "rpg", "apg", "statValue", "leagues"):
+            assert key in row, f"Missing key: {key}"
+        # Rows are sorted descending by the chosen stat.
+        ppg_values = [r["ppg"] for r in rows]
+        assert ppg_values == sorted(ppg_values, reverse=True)
+
+    # total_points variant also works.
+    pts = client.get("/api/v1/stats/alltime/?stat=total_points&limit=3")
+    assert pts.status_code == 200
+    pt_rows = pts.json()["results"]
+    if len(pt_rows) >= 2:
+        assert pt_rows[0]["totalPoints"] >= pt_rows[1]["totalPoints"]
+
+    # minGames=999 eliminates everyone (no player has that many games in seed data).
+    none_resp = client.get("/api/v1/stats/alltime/?minGames=999")
+    assert none_resp.status_code == 200
+    assert none_resp.json()["results"] == []
+
+    # Unknown stat key returns 400.
+    bad = client.get("/api/v1/stats/alltime/?stat=nonsense")
+    assert bad.status_code == 400
+
+
+def test_player_of_the_day(db, client) -> None:
+    """Player-of-the-day returns a valid player with bio and latest stats."""
+    call_command("seed_demo_data")
+
+    resp = client.get("/api/v1/players/player-of-the-day/")
+    assert resp.status_code == 200
+    body = resp.json()
+
+    assert "player" in body
+    player = body["player"]
+    assert "slug" in player
+    assert "firstName" in player
+
+    # latestStats is either null or carries the standard stats shape.
+    if body.get("latestStats") is not None:
+        ls = body["latestStats"]
+        assert "gamesPlayed" in ls
+        assert "pointsPerGame" in ls
+        assert "advanced" in ls

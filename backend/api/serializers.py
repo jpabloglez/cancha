@@ -407,3 +407,78 @@ class LeaderSerializer(serializers.Serializer):
     value = serializers.FloatField()
     photo = MediaAssetSerializer(allow_null=True)
     team = TeamSerializer(allow_null=True)
+
+
+class AllTimeLeaderSerializer(serializers.Serializer):
+    """A single entry in the cross-season all-time statistical ranking.
+
+    Attributes
+    ----------
+    player_id : int
+        Person primary key.
+    player_name : str
+        Full display name.
+    player_slug : str
+        URL-safe player identifier.
+    photo : MediaAsset or None
+        Player headshot.
+    nationality : str or None
+        ISO nationality code.
+    primary_position : str or None
+        Primary playing position (PG/SG/SF/PF/C).
+    total_games : int
+        Career games played across all included seasons.
+    seasons_count : int
+        Number of distinct seasons included.
+    leagues : list[str]
+        Distinct league slugs the player appeared in.
+    total_points : float
+        Cumulative career points.
+    total_rebounds : float
+        Cumulative career rebounds.
+    total_assists : float
+        Cumulative career assists.
+    ppg : float
+        Career points per game.
+    rpg : float
+        Career rebounds per game.
+    apg : float
+        Career assists per game.
+    per : float or None
+        Games-weighted career PER.
+    stat_value : float
+        The primary ranked stat value (mirrors the sorted column).
+    """
+
+    player_id = serializers.IntegerField()
+    player_name = serializers.CharField()
+    player_slug = serializers.CharField()
+    photo = MediaAssetSerializer(allow_null=True)
+    nationality = serializers.CharField(allow_null=True)
+    primary_position = serializers.CharField(allow_null=True)
+    total_games = serializers.IntegerField()
+    seasons_count = serializers.IntegerField()
+    leagues = serializers.ListField(child=serializers.CharField())
+    total_points = serializers.FloatField()
+    total_rebounds = serializers.FloatField()
+    total_assists = serializers.FloatField()
+    ppg = serializers.FloatField()
+    rpg = serializers.FloatField()
+    apg = serializers.FloatField()
+    per = serializers.FloatField(allow_null=True)
+    stat_value = serializers.FloatField()
+
+
+class PlayerOfTheDaySerializer(serializers.Serializer):
+    """Player of the day: full bio plus latest season stats.
+
+    Attributes
+    ----------
+    player : PersonDetail
+        Full player bio with career timeline.
+    latest_stats : dict or None
+        The player's most recent season aggregate, or None if not yet ingested.
+    """
+
+    player = PersonDetailSerializer()
+    latest_stats = serializers.DictField(allow_null=True)

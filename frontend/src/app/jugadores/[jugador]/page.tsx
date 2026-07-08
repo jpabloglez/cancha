@@ -155,6 +155,52 @@ export default async function PlayerPage({
         </section>
       )}
 
+      {stats.length > 0 && (() => {
+        const totalGames = stats.reduce((s, r) => s + r.gamesPlayed, 0);
+        const careerPpg = totalGames > 0
+          ? stats.reduce((s, r) => s + r.pointsPerGame * r.gamesPlayed, 0) / totalGames
+          : 0;
+        const careerRpg = totalGames > 0
+          ? stats.reduce((s, r) => s + r.reboundsPerGame * r.gamesPlayed, 0) / totalGames
+          : 0;
+        const careerApg = totalGames > 0
+          ? stats.reduce((s, r) => s + r.assistsPerGame * r.gamesPlayed, 0) / totalGames
+          : 0;
+        const careerPer = totalGames > 0
+          ? stats.reduce((s, r) => s + r.advanced.playerEfficiencyRating * r.gamesPlayed, 0) / totalGames
+          : 0;
+        const totalPts = stats.reduce((s, r) => s + r.pointsPerGame * r.gamesPlayed, 0);
+        return (
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Totales históricos</h2>
+            <div className="flex flex-wrap gap-3">
+              {(
+                [
+                  ["Partidos", totalGames.toFixed(0), ""],
+                  ["Temporadas", String(stats.length), ""],
+                  ["Pts. totales", totalPts.toFixed(0), ""],
+                  ["PPG carrera", careerPpg.toFixed(1), ""],
+                  ["RPG carrera", careerRpg.toFixed(1), ""],
+                  ["APG carrera", careerApg.toFixed(1), ""],
+                  ["PER carrera", careerPer.toFixed(1), ""],
+                ] as [string, string, string][]
+              ).map(([label, val]) => (
+                <div
+                  key={label}
+                  className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2 text-center dark:border-zinc-700 dark:bg-zinc-800"
+                >
+                  <p className="text-base font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{val}</p>
+                  <p className="text-[10px] text-zinc-500">{label}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-zinc-400">
+              Basado en {stats.length} temporada{stats.length !== 1 ? "s" : ""} con datos disponibles.
+            </p>
+          </section>
+        );
+      })()}
+
       {stats.length === 0 ? (
         <p className="text-sm text-zinc-500">
           No hay estadísticas disponibles para este jugador.
