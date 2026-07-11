@@ -266,6 +266,34 @@ def _enrich_players(profiles, *, store_media: bool) -> tuple[int, int]:
     return enriched, photos
 
 
+def resolve_past_edition_ids(
+    count: int,
+    connector: _AcbConnectorLike | None = None,
+) -> list[str]:
+    """Return the editionIds of the N most recent ACB seasons, newest first.
+
+    Parameters
+    ----------
+    count : int
+        Number of past editions to return.
+    connector : SourceConnector or None
+        Connector to use; resolved from the registry when omitted.
+
+    Returns
+    -------
+    list of str
+        Edition ids sorted by descending start year, e.g.
+        ``["90", "89", "88", "87", "86"]`` for count=5 ending at 2025/26.
+    """
+    acb_connector = cast(_AcbConnectorLike, connector or get_connector(ACB_CONNECTOR_ID))
+    schedule = parse_matches(
+        _json(acb_connector.fetch_current_schedule()), source=ACB_CONNECTOR_ID
+    )
+    # seasons dict: {edition_id: start_year}; pick the N most-recent by start_year.
+    items = sorted(schedule.seasons.items(), key=lambda kv: kv[1], reverse=True)
+    return [str(edition_id) for edition_id, _ in items[:count]]
+
+
 def resolve_current_edition_id(
     connector: _AcbConnectorLike | None = None,
 ) -> str:
