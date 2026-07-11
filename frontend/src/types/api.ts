@@ -281,6 +281,17 @@ export interface Leader {
   team: Team | null;
 }
 
+export interface LeagueFreshness {
+  slug: string;
+  name: string;
+  lastGameDate: string | null;
+}
+
+export interface DataFreshness {
+  lastUpdated: string | null;
+  byLeague: LeagueFreshness[];
+}
+
 // DRF LimitOffsetPagination envelope.
 export interface Paginated<T> {
   count: number;

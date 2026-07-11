@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { MediaImage } from "@/components/MediaImage";
@@ -51,6 +52,23 @@ const ZONE_LABEL_COLOR: Record<string, string> = {
   playoff: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
   relegation: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ liga: string }>;
+}): Promise<Metadata> {
+  try {
+    const { liga } = await params;
+    const league = await getLeague(liga);
+    return {
+      title: `${league.name} · Basket Stats`,
+      description: `Clasificaciones, estadísticas y partidos de la ${league.name}.`,
+    };
+  } catch {
+    return { title: "Liga · Basket Stats" };
+  }
+}
 
 // League page: standings, team list and finished games for the selected season
 // (spec §6.1). Server-rendered for SEO and fast first paint. The season is

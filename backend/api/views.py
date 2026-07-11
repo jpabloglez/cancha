@@ -1107,3 +1107,40 @@ class GlobalSearchView(APIView):
                 ).data,
             }
         )
+
+
+# ---------------------------------------------------------------------------
+# Data freshness
+# ---------------------------------------------------------------------------
+
+
+@api_view(["GET"])
+def data_freshness(request: Request) -> Response:
+    """Return the date of the most recent ingested game per league.
+
+    Returns
+    -------
+    Response
+        ``{"lastUpdated": "YYYY-MM-DD" | null, "byLeague": [{"slug", "name", "lastGameDate"}]}``
+    """
+    leagues = League.objects.all().order_by("level")
+    by_league = []
+    overall_max = None
+    for league in leagues:
+        agg = Game.objects.filter(season__league=league).aggregate(last=Max("date"))
+        last = agg["last"]
+        if last:
+            # Normalize to date string regardless of whether the field is datetime or date.
+            last_date = last.date() if hasattr(last, "date") else last
+            last_str = last_date.isoformat()
+            if overall_max is None or last_date > overall_max:
+                overall_max = last_date
+        else:
+            last_str = None
+        by_league.append({"slug": league.slug, "name": league.name, "lastGameDate": last_str})
+    return Response(
+        {
+            "lastUpdated": overall_max.isoformat() if overall_max else None,
+            "byLeague": by_league,
+        }
+    )

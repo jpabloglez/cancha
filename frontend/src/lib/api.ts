@@ -6,6 +6,7 @@
 import type {
   AllTimeLeaderPage,
   BoxScore,
+  DataFreshness,
   Game,
   Leader,
   League,
@@ -216,6 +217,13 @@ export function getAllTimeLeaders(params: AllTimeLeadersParams = {}): Promise<Al
 /** Fetch the deterministic player of the day (rotates at midnight Madrid time). */
 export function getPlayerOfTheDay(): Promise<PlayerOfTheDay> {
   return apiFetch<PlayerOfTheDay>("/players/player-of-the-day/", {
+    next: { revalidate: 3600 },
+  });
+}
+
+/** Fetch data freshness info (last ingested game date per league). */
+export function getDataFreshness(): Promise<DataFreshness> {
+  return apiFetch<DataFreshness>("/stats/data-freshness/", {
     next: { revalidate: 3600 },
   });
 }

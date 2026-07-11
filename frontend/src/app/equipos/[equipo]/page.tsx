@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { MediaImage } from "@/components/MediaImage";
@@ -51,6 +52,23 @@ const ADV_AXES: RadarAxis[] = [
   { key: "tovPercent", label: "%PER", inverted: true },
   { key: "efgPercent", label: "%TE" },
 ];
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ equipo: string }>;
+}): Promise<Metadata> {
+  try {
+    const { equipo } = await params;
+    const team = await getTeam(equipo);
+    return {
+      title: `${team.name} · Basket Stats`,
+      description: `Estadísticas, plantilla y resultados del ${team.name}.`,
+    };
+  } catch {
+    return { title: "Equipo · Basket Stats" };
+  }
+}
 
 export default async function TeamPage({
   params,
