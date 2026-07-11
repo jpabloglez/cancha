@@ -58,6 +58,15 @@ def test_parse_matches_season_map_and_rounds() -> None:
     assert len(schedule.round_ids) > 0
 
 
+def test_parse_matches_round_number_by_id() -> None:
+    """round_number_by_id maps each round id to its matchday number."""
+    schedule = parse_matches(_matches(), source="acb")
+    # Fixture has id=5884 → roundNumber=1, id=5885 → roundNumber=2, etc.
+    assert schedule.round_number_by_id[5884] == 1
+    assert schedule.round_number_by_id[5885] == 2
+    assert schedule.round_number_by_id[5916] == 33
+
+
 def test_parse_matches_finished_headers() -> None:
     """Only FINALIZED games become headers, keyed to teams by clubId."""
     schedule = parse_matches(_matches(), source="acb")

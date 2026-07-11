@@ -111,6 +111,7 @@ class SeasonMatches:
     teams: list[NormalizedTeam] = field(default_factory=list)
     headers: list[MatchHeader] = field(default_factory=list)
     round_ids: list[int] = field(default_factory=list)
+    round_number_by_id: dict[int, int] = field(default_factory=dict)
     seasons: dict[int, int] = field(default_factory=dict)
     current_edition_id: int | None = None
 
@@ -170,7 +171,13 @@ def parse_matches(payload: dict, *, source: str) -> SeasonMatches:
         for s in available.get("seasons", [])
         if s.get("seasonStartYear") is not None
     }
-    round_ids = [int(r["id"]) for r in available.get("rounds", [])]
+    rounds_raw = available.get("rounds", [])
+    round_ids = [int(r["id"]) for r in rounds_raw]
+    round_number_by_id = {
+        int(r["id"]): int(r["roundNumber"])
+        for r in rounds_raw
+        if r.get("roundNumber") is not None
+    }
     selected = payload.get("selectedFilters", {})
     current = selected.get("season")
 
@@ -178,6 +185,7 @@ def parse_matches(payload: dict, *, source: str) -> SeasonMatches:
         teams=teams,
         headers=headers,
         round_ids=round_ids,
+        round_number_by_id=round_number_by_id,
         seasons=seasons,
         current_edition_id=int(current) if current is not None else None,
     )

@@ -131,6 +131,9 @@ class ParsedGame:
     persons: list[NormalizedPerson]
 
 
+_JORNADA_RE = re.compile(r"Jornada\s+(\d+)", re.IGNORECASE)
+
+
 def parse_game_ids(html: str) -> list[str]:
     """Extract distinct finished-game ids from a results/calendar page.
 
@@ -148,6 +151,46 @@ def parse_game_ids(html: str) -> list[str]:
     for match in _GAME_ID_RE.finditer(html):
         seen.setdefault(match.group(1), None)
     return list(seen.keys())
+
+
+def parse_game_round_map(html: str) -> dict[str, str]:
+    """Build a map of game_id → round_label from the season calendar page.
+
+    The calendar page groups games under ``<h1 class="titulo-modulo">Jornada N
+    DD/MM/YYYY</h1>`` headers; the next sibling element contains the game links
+    for that round.
+
+    Parameters
+    ----------
+    html : str
+        Raw HTML of the calendar/results page.
+
+    Returns
+    -------
+    dict of str to str
+        ``{game_id: "J<n>"}`` for every finished game whose round number can be
+        read from the page structure. Games not covered by a jornada header are
+        omitted (they may be playoff/cup games without a matchday number).
+    """
+    soup = BeautifulSoup(html, "lxml")
+    game_round: dict[str, str] = {}
+
+    for header in soup.find_all("h1", class_="titulo-modulo"):
+        text = header.get_text()
+        m = _JORNADA_RE.search(text)
+        if not m:
+            continue
+        round_label = f"J{m.group(1)}"
+        # The sibling element (usually a div or table) contains the game links.
+        sibling = header.find_next_sibling()
+        if sibling is None:
+            continue
+        for link in sibling.find_all("a", href=_GAME_ID_RE):
+            gid = _GAME_ID_RE.search(link["href"])
+            if gid:
+                game_round.setdefault(gid.group(1), round_label)
+
+    return game_round
 
 
 def parse_box_score(html: str, *, source: str, game_external_id: str) -> ParsedGame:

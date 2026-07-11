@@ -342,8 +342,17 @@ def _collect_finished_games(
         except (ParserError, KeyError, ValueError) as exc:
             logger.warning("Skipping ACB round %s: %s", round_id, exc)
             continue
+        # Derive the round label from the schedule's id→number map so we don't
+        # depend on the per-round payload including roundNumber in match objects
+        # (it doesn't when isRoundSelected=false was used for the initial fetch).
+        round_number = schedule.round_number_by_id.get(round_id)
+        round_label = f"J{round_number}" if round_number is not None else None
         for header in batch.headers:
-            headers.setdefault(header.external_id, header)
+            if round_label is not None:
+                header.round_label = round_label
+            # Always overwrite so round-specific labels take precedence over the
+            # initial schedule header (which had round_label=None).
+            headers[header.external_id] = header
         for team in batch.teams:
             teams.setdefault(team.ref.external_id, team)
         for profile in parse_team_profiles(payload, source=ACB_CONNECTOR_ID):
