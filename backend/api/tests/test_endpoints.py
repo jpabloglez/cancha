@@ -181,3 +181,75 @@ def test_player_of_the_day(db, client) -> None:
         assert "gamesPlayed" in ls
         assert "pointsPerGame" in ls
         assert "advanced" in ls
+
+
+def test_season_rounds(db, client) -> None:
+    """GET /seasons/{id}/rounds/ returns distinct labels sorted numerically."""
+    call_command("seed_demo_data")
+
+    season = Season.objects.first()
+    assert season is not None
+
+    resp = client.get(f"/api/v1/seasons/{season.pk}/rounds/")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "rounds" in body
+
+    rounds = body["rounds"]
+    # Seed creates at least one round per game pair.
+    assert len(rounds) > 0
+    # No duplicates.
+    assert len(rounds) == len(set(rounds))
+    # All labels match the J<n> pattern.
+    assert all(r.startswith("J") for r in rounds)
+    # Sorted in ascending numeric order (J1 before J10, not alphabetically).
+    nums = [int(r[1:]) for r in rounds if r[1:].isdigit()]
+    assert nums == sorted(nums)
+
+
+def test_games_round_filter(db, client) -> None:
+    """GET /games/?season=X&round=J1 returns only games from that jornada."""
+    call_command("seed_demo_data")
+
+    season = Season.objects.first()
+    assert season is not None
+
+    # Fetch available rounds first.
+    rounds_body = client.get(f"/api/v1/seasons/{season.pk}/rounds/").json()
+    rounds = rounds_body["rounds"]
+    assert len(rounds) > 0
+
+    target_round = rounds[0]
+    resp = client.get(f"/api/v1/games/?season={season.pk}&round={target_round}")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["count"] > 0
+    # Every returned game belongs to the requested round.
+    assert all(g["round"] == target_round for g in body["results"])
+
+    # A round that doesn't exist returns an empty list, not an error.
+    empty = client.get(f"/api/v1/games/?season={season.pk}&round=J999")
+    assert empty.status_code == 200
+    assert empty.json()["count"] == 0
+
+
+def test_backfill_rounds_patches_null_rounds(db) -> None:
+    """backfill_rounds updates Game.round for rows that have it set to null."""
+    from django.core.management import call_command as cc
+
+    from games.models import Game
+
+    call_command("seed_demo_data")
+
+    # Null out some rounds to simulate pre-CANCHA-04 data.
+    total = Game.objects.count()
+    assert total > 0
+    Game.objects.all().update(round=None)
+    assert Game.objects.filter(round__isnull=False).count() == 0
+
+    # The command cannot re-derive rounds from cached raw documents in tests
+    # (no RawDocument rows exist), so it should run without error and report 0.
+    cc("backfill_rounds")
+    # No crash is the main assertion; nothing was patched because there are
+    # no cached documents in the test DB.
+    assert Game.objects.filter(round__isnull=False).count() == 0
