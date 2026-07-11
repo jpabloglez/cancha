@@ -3,20 +3,20 @@ import { notFound } from "next/navigation";
 
 import { MediaImage } from "@/components/MediaImage";
 import { SeasonSelector } from "@/components/SeasonSelector";
-import { getGames, getLeague, getSeasons } from "@/lib/api";
+import { getGames, getLeague, getSeasonRounds, getSeasons } from "@/lib/api";
 import type { Game, Season } from "@/types/api";
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 50;
 
 export default async function LeagueGamesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ liga: string }>;
-  searchParams: Promise<{ season?: string; page?: string }>;
+  searchParams: Promise<{ season?: string; page?: string; round?: string }>;
 }) {
   const { liga } = await params;
-  const { season: seasonParam, page: pageParam } = await searchParams;
+  const { season: seasonParam, page: pageParam, round: roundParam } = await searchParams;
 
   const page = Math.max(1, Number(pageParam ?? "1") || 1);
   const offset = (page - 1) * PAGE_SIZE;
@@ -26,6 +26,7 @@ export default async function LeagueGamesPage({
   let selected!: Season;
   let games: Game[] = [];
   let totalCount = 0;
+  let rounds: string[] = [];
 
   try {
     const league = await getLeague(liga);
@@ -34,9 +35,10 @@ export default async function LeagueGamesPage({
     if (seasons.length === 0) notFound();
 
     selected = seasons.find((s) => String(s.id) === seasonParam) ?? seasons[0];
-    const result = await getGames(selected.id, { limit: PAGE_SIZE, offset });
-    games = result.results;
-    totalCount = result.count;
+    [rounds, { results: games, count: totalCount }] = await Promise.all([
+      getSeasonRounds(selected.id).then((r) => r.rounds),
+      getGames(selected.id, { limit: PAGE_SIZE, offset, round: roundParam }),
+    ]);
   } catch {
     notFound();
   }
@@ -44,8 +46,15 @@ export default async function LeagueGamesPage({
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   function hrefPage(p: number) {
-    const params = new URLSearchParams({ season: String(selected.id), page: String(p) });
-    return `/ligas/${liga}/partidos?${params.toString()}`;
+    const ps = new URLSearchParams({ season: String(selected.id), page: String(p) });
+    if (roundParam) ps.set("round", roundParam);
+    return `/ligas/${liga}/partidos?${ps.toString()}`;
+  }
+
+  function hrefRound(r: string | null) {
+    const ps = new URLSearchParams({ season: String(selected.id) });
+    if (r) ps.set("round", r);
+    return `/ligas/${liga}/partidos?${ps.toString()}`;
   }
 
   // Group by round label if available, otherwise by month.
@@ -75,6 +84,35 @@ export default async function LeagueGamesPage({
         </div>
         <SeasonSelector seasons={seasons} selectedId={selected.id} />
       </header>
+
+      {/* Jornada picker */}
+      {rounds.length > 0 && (
+        <nav className="flex flex-wrap gap-1" aria-label="Jornadas">
+          <Link
+            href={hrefRound(null)}
+            className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+              !roundParam
+                ? "bg-court text-white"
+                : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+            }`}
+          >
+            Todas
+          </Link>
+          {rounds.map((r) => (
+            <Link
+              key={r}
+              href={hrefRound(r)}
+              className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                roundParam === r
+                  ? "bg-court text-white"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              }`}
+            >
+              {r}
+            </Link>
+          ))}
+        </nav>
+      )}
 
       {Object.entries(byGroup).map(([group, groupGames]) => (
         <section key={group} className="space-y-1">

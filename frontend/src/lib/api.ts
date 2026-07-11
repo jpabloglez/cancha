@@ -89,12 +89,18 @@ export function getStandings(seasonId: number): Promise<Standing[]> {
 /** Fetch finished games for a season. */
 export function getGames(
   seasonId: number,
-  opts: { limit?: number; offset?: number } = {},
+  opts: { limit?: number; offset?: number; round?: string } = {},
 ): Promise<Paginated<Game>> {
   const params = new URLSearchParams({ season: String(seasonId) });
   if (opts.limit) params.set("limit", String(opts.limit));
   if (opts.offset) params.set("offset", String(opts.offset));
+  if (opts.round) params.set("round", opts.round);
   return apiFetch<Paginated<Game>>(`/games/?${params.toString()}`);
+}
+
+/** Fetch the distinct round labels for a season, sorted numerically. */
+export function getSeasonRounds(seasonId: number): Promise<{ rounds: string[] }> {
+  return apiFetch<{ rounds: string[] }>(`/seasons/${seasonId}/rounds/`);
 }
 
 /** Fetch the full box score (teams + player lines) for a game. */

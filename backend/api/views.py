@@ -7,6 +7,7 @@ implemented as viewset ``@action``s or standalone views.
 """
 
 import hashlib
+import re
 
 from django.db.models import (
     Count,
@@ -228,6 +229,41 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
                 ordered, many=True, context={"request": request}
             ).data
         )
+
+    @action(detail=True)
+    def rounds(self, request: Request, pk: str | None = None) -> Response:
+        """Return the distinct round labels for a season, sorted numerically.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Incoming request.
+        pk : str or None
+            Season primary key from the URL.
+
+        Returns
+        -------
+        rest_framework.response.Response
+            ``{"rounds": ["J1", "J2", ..., "J34"]}`` — labels that have at least
+            one finished game, in ascending round order.  Rounds without a
+            numeric suffix (e.g. playoff labels from older ingestion) are appended
+            after the numbered ones.
+        """
+        season = self.get_object()
+        labels = (
+            Game.objects.filter(season=season)
+            .exclude(round__isnull=True)
+            .order_by()
+            .values_list("round", flat=True)
+            .distinct()
+        )
+
+        def _sort_key(label: str) -> tuple[int, str]:
+            m = re.match(r"J(\d+)$", label)
+            return (int(m.group(1)), "") if m else (10000, label)
+
+        sorted_labels = sorted(labels, key=_sort_key)
+        return Response({"rounds": sorted_labels})
 
 
 def _tgs_aggregates(qs: QuerySet) -> dict:
@@ -707,7 +743,7 @@ class GameViewSet(viewsets.ReadOnlyModelViewSet):
         "away_team_season__team__logo",
     ).all()
     serializer_class = GameSerializer
-    filterset_fields = ["season"]
+    filterset_fields = ["season", "round"]
 
     @action(detail=True)
     def boxscore(self, request: Request, pk: str | None = None) -> Response:
