@@ -15,6 +15,7 @@ import type {
   PersonDetail,
   PlayerOfTheDay,
   PlayerSeasonStats,
+  RecentGame,
   RosterEntry,
   Season,
   Standing,
@@ -116,6 +117,18 @@ export function getTeam(slug: string): Promise<Team> {
 /** Fetch aggregated stats for every season a team has participated in, newest first. */
 export function getTeamStatsHistory(slug: string): Promise<TeamStatsHistoryEntry[]> {
   return apiFetch<TeamStatsHistoryEntry[]>(`/teams/${slug}/stats-history/`);
+}
+
+/** Fetch the most recent games for a team, with W/L outcome, newest first. */
+export function getTeamRecentGames(
+  slug: string,
+  opts: { season?: number; limit?: number } = {},
+): Promise<RecentGame[]> {
+  const params = new URLSearchParams();
+  if (opts.season) params.set("season", String(opts.season));
+  if (opts.limit) params.set("limit", String(opts.limit));
+  const qs = params.toString();
+  return apiFetch<RecentGame[]>(`/teams/${slug}/recent-games/${qs ? `?${qs}` : ""}`);
 }
 
 /** Fetch per-game, per-100-possession and advanced stats for a team in a season. */
