@@ -16,7 +16,7 @@ from connectors.parsers.feb import FEB_PARSER_VERSION
 from stats.aggregation import recompute_player_season_aggregates
 
 from .acb_ingest import IngestResult as AcbIngestResult
-from .acb_ingest import ingest_acb_season, resolve_current_edition_id
+from .acb_ingest import ingest_acb_season, resolve_current_edition_id, resolve_past_edition_ids
 from .catalog import (
     ACB_CONNECTOR_ID,
     FEB_COMPETITIONS,
@@ -178,6 +178,34 @@ def ingest_current_acb_season() -> int:
     """
     edition_id = resolve_current_edition_id()
     return run_ingest_season(ACB_CONNECTOR_ID, edition_id)
+
+
+@shared_task
+def backfill_acb_seasons(count: int = 5) -> dict[str, int]:
+    """Ingest the last *count* ACB seasons serially (Celery Beat entry).
+
+    Intended for manual or scheduled backfill runs.  Each edition is isolated
+    so a failure on one season does not abort the rest.
+
+    Parameters
+    ----------
+    count : int
+        Number of past ACB editions to (re-)ingest, newest first.
+
+    Returns
+    -------
+    dict of str to int
+        ``{edition_id: games_ingested}`` for each season attempted.
+    """
+    edition_ids = resolve_past_edition_ids(count)
+    results: dict[str, int] = {}
+    for edition_id in edition_ids:
+        try:
+            results[edition_id] = run_ingest_season(ACB_CONNECTOR_ID, edition_id)
+        except Exception as exc:  # noqa: BLE001 - isolate per-season failures
+            logger.warning("ACB edition %s backfill failed: %s", edition_id, exc)
+            results[edition_id] = -1
+    return results
 
 
 def run_enrich_season(connector_id: str, season_external_id: str) -> int:

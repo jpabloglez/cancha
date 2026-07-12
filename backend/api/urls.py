@@ -18,6 +18,7 @@ from .views import (
     SeasonViewSet,
     TeamSeasonViewSet,
     TeamViewSet,
+    data_freshness,
     health,
 )
 
@@ -36,6 +37,7 @@ urlpatterns = [
     path("health/", health, name="health"),
     path("stats/leaders/", LeadersView.as_view(), name="leaders"),
     path("stats/alltime/", AllTimeLeadersView.as_view(), name="alltime-leaders"),
+    path("stats/data-freshness/", data_freshness, name="data-freshness"),
     path("search/", GlobalSearchView.as_view(), name="search"),
     path("", include(router.urls)),
 ]

@@ -1,8 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { MediaImage } from "@/components/MediaImage";
 import { getLeaders, getLeagues, getSeasons } from "@/lib/api";
 import type { Leader, League, Season } from "@/types/api";
+
+export const metadata: Metadata = {
+  title: "Líderes estadísticos · Basket Stats",
+  description: "Los mejores jugadores por puntos, rebotes, asistencias, PER y TS% en la ACB, Primera FEB y Segunda FEB.",
+};
 
 // Statistical leaders tables by category (spec §6.1). Server-rendered; the
 // active category, league and season are selected via query parameters.

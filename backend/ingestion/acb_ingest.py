@@ -266,6 +266,34 @@ def _enrich_players(profiles, *, store_media: bool) -> tuple[int, int]:
     return enriched, photos
 
 
+def resolve_past_edition_ids(
+    count: int,
+    connector: _AcbConnectorLike | None = None,
+) -> list[str]:
+    """Return the editionIds of the N most recent ACB seasons, newest first.
+
+    Parameters
+    ----------
+    count : int
+        Number of past editions to return.
+    connector : SourceConnector or None
+        Connector to use; resolved from the registry when omitted.
+
+    Returns
+    -------
+    list of str
+        Edition ids sorted by descending start year, e.g.
+        ``["90", "89", "88", "87", "86"]`` for count=5 ending at 2025/26.
+    """
+    acb_connector = cast(_AcbConnectorLike, connector or get_connector(ACB_CONNECTOR_ID))
+    schedule = parse_matches(
+        _json(acb_connector.fetch_current_schedule()), source=ACB_CONNECTOR_ID
+    )
+    # seasons dict: {edition_id: start_year}; pick the N most-recent by start_year.
+    items = sorted(schedule.seasons.items(), key=lambda kv: kv[1], reverse=True)
+    return [str(edition_id) for edition_id, _ in items[:count]]
+
+
 def resolve_current_edition_id(
     connector: _AcbConnectorLike | None = None,
 ) -> str:
@@ -342,8 +370,17 @@ def _collect_finished_games(
         except (ParserError, KeyError, ValueError) as exc:
             logger.warning("Skipping ACB round %s: %s", round_id, exc)
             continue
+        # Derive the round label from the schedule's id→number map so we don't
+        # depend on the per-round payload including roundNumber in match objects
+        # (it doesn't when isRoundSelected=false was used for the initial fetch).
+        round_number = schedule.round_number_by_id.get(round_id)
+        round_label = f"J{round_number}" if round_number is not None else None
         for header in batch.headers:
-            headers.setdefault(header.external_id, header)
+            if round_label is not None:
+                header.round_label = round_label
+            # Always overwrite so round-specific labels take precedence over the
+            # initial schedule header (which had round_label=None).
+            headers[header.external_id] = header
         for team in batch.teams:
             teams.setdefault(team.ref.external_id, team)
         for profile in parse_team_profiles(payload, source=ACB_CONNECTOR_ID):

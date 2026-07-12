@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { getDataFreshness } from "@/lib/api";
 import { CONTACT_EMAIL, GITHUB_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -14,6 +15,25 @@ export const metadata: Metadata = {
 // Inline script that runs before first paint to apply the saved theme and
 // prevent a flash of unstyled (light) content. Default is dark.
 const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){document.documentElement.classList.add('dark')}})();`;
+
+async function DataFreshnessLine() {
+  try {
+    const freshness = await getDataFreshness();
+    if (!freshness.lastUpdated) return null;
+    const date = new Date(freshness.lastUpdated).toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    return (
+      <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-600">
+        Datos hasta: {date}
+      </p>
+    );
+  } catch {
+    return null;
+  }
+}
 
 export default function RootLayout({
   children,
@@ -110,6 +130,7 @@ export default function RootLayout({
                 Acerca de
               </Link>
             </p>
+            <DataFreshnessLine />
           </div>
         </footer>
       </body>

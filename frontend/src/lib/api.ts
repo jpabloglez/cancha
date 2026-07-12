@@ -6,6 +6,7 @@
 import type {
   AllTimeLeaderPage,
   BoxScore,
+  DataFreshness,
   Game,
   Leader,
   League,
@@ -14,6 +15,7 @@ import type {
   PersonDetail,
   PlayerOfTheDay,
   PlayerSeasonStats,
+  RecentGame,
   RosterEntry,
   Season,
   Standing,
@@ -88,12 +90,18 @@ export function getStandings(seasonId: number): Promise<Standing[]> {
 /** Fetch finished games for a season. */
 export function getGames(
   seasonId: number,
-  opts: { limit?: number; offset?: number } = {},
+  opts: { limit?: number; offset?: number; round?: string } = {},
 ): Promise<Paginated<Game>> {
   const params = new URLSearchParams({ season: String(seasonId) });
   if (opts.limit) params.set("limit", String(opts.limit));
   if (opts.offset) params.set("offset", String(opts.offset));
+  if (opts.round) params.set("round", opts.round);
   return apiFetch<Paginated<Game>>(`/games/?${params.toString()}`);
+}
+
+/** Fetch the distinct round labels for a season, sorted numerically. */
+export function getSeasonRounds(seasonId: number): Promise<{ rounds: string[] }> {
+  return apiFetch<{ rounds: string[] }>(`/seasons/${seasonId}/rounds/`);
 }
 
 /** Fetch the full box score (teams + player lines) for a game. */
@@ -109,6 +117,18 @@ export function getTeam(slug: string): Promise<Team> {
 /** Fetch aggregated stats for every season a team has participated in, newest first. */
 export function getTeamStatsHistory(slug: string): Promise<TeamStatsHistoryEntry[]> {
   return apiFetch<TeamStatsHistoryEntry[]>(`/teams/${slug}/stats-history/`);
+}
+
+/** Fetch the most recent games for a team, with W/L outcome, newest first. */
+export function getTeamRecentGames(
+  slug: string,
+  opts: { season?: number; limit?: number } = {},
+): Promise<RecentGame[]> {
+  const params = new URLSearchParams();
+  if (opts.season) params.set("season", String(opts.season));
+  if (opts.limit) params.set("limit", String(opts.limit));
+  const qs = params.toString();
+  return apiFetch<RecentGame[]>(`/teams/${slug}/recent-games/${qs ? `?${qs}` : ""}`);
 }
 
 /** Fetch per-game, per-100-possession and advanced stats for a team in a season. */
@@ -216,6 +236,13 @@ export function getAllTimeLeaders(params: AllTimeLeadersParams = {}): Promise<Al
 /** Fetch the deterministic player of the day (rotates at midnight Madrid time). */
 export function getPlayerOfTheDay(): Promise<PlayerOfTheDay> {
   return apiFetch<PlayerOfTheDay>("/players/player-of-the-day/", {
+    next: { revalidate: 3600 },
+  });
+}
+
+/** Fetch data freshness info (last ingested game date per league). */
+export function getDataFreshness(): Promise<DataFreshness> {
+  return apiFetch<DataFreshness>("/stats/data-freshness/", {
     next: { revalidate: 3600 },
   });
 }

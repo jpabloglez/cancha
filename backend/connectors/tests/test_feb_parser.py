@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from connectors.parsers.feb import ParserError, parse_box_score, parse_game_ids
+from connectors.parsers.feb import ParserError, parse_box_score, parse_game_ids, parse_game_round_map
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -84,6 +84,36 @@ def test_parse_box_score_rejects_wrong_structure() -> None:
             source="feb-primera",
             game_external_id="1",
         )
+
+
+def test_parse_game_round_map_extracts_jornada_labels() -> None:
+    """Games under a 'Jornada N' header map to 'JN' round labels."""
+    html = (
+        '<h1 class="titulo-modulo">Jornada 3 18/10/2024</h1>'
+        '<div>'
+        '  <a href="/partido/1001">Partido 1</a>'
+        '  <a href="/partido/1002">Partido 2</a>'
+        '</div>'
+        '<h1 class="titulo-modulo">Jornada 4 25/10/2024</h1>'
+        '<div>'
+        '  <a href="/partido/2001">Partido 3</a>'
+        '</div>'
+        '<h1 class="titulo-modulo">Play-off cuartos</h1>'
+        '<div>'
+        '  <a href="/partido/9001">Playoff game</a>'
+        '</div>'
+    )
+    result = parse_game_round_map(html)
+    assert result == {"1001": "J3", "1002": "J3", "2001": "J4"}
+
+
+def test_parse_game_round_map_ignores_non_jornada_headers() -> None:
+    """Headers without 'Jornada N' (e.g. playoff labels) are skipped."""
+    html = (
+        '<h1 class="titulo-modulo">Semifinales</h1>'
+        '<div><a href="/partido/5555">game</a></div>'
+    )
+    assert parse_game_round_map(html) == {}
 
 
 def test_shooting_handles_spanish_decimals_and_blanks() -> None:

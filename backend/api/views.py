@@ -7,6 +7,7 @@ implemented as viewset ``@action``s or standalone views.
 """
 
 import hashlib
+import re
 
 from django.db.models import (
     Count,
@@ -228,6 +229,41 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
                 ordered, many=True, context={"request": request}
             ).data
         )
+
+    @action(detail=True)
+    def rounds(self, request: Request, pk: str | None = None) -> Response:
+        """Return the distinct round labels for a season, sorted numerically.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Incoming request.
+        pk : str or None
+            Season primary key from the URL.
+
+        Returns
+        -------
+        rest_framework.response.Response
+            ``{"rounds": ["J1", "J2", ..., "J34"]}`` — labels that have at least
+            one finished game, in ascending round order.  Rounds without a
+            numeric suffix (e.g. playoff labels from older ingestion) are appended
+            after the numbered ones.
+        """
+        season = self.get_object()
+        labels = (
+            Game.objects.filter(season=season)
+            .exclude(round__isnull=True)
+            .order_by()
+            .values_list("round", flat=True)
+            .distinct()
+        )
+
+        def _sort_key(label: str) -> tuple[int, str]:
+            m = re.match(r"J(\d+)$", label)
+            return (int(m.group(1)), "") if m else (10000, label)
+
+        sorted_labels = sorted(labels, key=_sort_key)
+        return Response({"rounds": sorted_labels})
 
 
 def _tgs_aggregates(qs: QuerySet) -> dict:
@@ -488,6 +524,70 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             }
         )
 
+    @action(detail=True, url_path="recent-games")
+    def recent_games(self, request: Request, slug: str | None = None) -> Response:
+        """Return the most recent finished games for this team in a season.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Optional ``season`` query parameter (season pk); defaults to the
+            most recent season this team participated in.  Optional ``limit``
+            (default 10, max 50).
+        slug : str or None
+            Team slug from the URL.
+
+        Returns
+        -------
+        rest_framework.response.Response
+            List of game objects enriched with a ``result`` field (``"W"`` /
+            ``"L"``) indicating this team's outcome, newest first.
+        """
+        team = self.get_object()
+        season_id = request.query_params.get("season")
+        try:
+            limit = min(int(request.query_params.get("limit", 10)), 50)
+        except ValueError:
+            limit = 10
+
+        if season_id:
+            team_season = TeamSeason.objects.filter(
+                team=team, season_id=season_id
+            ).first()
+        else:
+            team_season = (
+                TeamSeason.objects.filter(team=team)
+                .order_by("-season__start_date")
+                .select_related("season")
+                .first()
+            )
+
+        if team_season is None:
+            return Response([])
+
+        games = (
+            Game.objects.filter(
+                Q(home_team_season=team_season) | Q(away_team_season=team_season)
+            )
+            .select_related(
+                "home_team_season__team__logo",
+                "away_team_season__team__logo",
+            )
+            .order_by("-date")[:limit]
+        )
+
+        rows = []
+        for game in games:
+            is_home = game.home_team_season_id == team_season.id
+            team_score = game.final_score_home if is_home else game.final_score_away
+            opp_score = game.final_score_away if is_home else game.final_score_home
+            data = GameSerializer(game, context={"request": request}).data
+            data["result"] = "W" if team_score > opp_score else "L"
+            data["isHome"] = is_home
+            rows.append(data)
+
+        return Response(rows)
+
     @action(detail=True, url_path="stats-history")
     def stats_history(self, request: Request, slug: str | None = None) -> Response:
         """Return per-season aggregated stats for all seasons this team played.
@@ -707,7 +807,7 @@ class GameViewSet(viewsets.ReadOnlyModelViewSet):
         "away_team_season__team__logo",
     ).all()
     serializer_class = GameSerializer
-    filterset_fields = ["season"]
+    filterset_fields = ["season", "round", "home_team_season", "away_team_season"]
 
     @action(detail=True)
     def boxscore(self, request: Request, pk: str | None = None) -> Response:
@@ -1107,3 +1207,40 @@ class GlobalSearchView(APIView):
                 ).data,
             }
         )
+
+
+# ---------------------------------------------------------------------------
+# Data freshness
+# ---------------------------------------------------------------------------
+
+
+@api_view(["GET"])
+def data_freshness(request: Request) -> Response:
+    """Return the date of the most recent ingested game per league.
+
+    Returns
+    -------
+    Response
+        ``{"lastUpdated": "YYYY-MM-DD" | null, "byLeague": [{"slug", "name", "lastGameDate"}]}``
+    """
+    leagues = League.objects.all().order_by("level")
+    by_league = []
+    overall_max = None
+    for league in leagues:
+        agg = Game.objects.filter(season__league=league).aggregate(last=Max("date"))
+        last = agg["last"]
+        if last:
+            # Normalize to date string regardless of whether the field is datetime or date.
+            last_date = last.date() if hasattr(last, "date") else last
+            last_str = last_date.isoformat()
+            if overall_max is None or last_date > overall_max:
+                overall_max = last_date
+        else:
+            last_str = None
+        by_league.append({"slug": league.slug, "name": league.name, "lastGameDate": last_str})
+    return Response(
+        {
+            "lastUpdated": overall_max.isoformat() if overall_max else None,
+            "byLeague": by_league,
+        }
+    )

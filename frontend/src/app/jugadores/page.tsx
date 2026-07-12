@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { AllTimeLeaderboard } from "@/components/AllTimeLeaderboard";
 import { MediaImage } from "@/components/MediaImage";
@@ -24,10 +25,7 @@ function PlayerOfTheDayCard({ data }: { data: PlayerOfTheDay }) {
         <MediaImage asset={player.photo} alt={fullName} initials={initials} size={80} />
         <div className="flex-1 space-y-2">
           <div>
-            <Link
-              href={`/jugadores/${player.slug}`}
-              className="text-xl font-bold hover:underline"
-            >
+            <Link href={`/jugadores/${player.slug}`} className="text-xl font-bold hover:underline">
               {fullName}
             </Link>
             <div className="mt-1 flex items-center gap-2">
@@ -77,29 +75,45 @@ function PlayerOfTheDayCard({ data }: { data: PlayerOfTheDay }) {
 }
 
 // ---------------------------------------------------------------------------
-// Player search bar (client interaction handled via Link + search params)
+// Metadata
 // ---------------------------------------------------------------------------
 
-function PlayerSearchHint() {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/40">
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        Para buscar un jugador específico usa la barra de búsqueda en la parte superior de la página.
-      </p>
-    </div>
-  );
-}
+export const metadata: Metadata = {
+  title: "Jugadores · Basket Stats",
+  description: "Clasificación histórica y estadísticas acumuladas de jugadores de ACB, Primera FEB y Segunda FEB.",
+};
 
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
-export const metadata = {
-  title: "Jugadores · Cancha",
-  description: "Clasificación histórica y estadísticas acumuladas de jugadores de ACB, Primera FEB y Segunda FEB.",
-};
+interface SearchParams {
+  stat?: string;
+  league?: string;
+  from?: string;
+  to?: string;
+  pos?: string;
+  min?: string;
+  n?: string;
+}
 
-export default async function JugadoresPage() {
+export default async function JugadoresPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+
+  const initialFilters = {
+    stat: sp.stat ?? "ppg",
+    league: sp.league ?? "",
+    seasonFrom: sp.from ?? "",
+    seasonTo: sp.to ?? "",
+    position: sp.pos ?? "",
+    minGames: sp.min ? Number(sp.min) : 20,
+    limit: sp.n ? Number(sp.n) : 10,
+  };
+
   let playerOfTheDay: PlayerOfTheDay | null = null;
   let initialRows: AllTimeLeader[] = [];
   let initialCount = 0;
@@ -108,14 +122,21 @@ export default async function JugadoresPage() {
   try {
     const [potd, allTime, leaguesPage] = await Promise.all([
       getPlayerOfTheDay(),
-      getAllTimeLeaders({ stat: "ppg", limit: 10, minGames: 20 }),
+      getAllTimeLeaders({
+        stat: initialFilters.stat,
+        league: initialFilters.league || undefined,
+        seasonFrom: initialFilters.seasonFrom || undefined,
+        seasonTo: initialFilters.seasonTo || undefined,
+        position: initialFilters.position || undefined,
+        minGames: initialFilters.minGames,
+        limit: initialFilters.limit,
+      }),
       getLeagues(),
     ]);
     playerOfTheDay = potd;
     initialRows = allTime.results;
     initialCount = allTime.count;
 
-    // Collect all season start years across all leagues for the season filter.
     const seasonResponses = await Promise.all(
       leaguesPage.results.map((l) => getSeasons(l.id))
     );
@@ -127,12 +148,11 @@ export default async function JugadoresPage() {
     }
     seasonYears = Array.from(yearsSet).sort((a, b) => Number(b) - Number(a));
   } catch {
-    // If the API is down, render an empty state rather than a server error.
+    // Render empty state if the API is down.
   }
 
   return (
     <div className="space-y-10">
-      {/* ── Header ──────────────────────────────────────────────────── */}
       <header className="space-y-1">
         <h1 className="text-2xl font-bold">Jugadores</h1>
         <p className="text-zinc-500 dark:text-zinc-400">
@@ -140,18 +160,20 @@ export default async function JugadoresPage() {
         </p>
       </header>
 
-      {/* ── Search hint ─────────────────────────────────────────────── */}
-      <PlayerSearchHint />
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/40">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          Para buscar un jugador específico usa la barra de búsqueda en la parte superior de la página.
+        </p>
+      </div>
 
-      {/* ── Player of the day ───────────────────────────────────────── */}
       {playerOfTheDay && <PlayerOfTheDayCard data={playerOfTheDay} />}
 
-      {/* ── All-time leaderboard ────────────────────────────────────── */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Clasificación histórica</h2>
         <AllTimeLeaderboard
           initialRows={initialRows}
           initialCount={initialCount}
+          initialFilters={initialFilters}
           seasons={seasonYears}
         />
       </section>

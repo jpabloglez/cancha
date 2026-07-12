@@ -14,6 +14,7 @@ from connectors.parsers.feb import (
     ParserError,
     parse_box_score,
     parse_game_ids,
+    parse_game_round_map,
     parse_player_profile,
     parse_team_profile,
 )
@@ -86,12 +87,15 @@ def ingest_feb_season(
     connector = connector or get_connector(connector_id)
 
     results = connector.fetch_completed_games(season_external_id)
-    game_ids = parse_game_ids(results.data)
+    calendar_html = results.data
+    game_ids = parse_game_ids(calendar_html)
+    round_map = parse_game_round_map(calendar_html)
     logger.info(
-        "FEB %s %s: %d finished games found",
+        "FEB %s %s: %d finished games found (%d with round labels)",
         connector_id,
         season_external_id,
         len(game_ids),
+        len(round_map),
     )
 
     ingested = 0
@@ -102,6 +106,8 @@ def ingest_feb_season(
             parsed = parse_box_score(
                 payload.data, source=connector_id, game_external_id=game_id
             )
+            # Patch in the round label from the calendar page.
+            parsed.game.round = round_map.get(game_id)
             for team in parsed.teams:
                 team_obj = upsert_team(team)
                 upsert_team_season(team=team_obj, season=season, league=league)

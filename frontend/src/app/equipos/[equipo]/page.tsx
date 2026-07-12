@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { MediaImage } from "@/components/MediaImage";
@@ -10,11 +11,13 @@ import {
   getRoster,
   getSeasons,
   getTeam,
+  getTeamRecentGames,
   getTeamSeasonStats,
   getTeamSeasons,
   getTeamStatsHistory,
 } from "@/lib/api";
 import type {
+  RecentGame,
   RosterEntry,
   RosterStats,
   Season,
@@ -52,6 +55,23 @@ const ADV_AXES: RadarAxis[] = [
   { key: "efgPercent", label: "%TE" },
 ];
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ equipo: string }>;
+}): Promise<Metadata> {
+  try {
+    const { equipo } = await params;
+    const team = await getTeam(equipo);
+    return {
+      title: `${team.name} · Basket Stats`,
+      description: `Estadísticas, plantilla y resultados del ${team.name}.`,
+    };
+  } catch {
+    return { title: "Equipo · Basket Stats" };
+  }
+}
+
 export default async function TeamPage({
   params,
   searchParams,
@@ -68,6 +88,7 @@ export default async function TeamPage({
   let roster: RosterEntry[] = [];
   let teamStats: TeamSeasonStats | null = null;
   let history: TeamStatsHistoryEntry[] = [];
+  let recentGames: RecentGame[] = [];
 
   try {
     team = await getTeam(equipo);
@@ -82,7 +103,7 @@ export default async function TeamPage({
         seasonOptions.find((s) => String(s.id) === seasonParam) ??
         seasonOptions[0];
 
-      const [rosterRes, statsRes, historyRes] = await Promise.all([
+      const [rosterRes, statsRes, historyRes, recentRes] = await Promise.all([
         selectedSeason
           ? getRoster(equipo, selectedSeason.id).catch((): RosterEntry[] => [])
           : Promise.resolve<RosterEntry[]>([]),
@@ -92,10 +113,15 @@ export default async function TeamPage({
             )
           : Promise.resolve<TeamSeasonStats | null>(null),
         getTeamStatsHistory(equipo).catch((): TeamStatsHistoryEntry[] => []),
+        getTeamRecentGames(equipo, {
+          season: selectedSeason?.id,
+          limit: 10,
+        }).catch((): RecentGame[] => []),
       ]);
       roster = rosterRes;
       teamStats = statsRes;
       history = historyRes;
+      recentGames = recentRes;
     }
   } catch {
     notFound();
@@ -152,6 +178,15 @@ export default async function TeamPage({
             </RadarCard>
           </div>
           <StatSummaryTable stats={teamStats} teamName={teamName} />
+        </section>
+      )}
+
+      {recentGames.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">
+            Últimos partidos{selectedSeason ? ` · ${selectedSeason.name}` : ""}
+          </h2>
+          <RecentGamesList games={recentGames} />
         </section>
       )}
 
@@ -356,6 +391,60 @@ function HistoryTable({
         Color: verde = por encima de la media de liga · rojo = por debajo. Pasa el ratón por un valor para ver la media.
       </p>
     </div>
+  );
+}
+
+function RecentGamesList({ games }: { games: RecentGame[] }) {
+  return (
+    <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+      {games.map((game) => {
+        const opponent = game.isHome ? game.awayTeam : game.homeTeam;
+        const teamScore = game.isHome ? game.finalScoreHome : game.finalScoreAway;
+        const oppScore = game.isHome ? game.finalScoreAway : game.finalScoreHome;
+        return (
+          <li key={game.id}>
+            <Link
+              href={`/partidos/${game.id}`}
+              className="flex items-center gap-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+            >
+              <span
+                className={`w-6 shrink-0 rounded text-center text-xs font-bold ${
+                  game.result === "W"
+                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                    : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                }`}
+              >
+                {game.result}
+              </span>
+              <span className="w-14 shrink-0 text-xs text-zinc-400">
+                {new Date(game.date).toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "short",
+                })}
+              </span>
+              {game.round && (
+                <span className="w-8 shrink-0 text-xs text-zinc-400">{game.round}</span>
+              )}
+              <span className="flex flex-1 items-center gap-2 truncate">
+                <span className="text-xs text-zinc-400">{game.isHome ? "vs" : "@"}</span>
+                <MediaImage
+                  asset={opponent.logo}
+                  alt={opponent.name}
+                  initials={opponent.name.slice(0, 2).toUpperCase()}
+                  color={opponent.primaryColor || undefined}
+                  rounded="lg"
+                  size={18}
+                />
+                <span className="truncate">{opponent.shortName || opponent.name}</span>
+              </span>
+              <span className="shrink-0 font-semibold tabular-nums">
+                {teamScore} – {oppScore}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

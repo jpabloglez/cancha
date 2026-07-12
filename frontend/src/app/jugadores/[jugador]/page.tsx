@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { MediaImage } from "@/components/MediaImage";
@@ -13,6 +14,24 @@ const POSITION_LABELS: Record<string, string> = {
   PF: "Ala-pívot",
   C: "Pívot",
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ jugador: string }>;
+}): Promise<Metadata> {
+  try {
+    const { jugador } = await params;
+    const player = await getPlayer(jugador);
+    const name = player.displayName || `${player.firstName} ${player.lastName}`;
+    return {
+      title: `${name} · Basket Stats`,
+      description: `Estadísticas de carrera de ${name}: puntos, rebotes, asistencias y métricas avanzadas en ACB, Primera FEB y Segunda FEB.`,
+    };
+  } catch {
+    return { title: "Jugador · Basket Stats" };
+  }
+}
 
 export default async function PlayerPage({
   params,
@@ -102,6 +121,15 @@ export default async function PlayerPage({
               </div>
             </div>
           )}
+          {/* Comparar link */}
+          <div>
+            <Link
+              href={`/comparar?ids=${player.slug}`}
+              className="inline-block rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            >
+              Comparar con otro jugador →
+            </Link>
+          </div>
         </div>
       </header>
 

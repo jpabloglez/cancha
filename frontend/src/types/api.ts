@@ -153,6 +153,11 @@ export interface Game {
   round: string | null;
 }
 
+export interface RecentGame extends Game {
+  result: "W" | "L";
+  isHome: boolean;
+}
+
 // A team's totals within a game box score (keyed by team-season).
 export interface TeamBoxScore {
   teamSeason: number;
@@ -279,6 +284,17 @@ export interface Leader {
   value: number;
   photo: MediaAsset | null;
   team: Team | null;
+}
+
+export interface LeagueFreshness {
+  slug: string;
+  name: string;
+  lastGameDate: string | null;
+}
+
+export interface DataFreshness {
+  lastUpdated: string | null;
+  byLeague: LeagueFreshness[];
 }
 
 // DRF LimitOffsetPagination envelope.
