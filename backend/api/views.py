@@ -19,7 +19,7 @@ from django.db.models import (
     QuerySet,
     Sum,
 )
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, Lower
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
@@ -409,6 +409,33 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = "slug"
     filter_backends = [SearchFilter]
     search_fields = ["name", "short_name", "city"]
+
+    def get_queryset(self) -> QuerySet:
+        """Return teams, deduplicating by case-insensitive name on the list action.
+
+        The FEB connector creates one Team row per season because FEB's website
+        uses a different external_id for the same club across seasons.  On the
+        list endpoint we collapse those duplicates by grouping on ``Lower(name)``
+        and keeping the row with the highest ``id`` (most recently ingested),
+        which is most likely to have the richest data (logo, city, etc.).
+        Detail and sub-actions use the full queryset so every slug remains
+        routable.
+
+        Returns
+        -------
+        QuerySet
+            Filtered queryset appropriate for the current action.
+        """
+        qs = Team.objects.select_related("logo").all()
+        if self.action == "list":
+            canonical_ids = (
+                Team.objects.annotate(name_lower=Lower("name"))
+                .values("name_lower")
+                .annotate(rep_id=Max("id"))
+                .values_list("rep_id", flat=True)
+            )
+            qs = qs.filter(id__in=canonical_ids)
+        return qs
 
     @action(detail=True)
     def roster(self, request: Request, slug: str | None = None) -> Response:
