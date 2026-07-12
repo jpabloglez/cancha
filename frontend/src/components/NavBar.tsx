@@ -9,6 +9,7 @@ import type { SearchResults } from "@/lib/api";
 
 const NAV_LINKS = [
   { href: "/ligas",      label: "Ligas" },
+  { href: "/equipos",    label: "Equipos" },
   { href: "/jugadores",  label: "Jugadores" },
   { href: "/comparar",   label: "Comparar" },
   { href: "/lideres",    label: "Líderes" },

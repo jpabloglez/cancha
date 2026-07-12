@@ -109,6 +109,17 @@ export function getBoxscore(gameId: number): Promise<BoxScore> {
   return apiFetch<BoxScore>(`/games/${gameId}/boxscore/`);
 }
 
+/** Fetch a paginated list of teams, optionally filtered by text search. */
+export function getTeams(
+  opts: { limit?: number; search?: string } = {},
+): Promise<Paginated<Team>> {
+  const params = new URLSearchParams();
+  if (opts.limit) params.set("limit", String(opts.limit));
+  if (opts.search) params.set("search", opts.search);
+  const qs = params.toString();
+  return apiFetch<Paginated<Team>>(`/teams/${qs ? `?${qs}` : ""}`);
+}
+
 /** Fetch a single team by its slug. */
 export function getTeam(slug: string): Promise<Team> {
   return apiFetch<Team>(`/teams/${slug}/`);
