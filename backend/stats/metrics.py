@@ -231,6 +231,135 @@ def calculate_player_efficiency_rating(
     return per
 
 
+def calculate_three_point_rate(
+    three_point_att: np.ndarray,
+    field_goals_att: np.ndarray,
+) -> np.ndarray:
+    """Compute Three-Point Attempt Rate (3PAr = 3PA / FGA).
+
+    Parameters
+    ----------
+    three_point_att : np.ndarray
+        Three-point field goal attempts.
+    field_goals_att : np.ndarray
+        Total field goal attempts (2P + 3P).
+
+    Returns
+    -------
+    np.ndarray
+        3PAr as a fraction in [0, 1]; 0 where there were no field goal attempts.
+    """
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(field_goals_att > 0, three_point_att / field_goals_att, 0.0)
+
+
+def calculate_free_throw_rate(
+    free_throws_att: np.ndarray,
+    field_goals_att: np.ndarray,
+) -> np.ndarray:
+    """Compute Free Throw Rate (FTr = FTA / FGA).
+
+    Parameters
+    ----------
+    free_throws_att : np.ndarray
+        Free throw attempts.
+    field_goals_att : np.ndarray
+        Total field goal attempts.
+
+    Returns
+    -------
+    np.ndarray
+        FTr as a fraction; 0 where there were no field goal attempts.
+    """
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(field_goals_att > 0, free_throws_att / field_goals_att, 0.0)
+
+
+def calculate_tov_percent(
+    turnovers: np.ndarray,
+    field_goals_att: np.ndarray,
+    free_throws_att: np.ndarray,
+) -> np.ndarray:
+    """Compute Turnover Percentage (TOV% = TOV / (FGA + 0.44·FTA + TOV)).
+
+    Parameters
+    ----------
+    turnovers : np.ndarray
+        Turnovers committed.
+    field_goals_att : np.ndarray
+        Field goal attempts.
+    free_throws_att : np.ndarray
+        Free throw attempts.
+
+    Returns
+    -------
+    np.ndarray
+        TOV% as a fraction in [0, 1]; 0 where the denominator is zero.
+
+    Notes
+    -----
+    Estimates the fraction of possessions used that ended in a turnover.
+    """
+    denominator = field_goals_att + 0.44 * free_throws_att + turnovers
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(denominator > 0, turnovers / denominator, 0.0)
+
+
+def calculate_rebound_percent(
+    player_reb: np.ndarray,
+    opponent_reb: np.ndarray,
+) -> np.ndarray:
+    """Compute a rebounding percentage (ORB% or DRB%).
+
+    Parameters
+    ----------
+    player_reb : np.ndarray
+        Player rebounds of the target type (offensive or defensive).
+    opponent_reb : np.ndarray
+        Opponent rebounds of the complementary type:
+        pass opponent DRB to compute ORB%, opponent ORB to compute DRB%.
+
+    Returns
+    -------
+    np.ndarray
+        Rebound percentage as a fraction in [0, 1]; 0 when both sides are zero.
+
+    Notes
+    -----
+    REB% = player_reb / (player_reb + opponent_reb).
+    """
+    denominator = player_reb + opponent_reb
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(denominator > 0, player_reb / denominator, 0.0)
+
+
+def calculate_ast_percent(
+    assists: np.ndarray,
+    team_field_goals_made: np.ndarray,
+) -> np.ndarray:
+    """Compute Assist Percentage proxy (AST% ≈ AST / team FGM).
+
+    Parameters
+    ----------
+    assists : np.ndarray
+        Player assists.
+    team_field_goals_made : np.ndarray
+        Total team field goals made in the games the player appeared in.
+
+    Returns
+    -------
+    np.ndarray
+        AST% as a fraction in [0, 1]; 0 where team FGM is zero.
+
+    Notes
+    -----
+    The on-court definition requires lineup data unavailable from box scores.
+    This proxy (AST / team_FGM) is the standard box-score-only approximation.
+    """
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(team_field_goals_made > 0, assists / team_field_goals_made, 0.0)
+
+
 #: League-average PER, the value the normalized scale is anchored to (Hollinger).
 PER_LEAGUE_AVERAGE = 15.0
 

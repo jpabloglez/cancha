@@ -48,6 +48,13 @@ export interface AdvancedStats {
   effectiveFieldGoalPercent: number;
   usageRate: number;
   playerEfficiencyRating: number;
+  threePointRate: number;
+  freeThrowRate: number;
+  tovPercent: number;
+  mpPercent: number;
+  orbPercent: number;
+  drbPercent: number;
+  astPercent: number;
 }
 
 export interface PlayerSeasonStats {

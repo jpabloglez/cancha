@@ -194,6 +194,13 @@ class PlayerSeasonAggregateSerializer(serializers.ModelSerializer):
             "ts_percent",
             "usage_rate",
             "efg_percent",
+            "three_point_rate",
+            "free_throw_rate",
+            "tov_percent",
+            "mp_percent",
+            "orb_percent",
+            "drb_percent",
+            "ast_percent",
         ]
 
 

@@ -24,14 +24,18 @@ export interface AdvancedRadarSeries {
 
 const COLORS = ["#c0612b", "#2b6fc0", "#2bb673", "#9b2bc0"];
 
-// Each axis maps the raw API value to a 0-100 visual scale.
-// TS%, EFG%, Uso are fractions → multiply by 100.
-// PER: elite ≈ 25-30, average ≈ 15 → scale so PER 35 = 100.
+// Each axis maps the raw API value to a 0-100 visual scale so all axes are
+// comparable on a single radial scale. Elite ceilings are approximate league
+// benchmarks; visual scale is relative, not absolute.
+// TS%, USO%, ORB%, AST%: fractions → *100 (typical elite ~65%, 35%, 20%, 40%).
+// PER: average 15, elite ~30 → (v/35)*100 capped at 100.
 const AXES: { key: keyof AdvancedStats; label: string; toViz: (v: number) => number }[] = [
   { key: "trueShootingPercent", label: "TS%", toViz: (v) => v * 100 },
-  { key: "effectiveFieldGoalPercent", label: "eFG%", toViz: (v) => v * 100 },
   { key: "usageRate", label: "Uso%", toViz: (v) => v * 100 },
   { key: "playerEfficiencyRating", label: "PER", toViz: (v) => Math.min((v / 35) * 100, 100) },
+  { key: "orbPercent", label: "RO%", toViz: (v) => Math.min(v * 500, 100) },
+  { key: "drbPercent", label: "RD%", toViz: (v) => Math.min(v * 400, 100) },
+  { key: "astPercent", label: "ASI%", toViz: (v) => Math.min(v * 250, 100) },
 ];
 
 function toRadarData(series: AdvancedRadarSeries[]) {
@@ -45,8 +49,6 @@ function toRadarData(series: AdvancedRadarSeries[]) {
 }
 
 function fmtRaw(key: keyof AdvancedStats, value: number): string {
-  const axis = AXES.find((a) => a.key === key);
-  if (!axis) return String(value);
   if (key === "playerEfficiencyRating") return value.toFixed(1);
   return `${(value * 100).toFixed(1)}%`;
 }
