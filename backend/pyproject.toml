@@ -9,6 +9,8 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.per-file-ignores]
 # Migrations are auto-generated; tests may use long descriptive lines.
 "*/migrations/*" = ["E501"]
+# datetime.UTC (UP017) conflicts with the typeshed stubs version used in CI.
+"ingestion/management/commands/db_check.py" = ["UP017"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"

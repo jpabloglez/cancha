@@ -270,7 +270,9 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
             .distinct()
         )
 
-        def _sort_key(label: str) -> tuple[int, str]:
+        def _sort_key(label: str | None) -> tuple[int, str]:
+            if label is None:
+                return (10000, "")
             m = re.match(r"J(\d+)$", label)
             return (int(m.group(1)), "") if m else (10000, label)
 
@@ -1109,9 +1111,15 @@ class AllTimeLeadersView(APIView):
                 topg=ExpressionWrapper(F("turnovers_total") / F("games_float"), output_field=_f),
                 per_weighted=ExpressionWrapper(F("per_total") / F("games_float"), output_field=_f),
                 ts_weighted=ExpressionWrapper(F("ts_total") / F("games_float"), output_field=_f),
-                two_pct_weighted=ExpressionWrapper(F("two_pct_total") / F("games_float"), output_field=_f),
-                three_pct_weighted=ExpressionWrapper(F("three_pct_total") / F("games_float"), output_field=_f),
-                ft_pct_weighted=ExpressionWrapper(F("ft_pct_total") / F("games_float"), output_field=_f),
+                two_pct_weighted=ExpressionWrapper(
+                    F("two_pct_total") / F("games_float"), output_field=_f
+                ),
+                three_pct_weighted=ExpressionWrapper(
+                    F("three_pct_total") / F("games_float"), output_field=_f
+                ),
+                ft_pct_weighted=ExpressionWrapper(
+                    F("ft_pct_total") / F("games_float"), output_field=_f
+                ),
             )
             .filter(total_games__gte=min_games)
         )

@@ -25,14 +25,13 @@ import urllib.request
 from datetime import datetime, timezone
 
 from django.core.management.base import BaseCommand
-from django.db.models import Count, Max, Min, Q
+from django.db.models import Max, Min
 from django.db.models.functions import Lower
 
 from games.models import Game, TeamGameStats
 from ingestion.models import DataSource, IngestionRun
 from players.models import Person, PlayerGameStats, PlayerSeasonAggregate, RosterEntry
 from teams.models import League, Season, Team, TeamSeason
-
 
 # ── Formatting helpers ────────────────────────────────────────────────────────
 
@@ -328,5 +327,8 @@ class Command(BaseCommand):
             )
 
         self.stdout.write("  " + _hr("·"))
-        summary = self.style.SUCCESS("All counts match.") if all_ok else self.style.WARNING("Some discrepancies found.")
+        if all_ok:
+            summary = self.style.SUCCESS("All counts match.")
+        else:
+            summary = self.style.WARNING("Some discrepancies found.")
         self.stdout.write(f"  {summary}")
