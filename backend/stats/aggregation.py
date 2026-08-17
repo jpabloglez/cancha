@@ -16,8 +16,13 @@ from players.models import PlayerGameStats, PlayerSeasonAggregate
 from teams.models import Season
 
 from .metrics import (
+    calculate_ast_percent,
     calculate_effective_field_goal_percent,
+    calculate_free_throw_rate,
     calculate_player_efficiency_rating,
+    calculate_rebound_percent,
+    calculate_three_point_rate,
+    calculate_tov_percent,
     calculate_true_shooting_percent,
     calculate_usage_rate,
     scale_per_to_league_average,
@@ -57,16 +62,22 @@ def recompute_player_season_aggregates(season_id: int) -> int:
     for line in lines:
         player_lines[line.person_id].append(line)
 
-    # Team totals per (game, team_season) for the Usage Rate denominator.
+    # Team totals per (game, team_season) for the Usage Rate denominator and
+    # opponent-stats lookups (rebound/assist percentages).
     team_stats_map = {
         (t.game_id, t.team_season_id): t
         for t in TeamGameStats.objects.filter(game__season=season)
     }
 
+    # game_id -> [team_season_id, ...] lets _build_aggregate find the opponent row.
+    game_to_team_ids: dict[int, list[int]] = defaultdict(list)
+    for game_id, ts_id in team_stats_map:
+        game_to_team_ids[game_id].append(ts_id)
+
     # Build every player's aggregate first; the PER scale is a league-wide step
     # (it needs the minutes-weighted league average), applied before writing.
     built: list[tuple[int, dict[str, float]]] = [
-        (person_id, _build_aggregate(person_lines, team_stats_map))
+        (person_id, _build_aggregate(person_lines, team_stats_map, game_to_team_ids))
         for person_id, person_lines in player_lines.items()
     ]
     _scale_per(built)
@@ -112,6 +123,7 @@ def _scale_per(built: list[tuple[int, dict[str, float]]]) -> None:
 def _build_aggregate(
     person_lines: list[PlayerGameStats],
     team_stats_map: dict[tuple[int, int], "TeamGameStats"],
+    game_to_team_ids: dict[int, list[int]],
 ) -> dict[str, float]:
     """Compute the aggregate field values for one player in a season.
 
@@ -121,7 +133,10 @@ def _build_aggregate(
         All of the player's game lines in the season.
     team_stats_map : dict
         Lookup of ``(game_id, team_season_id) -> TeamGameStats`` used for the
-        Usage Rate team-totals denominator.
+        Usage Rate team-totals denominator and opponent-stat lookups.
+    game_to_team_ids : dict
+        Lookup of ``game_id -> [team_season_id, ...]`` used to find the
+        opponent's ``TeamGameStats`` row for rebound/assist percentages.
 
     Returns
     -------
@@ -181,15 +196,25 @@ def _build_aggregate(
         )[0]
     )
 
-    # Usage Rate denominator: team totals over the same set of games.
-    team_fga = team_fta = team_tov = 0.0
+    # Team and opponent totals over the same set of games.
+    team_fga = team_fta = team_tov = team_fgm = 0.0
+    opp_reb_off = opp_reb_def = 0.0  # used for DRB% and ORB% respectively
     for line in person_lines:
-        team_line = team_stats_map.get((line.game_id, line.team_season_id))
-        if team_line is None:
-            continue
-        team_fga += team_line.field_goals_att
-        team_fta += team_line.free_throws_att
-        team_tov += team_line.turnovers
+        my_ts_id = line.team_season_id
+        game_id = line.game_id
+        team_line = team_stats_map.get((game_id, my_ts_id))
+        if team_line is not None:
+            team_fga += team_line.field_goals_att
+            team_fta += team_line.free_throws_att
+            team_tov += team_line.turnovers
+            team_fgm += team_line.field_goals_made
+        opp_ts_ids = [tid for tid in game_to_team_ids.get(game_id, []) if tid != my_ts_id]
+        if opp_ts_ids:
+            opp_line = team_stats_map.get((game_id, opp_ts_ids[0]))
+            if opp_line is not None:
+                opp_reb_off += opp_line.rebounds_off
+                opp_reb_def += opp_line.rebounds_def
+
     usage_rate = float(
         calculate_usage_rate(
             tot_fga,
@@ -202,6 +227,22 @@ def _build_aggregate(
             np.array([_TEAM_MINUTES_PER_GAME * games_played]),
         )[0]
     )
+
+    p_orb = np.array([reb_off.sum()])
+    p_drb = np.array([reb_def.sum()])
+    orb_percent = float(
+        calculate_rebound_percent(p_orb, np.array([opp_reb_def]))[0]
+    )
+    drb_percent = float(
+        calculate_rebound_percent(p_drb, np.array([opp_reb_off]))[0]
+    )
+    ast_percent = float(
+        calculate_ast_percent(np.array([assists.sum()]), np.array([team_fgm]))[0]
+    )
+    three_point_rate = float(calculate_three_point_rate(tot_tpa, tot_fga)[0])
+    free_throw_rate = float(calculate_free_throw_rate(tot_fta, tot_fga)[0])
+    tov_percent = float(calculate_tov_percent(tot_turnovers, tot_fga, tot_fta)[0])
+    mp_percent = float(tot_minutes[0]) / (games_played * 40.0) if games_played > 0 else 0.0
 
     # Shooting percentages from season totals (accurate; not averages of averages).
     s_two_att = float((tot_fga - tot_tpa)[0])
@@ -232,4 +273,11 @@ def _build_aggregate(
         "ts_percent": ts_percent,
         "usage_rate": usage_rate,
         "efg_percent": efg_percent,
+        "three_point_rate": three_point_rate,
+        "free_throw_rate": free_throw_rate,
+        "tov_percent": tov_percent,
+        "mp_percent": mp_percent,
+        "orb_percent": orb_percent,
+        "drb_percent": drb_percent,
+        "ast_percent": ast_percent,
     }

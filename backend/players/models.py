@@ -283,6 +283,14 @@ class PlayerSeasonAggregate(models.Model):
         Season shooting percentages (T2, T3, FT).
     per, ts_percent, usage_rate, efg_percent : float
         Derived advanced metrics (spec §4.4).
+    three_point_rate, free_throw_rate, tov_percent : float
+        Shot-profile and ball-security rate stats.
+    mp_percent : float
+        Fraction of available minutes played (MP / games_played / 40).
+    orb_percent, drb_percent : float
+        Offensive and defensive rebounding percentages.
+    ast_percent : float
+        Assist percentage (proxy: AST / team FGM).
     """
 
     person = models.ForeignKey(
@@ -307,6 +315,13 @@ class PlayerSeasonAggregate(models.Model):
     ts_percent = models.FloatField(default=0.0)
     usage_rate = models.FloatField(default=0.0)
     efg_percent = models.FloatField(default=0.0)
+    three_point_rate = models.FloatField(default=0.0)
+    free_throw_rate = models.FloatField(default=0.0)
+    tov_percent = models.FloatField(default=0.0)
+    mp_percent = models.FloatField(default=0.0)
+    orb_percent = models.FloatField(default=0.0)
+    drb_percent = models.FloatField(default=0.0)
+    ast_percent = models.FloatField(default=0.0)
 
     class Meta:
         constraints = [

@@ -60,6 +60,11 @@ LEADER_STATS = {
     "ts": "ts_percent",
     "efg": "efg_percent",
     "usage": "usage_rate",
+    "3par": "three_point_rate",
+    "ftr": "free_throw_rate",
+    "orb": "orb_percent",
+    "drb": "drb_percent",
+    "ast_pct": "ast_percent",
 }
 
 # Public stat keys -> annotation names used by the all-time leaders endpoint.
@@ -121,6 +126,13 @@ def _aggregate_to_stats(aggregate: PlayerSeasonAggregate) -> dict:
             "effective_field_goal_percent": aggregate.efg_percent,
             "usage_rate": aggregate.usage_rate,
             "player_efficiency_rating": aggregate.per,
+            "three_point_rate": aggregate.three_point_rate,
+            "free_throw_rate": aggregate.free_throw_rate,
+            "tov_percent": aggregate.tov_percent,
+            "mp_percent": aggregate.mp_percent,
+            "orb_percent": aggregate.orb_percent,
+            "drb_percent": aggregate.drb_percent,
+            "ast_percent": aggregate.ast_percent,
         },
     }
 

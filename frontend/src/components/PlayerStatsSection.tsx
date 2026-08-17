@@ -104,6 +104,12 @@ export function PlayerStatsSection({ stats }: Props) {
                 <th className="px-2 text-right" title="Effective Field Goal %">eFG%</th>
                 <th className="px-2 text-right" title="Usage rate">USO%</th>
                 <th className="px-2 text-right" title="Player Efficiency Rating">PER</th>
+                <th className="px-2 text-right" title="Tasa de intentos de 3 (3PA/FGA)">3PAr</th>
+                <th className="px-2 text-right" title="Tasa de tiros libres (FTA/FGA)">TLr</th>
+                <th className="px-2 text-right" title="Tasa de pérdidas">T.P.%</th>
+                <th className="px-2 text-right" title="% rebote ofensivo">RO%</th>
+                <th className="px-2 text-right" title="% rebote defensivo">RD%</th>
+                <th className="px-2 text-right" title="% asistencias (proxy)">ASI%</th>
               </tr>
             </thead>
             <tbody>
@@ -140,6 +146,12 @@ export function PlayerStatsSection({ stats }: Props) {
                     <td className="px-2 text-right tabular-nums">{pct(s.advanced.effectiveFieldGoalPercent)}</td>
                     <td className="px-2 text-right tabular-nums">{pct(s.advanced.usageRate)}</td>
                     <td className="px-2 text-right tabular-nums">{s.advanced.playerEfficiencyRating.toFixed(1)}</td>
+                    <td className="px-2 text-right tabular-nums">{pct(s.advanced.threePointRate ?? 0)}</td>
+                    <td className="px-2 text-right tabular-nums">{(s.advanced.freeThrowRate ?? 0).toFixed(2)}</td>
+                    <td className="px-2 text-right tabular-nums">{pct(s.advanced.tovPercent ?? 0)}</td>
+                    <td className="px-2 text-right tabular-nums">{pct(s.advanced.orbPercent ?? 0)}</td>
+                    <td className="px-2 text-right tabular-nums">{pct(s.advanced.drbPercent ?? 0)}</td>
+                    <td className="px-2 text-right tabular-nums">{pct(s.advanced.astPercent ?? 0)}</td>
                   </tr>
                 );
               })}
