@@ -6,6 +6,9 @@ import { getDataFreshness } from "@/lib/api";
 import { CONTACT_EMAIL, GITHUB_URL } from "@/lib/site";
 import "./globals.css";
 
+// All pages fetch live backend data; static pre-rendering is not applicable.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Estadísticas de Baloncesto — ACB / LEB Oro / LEB Plata",
   description:

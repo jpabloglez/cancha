@@ -4,7 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from connectors.parsers.feb import ParserError, parse_box_score, parse_game_ids, parse_game_round_map
+from connectors.parsers.feb import (
+    ParserError,
+    parse_box_score,
+    parse_game_ids,
+    parse_game_round_map,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

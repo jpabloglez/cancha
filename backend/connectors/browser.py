@@ -5,6 +5,8 @@ Playwright is imported lazily so connectors that don't need a browser (FEB) work
 without it installed, and so the dependency is only required where it's used.
 """
 
+from typing import Literal
+
 from .http import DEFAULT_USER_AGENT
 
 
@@ -13,7 +15,7 @@ def fetch_rendered(
     *,
     timeout_ms: int = 30000,
     wait_selector: str | None = None,
-    wait_until: str = "networkidle",
+    wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] = "networkidle",
 ) -> str:
     """Return the fully-rendered HTML of a JavaScript-driven page.
 
