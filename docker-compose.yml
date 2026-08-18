@@ -38,6 +38,10 @@ services:
     build:
       context: ./backend
     command: python manage.py runserver 0.0.0.0:8000
+    # Run as the host user so the container can write to the bind-mounted
+    # ./backend directory (media uploads, collectstatic). UID/GID default to
+    # 1000 (typical first regular user on Linux/WSL2).
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
     ports:
@@ -57,6 +61,7 @@ services:
     # Single process running both the Celery worker and Celery Beat scheduler,
     # appropriate for a low-traffic, non-commercial deployment.
     command: celery -A config worker --beat --loglevel=info
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
     env_file:
