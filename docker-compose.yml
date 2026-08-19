@@ -14,7 +14,10 @@ services:
       # Postgres instances. Containers still reach it internally at db:5432.
       - "5433:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      # Bind-mount to ./data/postgres so the DB survives docker volume prune,
+      # docker compose down -v, and Docker Desktop resets. The directory is
+      # git-ignored; never commit it.
+      - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U basketball_stats"]
       interval: 5s
@@ -38,6 +41,10 @@ services:
     build:
       context: ./backend
     command: python manage.py runserver 0.0.0.0:8000
+    # Run as the host user so the container can write to the bind-mounted
+    # ./backend directory (media uploads, collectstatic). UID/GID default to
+    # 1000 (typical first regular user on Linux/WSL2).
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
     ports:
@@ -57,6 +64,7 @@ services:
     # Single process running both the Celery worker and Celery Beat scheduler,
     # appropriate for a low-traffic, non-commercial deployment.
     command: celery -A config worker --beat --loglevel=info
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
     env_file:
@@ -86,5 +94,4 @@ services:
     depends_on:
       - backend
 
-volumes:
-  db_data:
+# No top-level named volumes — db uses a bind mount (./data/postgres).

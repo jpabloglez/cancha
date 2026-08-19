@@ -11,6 +11,10 @@ venv/
 backend/staticfiles/
 backend/media/
 
+# Persistent Docker data (bind-mounted DB and backups; never commit)
+data/postgres/
+data/backups/
+
 # Node / frontend
 node_modules/
 .next/

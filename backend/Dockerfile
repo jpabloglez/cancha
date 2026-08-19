@@ -3,7 +3,7 @@
 # deployment. A multi-stage build would reduce the final image size at the cost
 # of more complex Playwright/Chromium wiring — a viable next step if image size
 # becomes a concern in production.
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 # Avoid writing .pyc files and force unbuffered stdout/stderr for live logs.
 ENV PYTHONDONTWRITEBYTECODE=1 \
