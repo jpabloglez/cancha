@@ -36,6 +36,7 @@ from ingestion.schemas import (
     NormalizedPerson,
     NormalizedPersonProfile,
     NormalizedPlayerBoxScore,
+    NormalizedStaffEntry,
     NormalizedTeam,
     NormalizedTeamBoxScore,
     NormalizedTeamProfile,
@@ -351,6 +352,68 @@ def parse_team_profiles(
         if profile is not None:
             profiles.setdefault(profile.ref.external_id, profile)
     return list(profiles.values())
+
+
+def parse_staff_entries(
+    payload: dict, *, source: str
+) -> list[tuple[NormalizedPerson, NormalizedStaffEntry]]:
+    """Extract coaching staff (head coach + assistants) from a box-score payload.
+
+    ACB's ``teamBoxscores`` block carries ``headCoach`` (a name string) and
+    ``assistantCoaches`` (a list of name strings) per team. Since the API exposes
+    no stable staff ID, the external_id is derived as ``"staff-{slug}"`` from the
+    coach's full name, scoped to "acb" — stable enough for deduplication within
+    a season.
+
+    Parameters
+    ----------
+    payload : dict
+        Decoded JSON from ``/api/matchdata/Result/boxscores``.
+    source : str
+        Connector id ("acb") used for every ``ExternalRef``.
+
+    Returns
+    -------
+    list of (NormalizedPerson, NormalizedStaffEntry)
+        One tuple per coach entry. The team_ref ``external_id`` is the ACB
+        ``clubId`` (same key used for team deduplication).
+    """
+    results: list[tuple[NormalizedPerson, NormalizedStaffEntry]] = []
+    for team_box in payload.get("teamBoxscores", []):
+        club_id = team_box.get("team", {}).get("clubId")
+        if club_id is None:
+            continue
+        team_ref = ExternalRef(source=source, external_id=str(club_id))
+
+        entries: list[tuple[str, str]] = []  # (full_name, role)
+        head = (team_box.get("headCoach") or "").strip()
+        if head:
+            entries.append((head, "head_coach"))
+        for name in team_box.get("assistantCoaches") or []:
+            name = (name or "").strip()
+            if name:
+                entries.append((name, "assistant_coach"))
+
+        for full_name, role in entries:
+            parts = full_name.rsplit(" ", 1)
+            first = parts[0] if len(parts) > 1 else ""
+            last = parts[-1]
+            name_slug = slugify(full_name)
+            if not name_slug:
+                continue
+            person = NormalizedPerson(
+                ref=ExternalRef(source=source, external_id=f"staff-{name_slug}"),
+                first_name=first[:100] or last[:100],
+                last_name=last[:100],
+                slug=f"entrenador-{name_slug}"[:160],
+            )
+            entry = NormalizedStaffEntry(
+                person_ref=person.ref,
+                team_ref=team_ref,
+                role=role,
+            )
+            results.append((person, entry))
+    return results
 
 
 def _team_profile(raw: dict, *, source: str) -> NormalizedTeamProfile | None:

@@ -13,7 +13,7 @@ import numpy as np
 from django.db import transaction
 
 from games.models import Game, TeamGameStats
-from players.models import CareerEntry, Person, PlayerGameStats, RosterEntry
+from players.models import CareerEntry, Person, PlayerGameStats, RosterEntry, StaffEntry
 from stats.metrics import estimate_possessions
 from teams.models import League, MediaAsset, Season, Team, TeamSeason
 
@@ -25,6 +25,7 @@ from .schemas import (
     NormalizedPerson,
     NormalizedPersonProfile,
     NormalizedRosterEntry,
+    NormalizedStaffEntry,
     NormalizedTeam,
     NormalizedTeamBoxScore,
     NormalizedTeamProfile,
@@ -491,6 +492,47 @@ def _set_if_present(obj: object, field: str, value: object) -> None:
     """
     if value is not None:
         setattr(obj, field, value)
+
+
+def upsert_staff_entry(
+    person_data: NormalizedPerson,
+    entry_data: NormalizedStaffEntry,
+    team_season: "TeamSeason",
+) -> StaffEntry:
+    """Create or update a coaching staff entry for a team-season.
+
+    The person is upserted first (by ``source`` + ``external_id``), then the
+    ``StaffEntry`` is upserted keyed on ``(person, team_season, role)``.
+
+    Parameters
+    ----------
+    person_data : NormalizedPerson
+        Normalized coach identity (name + slug derived from their full name).
+    entry_data : NormalizedStaffEntry
+        Role and team reference.
+    team_season : TeamSeason
+        The team-season this staff entry belongs to.
+
+    Returns
+    -------
+    StaffEntry
+        The persisted (created or existing) staff entry.
+    """
+    person, _ = Person.objects.update_or_create(
+        source=person_data.ref.source,
+        external_id=person_data.ref.external_id,
+        defaults={
+            "first_name": person_data.first_name,
+            "last_name": person_data.last_name,
+            "slug": person_data.slug,
+        },
+    )
+    staff_entry, _ = StaffEntry.objects.get_or_create(
+        person=person,
+        team_season=team_season,
+        role=entry_data.role,
+    )
+    return staff_entry
 
 
 def _resolve_person(ref: ExternalRef) -> Person:
