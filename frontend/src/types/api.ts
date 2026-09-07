@@ -304,6 +304,15 @@ export interface DataFreshness {
   byLeague: LeagueFreshness[];
 }
 
+export interface StaffEntry {
+  id: number;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  slug: string;
+  role: "head_coach" | "assistant_coach" | string;
+}
+
 // DRF LimitOffsetPagination envelope.
 export interface Paginated<T> {
   count: number;

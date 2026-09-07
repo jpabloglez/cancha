@@ -14,6 +14,7 @@ import {
   getTeamRecentGames,
   getTeamSeasonStats,
   getTeamSeasons,
+  getTeamStaff,
   getTeamStatsHistory,
 } from "@/lib/api";
 import type {
@@ -21,6 +22,7 @@ import type {
   RosterEntry,
   RosterStats,
   Season,
+  StaffEntry,
   Team,
   TeamSeasonStats,
   TeamStatsHistoryEntry,
@@ -86,6 +88,7 @@ export default async function TeamPage({
   let seasonOptions: Season[] = [];
   let selectedSeason: Season | undefined;
   let roster: RosterEntry[] = [];
+  let staff: StaffEntry[] = [];
   let teamStats: TeamSeasonStats | null = null;
   let history: TeamStatsHistoryEntry[] = [];
   let recentGames: RecentGame[] = [];
@@ -103,10 +106,11 @@ export default async function TeamPage({
         seasonOptions.find((s) => String(s.id) === seasonParam) ??
         seasonOptions[0];
 
-      const [rosterRes, statsRes, historyRes, recentRes] = await Promise.all([
+      const [rosterRes, staffRes, statsRes, historyRes, recentRes] = await Promise.all([
         selectedSeason
           ? getRoster(equipo, selectedSeason.id).catch((): RosterEntry[] => [])
           : Promise.resolve<RosterEntry[]>([]),
+        getTeamStaff(equipo, selectedSeason?.id).catch((): StaffEntry[] => []),
         selectedSeason
           ? getTeamSeasonStats(equipo, selectedSeason.id).catch(
               (): TeamSeasonStats | null => null,
@@ -119,6 +123,7 @@ export default async function TeamPage({
         }).catch((): RecentGame[] => []),
       ]);
       roster = rosterRes;
+      staff = staffRes;
       teamStats = statsRes;
       history = historyRes;
       recentGames = recentRes;
@@ -195,6 +200,15 @@ export default async function TeamPage({
           <h2 className="text-lg font-semibold">Historial por temporada</h2>
           <TeamHistoryChart history={history} />
           <HistoryTable history={history} selectedSeasonId={selectedSeason?.id} />
+        </section>
+      )}
+
+      {staff.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold">
+            Cuerpo técnico{selectedSeason ? ` · ${selectedSeason.name}` : ""}
+          </h2>
+          <StaffList staff={staff} />
         </section>
       )}
 
@@ -523,6 +537,40 @@ function PlayerStatRow({ stats }: { stats: RosterStats }) {
           <p className="text-[10px] text-zinc-400">{label}</p>
         </div>
       ))}
+    </div>
+  );
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  head_coach: "Entrenador principal",
+  assistant_coach: "Asistente",
+};
+
+function StaffList({ staff }: { staff: StaffEntry[] }) {
+  const head = staff.filter((s) => s.role === "head_coach");
+  const assistants = staff.filter((s) => s.role === "assistant_coach");
+  return (
+    <div className="space-y-2">
+      {head.map((s) => (
+        <div key={s.id} className="flex items-center gap-3">
+          <span className="rounded bg-zinc-800 px-2 py-0.5 text-[11px] font-semibold text-zinc-200 dark:bg-zinc-700">
+            {ROLE_LABELS[s.role] ?? s.role}
+          </span>
+          <span className="font-medium">
+            {s.displayName || `${s.firstName} ${s.lastName}`}
+          </span>
+        </div>
+      ))}
+      {assistants.length > 0 && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <span className="text-zinc-400">Asistentes:</span>
+          {assistants.map((s) => (
+            <span key={s.id}>
+              {s.displayName || `${s.firstName} ${s.lastName}`}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

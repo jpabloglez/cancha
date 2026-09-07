@@ -23,6 +23,7 @@ from connectors.parsers.acb import (
     parse_boxscore,
     parse_matches,
     parse_player_profiles,
+    parse_staff_entries,
     parse_team_profiles,
 )
 from connectors.registry import get_connector
@@ -35,11 +36,16 @@ from .persistence import (
     upsert_game_with_boxscore,
     upsert_person,
     upsert_person_profile,
+    upsert_staff_entry,
     upsert_team,
     upsert_team_profile,
     upsert_team_season,
 )
-from .schemas import NormalizedPersonProfile, NormalizedTeam, NormalizedTeamProfile
+from .schemas import (
+    NormalizedPersonProfile,
+    NormalizedTeam,
+    NormalizedTeamProfile,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +85,7 @@ class IngestResult:
     photos_stored: int = 0
     teams_enriched: int = 0
     logos_stored: int = 0
+    staff_ingested: int = 0
 
 
 def ingest_acb_season(
@@ -147,6 +154,8 @@ def ingest_acb_season(
     ingested = 0
     failed = 0
     profiles: dict[str, NormalizedPersonProfile] = {}
+    # Staff keyed by (team_club_id, person_external_id, role) for deduplication.
+    staff_seen: dict[tuple[str, str, str], tuple] = {}
     for header in headers:
         try:
             payload = _json(acb.fetch_box_score(header.external_id))
@@ -161,6 +170,15 @@ def ingest_acb_season(
             upsert_game_with_boxscore(parsed.game, season=season)
             for profile in parse_player_profiles(payload, source=ACB_CONNECTOR_ID):
                 profiles.setdefault(profile.ref.external_id, profile)
+            for person_data, entry_data in parse_staff_entries(
+                payload, source=ACB_CONNECTOR_ID
+            ):
+                key = (
+                    entry_data.team_ref.external_id,
+                    person_data.ref.external_id,
+                    entry_data.role,
+                )
+                staff_seen.setdefault(key, (person_data, entry_data))
             ingested += 1
         except (ParserError, KeyError, ValueError) as exc:
             logger.warning("Skipping ACB game %s: %s", header.external_id, exc)
@@ -170,9 +188,10 @@ def ingest_acb_season(
     teams_enriched, logos = _enrich_teams(
         team_profiles.values(), store_media=store_media
     )
+    staff_count = _persist_staff(staff_seen.values(), season=season)
     logger.info(
         "ACB edition %s: %d games ingested, %d failed, %d players enriched, "
-        "%d photos stored, %d teams enriched, %d logos stored",
+        "%d photos stored, %d teams enriched, %d logos stored, %d staff entries",
         edition_id,
         ingested,
         failed,
@@ -180,6 +199,7 @@ def ingest_acb_season(
         photos,
         teams_enriched,
         logos,
+        staff_count,
     )
 
     _rebuild_rosters(season)
@@ -191,7 +211,45 @@ def ingest_acb_season(
         photos_stored=photos,
         teams_enriched=teams_enriched,
         logos_stored=logos,
+        staff_ingested=staff_count,
     )
+
+
+def _persist_staff(entries, *, season) -> int:
+    """Upsert coaching staff entries for a season.
+
+    Parameters
+    ----------
+    entries : iterable of (NormalizedPerson, NormalizedStaffEntry)
+        Deduplicated staff entries gathered from all game box scores.
+    season : Season
+        The season these staff entries belong to.
+
+    Returns
+    -------
+    int
+        Number of staff entries successfully persisted.
+    """
+    from teams.models import TeamSeason
+
+    count = 0
+    for person_data, entry_data in entries:
+        try:
+            team_season = TeamSeason.objects.get(
+                team__source=entry_data.team_ref.source,
+                team__external_id=entry_data.team_ref.external_id,
+                season=season,
+            )
+            upsert_staff_entry(person_data, entry_data, team_season)
+            count += 1
+        except Exception as exc:  # noqa: BLE001 - log and continue
+            logger.warning(
+                "Skipping ACB staff entry %s (%s): %s",
+                person_data.ref.external_id,
+                entry_data.role,
+                exc,
+            )
+    return count
 
 
 def _enrich_teams(profiles, *, store_media: bool) -> tuple[int, int]:
