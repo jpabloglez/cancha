@@ -18,6 +18,7 @@ import type {
   RecentGame,
   RosterEntry,
   Season,
+  StaffEntry,
   Standing,
   Team,
   TeamSeason,
@@ -160,6 +161,12 @@ export function getRoster(slug: string, seasonId: number): Promise<RosterEntry[]
 /** Fetch the season participations of a team. */
 export function getTeamSeasons(teamId: number): Promise<Paginated<TeamSeason>> {
   return apiFetch<Paginated<TeamSeason>>(`/team-seasons/?team=${teamId}`);
+}
+
+/** Fetch coaching staff for a team, optionally scoped to a season. */
+export function getTeamStaff(slug: string, seasonId?: number): Promise<StaffEntry[]> {
+  const qs = seasonId ? `?season=${seasonId}` : "";
+  return apiFetch<StaffEntry[]>(`/teams/${slug}/staff/${qs}`);
 }
 
 /** Fetch a single player by their slug. */

@@ -13,6 +13,7 @@ from players.models import (
     PlayerGameStats,
     PlayerSeasonAggregate,
     RosterEntry,
+    StaffEntry,
 )
 from teams.models import League, MediaAsset, Season, Team, TeamSeason
 
@@ -229,6 +230,19 @@ class GameSerializer(serializers.ModelSerializer):
             "final_score_away",
             "round",
         ]
+
+
+class StaffEntrySerializer(serializers.ModelSerializer):
+    """Serialize a coaching staff entry with person name and role."""
+
+    firstName = serializers.CharField(source="person.first_name", read_only=True)
+    lastName = serializers.CharField(source="person.last_name", read_only=True)
+    displayName = serializers.CharField(source="person.display_name", read_only=True)
+    slug = serializers.CharField(source="person.slug", read_only=True)
+
+    class Meta:
+        model = StaffEntry
+        fields = ["id", "firstName", "lastName", "displayName", "slug", "role"]
 
 
 class RosterEntrySerializer(serializers.ModelSerializer):

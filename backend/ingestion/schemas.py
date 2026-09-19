@@ -246,6 +246,24 @@ class NormalizedTeamProfile(_Strict):
     logo: NormalizedMediaRef | None = None
 
 
+class NormalizedStaffEntry(_Strict):
+    """A coaching staff member linked to a team for one season.
+
+    Attributes
+    ----------
+    person_ref : ExternalRef
+        External identity of the staff member.
+    team_ref : ExternalRef
+        External identity of the team.
+    role : str
+        Role code: "head_coach" or "assistant_coach".
+    """
+
+    person_ref: ExternalRef
+    team_ref: ExternalRef
+    role: str = Field(min_length=1, max_length=50)
+
+
 class NormalizedPlayerBoxScore(_Strict):
     """A single player's box-score line in a game.
 

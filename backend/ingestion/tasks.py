@@ -9,6 +9,7 @@ record, and reingestion is idempotent thanks to ``update_or_create`` keyed by
 import logging
 
 from celery import shared_task
+from django.core.cache import cache
 from django.utils import timezone
 
 from connectors.parsers.acb import ACB_PARSER_VERSION
@@ -105,6 +106,8 @@ def run_ingest_season(connector_id: str, season_external_id: str) -> int:
                 "error_log",
             ]
         )
+        # Invalidate API cache so fresh data is served after ingestion.
+        cache.clear()
         return result.games_ingested
     except Exception as exc:
         run.status = IngestionRun.Status.FAILED

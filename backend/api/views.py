@@ -21,6 +21,8 @@ from django.db.models import (
 )
 from django.db.models.functions import Cast, Lower
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
@@ -30,7 +32,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from games.models import Game, TeamGameStats
-from players.models import Person, PlayerSeasonAggregate, RosterEntry
+from players.models import Person, PlayerSeasonAggregate, RosterEntry, StaffEntry
 from teams.models import League, Season, Team, TeamSeason
 
 from .serializers import (
@@ -45,10 +47,15 @@ from .serializers import (
     PlayerSeasonAggregateSerializer,
     RosterEntryWithStatsSerializer,
     SeasonSerializer,
+    StaffEntrySerializer,
     StandingSerializer,
     TeamSeasonSerializer,
     TeamSerializer,
 )
+
+_CACHE_SHORT = 60 * 30       # 30 min — stats updated nightly
+_CACHE_MEDIUM = 60 * 60      # 1 h — profiles / leaders
+_CACHE_LONG = 60 * 60 * 24  # 24 h — finished games / historical data
 
 # Public stat keys -> PlayerSeasonAggregate fields used by the leaders endpoint.
 LEADER_STATS = {
@@ -154,6 +161,8 @@ def health(request: Request) -> Response:
     return Response({"status": "ok"})
 
 
+@method_decorator(cache_page(_CACHE_LONG), name="list")
+@method_decorator(cache_page(_CACHE_LONG), name="retrieve")
 class LeagueViewSet(viewsets.ReadOnlyModelViewSet):
     """List and retrieve covered leagues (``/leagues``)."""
 
@@ -165,6 +174,8 @@ class LeagueViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = "slug"
 
 
+@method_decorator(cache_page(_CACHE_MEDIUM), name="list")
+@method_decorator(cache_page(_CACHE_MEDIUM), name="retrieve")
 class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
     """List/retrieve seasons and expose computed standings (``/seasons``)."""
 
@@ -415,6 +426,8 @@ def _build_team_stats(own: dict, opp: dict) -> dict:
     return {"gamesPlayed": g, "perGame": per_game, "per100": per_100, "advanced": advanced}
 
 
+@method_decorator(cache_page(_CACHE_SHORT), name="list")
+@method_decorator(cache_page(_CACHE_SHORT), name="retrieve")
 class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     """List/retrieve teams and expose a season roster (``/teams``)."""
 
@@ -496,6 +509,39 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
                 context={"request": request, "agg_by_person": agg_by_person},
             ).data
         )
+
+    @action(detail=True)
+    def staff(self, request: Request, slug: str | None = None) -> Response:
+        """Return coaching staff for a team, optionally filtered by season.
+
+        Parameters
+        ----------
+        request : rest_framework.request.Request
+            Optional ``season`` query parameter (season primary key). When
+            omitted the most recent season with staff entries is used.
+        slug : str or None
+            Team slug from the URL.
+
+        Returns
+        -------
+        rest_framework.response.Response
+            List of staff entries (role + person name).
+        """
+        team = self.get_object()
+        qs = StaffEntry.objects.filter(
+            team_season__team=team
+        ).select_related("person", "team_season__season").order_by(
+            "-team_season__season__start_year", "role"
+        )
+        season_id = request.query_params.get("season")
+        if season_id:
+            qs = qs.filter(team_season__season_id=season_id)
+        else:
+            # Latest season that has staff rows for this team.
+            latest = qs.values_list("team_season__season_id", flat=True).first()
+            if latest:
+                qs = qs.filter(team_season__season_id=latest)
+        return Response(StaffEntrySerializer(qs, many=True).data)
 
     @action(detail=True, url_path="season-stats")
     def season_stats(self, request: Request, slug: str | None = None) -> Response:
@@ -699,6 +745,7 @@ class TeamSeasonViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["team", "season", "league"]
 
 
+@method_decorator(cache_page(_CACHE_MEDIUM), name="retrieve")
 class PersonViewSet(viewsets.ReadOnlyModelViewSet):
     """List/retrieve players and expose season stats + comparison."""
 
@@ -839,6 +886,7 @@ class PlayerSeasonAggregateViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["person", "season"]
 
 
+@method_decorator(cache_page(_CACHE_LONG), name="retrieve")
 class GameViewSet(viewsets.ReadOnlyModelViewSet):
     """List/retrieve finished games and expose full box scores."""
 
