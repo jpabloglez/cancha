@@ -39,6 +39,7 @@ from ingestion.schemas import (
     NormalizedPerson,
     NormalizedPersonProfile,
     NormalizedPlayerBoxScore,
+    NormalizedStaffEntry,
     NormalizedTeam,
     NormalizedTeamBoxScore,
     NormalizedTeamProfile,
@@ -76,6 +77,9 @@ _LOGO_URL = "https://imagenes.feb.es/Imagen.aspx?i={i}&ti=1"
 _LOGO_RE = re.compile(r"imagenes\.feb\.es/Imagen\.aspx\?i=\d+&ti=1", re.IGNORECASE)
 _FEB_IMAGE_LICENSE = "©FEB / club — imagenes.feb.es (free distribution)"
 _FEB_IMAGE_ATTRIBUTION = "FEB.es"
+
+# Coach photo URL: "https://imagenes.feb.es/Foto.aspx?c=<coach_c_id>"
+_COACH_PHOTO_RE = re.compile(r"[?&]c=(\d+)", re.IGNORECASE)
 
 # Spanish "Puesto" (position) -> our 2-letter code (accent-stripped, lower key).
 _POSITION_MAP = {
@@ -356,6 +360,70 @@ def parse_team_profile(
         website=website[:200] if website and website.startswith("http") else None,
         logo=logo,
     )
+
+
+def parse_coach_from_team_profile(
+    html: str,
+    *,
+    source: str,
+    team_external_id: str,
+) -> tuple[NormalizedPerson, NormalizedStaffEntry] | None:
+    """Parse the head coach block from a FEB team profile page.
+
+    Parameters
+    ----------
+    html : str
+        Raw HTML of the team profile page (``/equipo/<i>``).
+    source : str
+        Connector id for every ``ExternalRef``.
+    team_external_id : str
+        The team's FEB ``i`` id.
+
+    Returns
+    -------
+    tuple of NormalizedPerson and NormalizedStaffEntry, or None
+        Head coach person and their staff entry, or None when no
+        ``div.box-entrenador`` block is present on the page.
+    """
+    soup = BeautifulSoup(html, "lxml")
+    box = soup.find("div", class_="box-entrenador")
+    if box is None:
+        return None
+    nombre = box.find("div", class_="nombre")
+    if nombre is None:
+        return None
+    full_name = _clean(nombre.get_text())
+    if not full_name:
+        return None
+
+    coach_c: str | None = None
+    img = box.find("img")
+    if img and img.get("src"):
+        m = _COACH_PHOTO_RE.search(img["src"])
+        if m:
+            coach_c = m.group(1)
+
+    if coach_c:
+        external_id = coach_c
+        slug = slugify(f"{full_name}-{source}-{coach_c}")[:160]
+    else:
+        name_slug = slugify(full_name)
+        external_id = f"staff-{name_slug}"
+        slug = slugify(f"entrenador-{name_slug}-{source}")[:160]
+
+    first, last = _split_name(full_name)
+    person = NormalizedPerson(
+        ref=ExternalRef(source=source, external_id=external_id),
+        first_name=first,
+        last_name=last,
+        slug=slug,
+    )
+    entry = NormalizedStaffEntry(
+        person_ref=ExternalRef(source=source, external_id=external_id),
+        team_ref=ExternalRef(source=source, external_id=team_external_id),
+        role="head_coach",
+    )
+    return person, entry
 
 
 def _nodo_map(soup) -> dict[str, str]:
