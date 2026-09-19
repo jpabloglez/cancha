@@ -13,6 +13,7 @@ from connectors.base import SourceConnector
 from connectors.parsers.feb import (
     ParserError,
     parse_box_score,
+    parse_coach_from_team_profile,
     parse_game_ids,
     parse_game_round_map,
     parse_player_profile,
@@ -29,6 +30,7 @@ from .persistence import (
     upsert_game_with_boxscore,
     upsert_person,
     upsert_person_profile,
+    upsert_staff_entry,
     upsert_team,
     upsert_team_profile,
     upsert_team_season,
@@ -134,6 +136,8 @@ class EnrichResult:
         Teams whose branding profile was fetched and persisted.
     players_enriched : int
         Players whose bio/trajectory profile was fetched and persisted.
+    staff_ingested : int
+        Head coaches upserted from team profile pages.
     media_stored : int
         Media assets (logos) whose binary was downloaded and stored.
     failures : int
@@ -142,6 +146,7 @@ class EnrichResult:
 
     teams_enriched: int
     players_enriched: int
+    staff_ingested: int
     media_stored: int
     failures: int
 
@@ -191,6 +196,7 @@ def enrich_feb_season(
 
     teams = 0
     players = 0
+    staff = 0
     media = 0
     failures = 0
 
@@ -198,11 +204,20 @@ def enrich_feb_season(
         team_i = team_season.team.external_id
         try:
             payload = connector.fetch_team_profile(team_i)
-            profile = parse_team_profile(payload.data, source=connector_id, team_external_id=team_i)
+            profile = parse_team_profile(
+                payload.data, source=connector_id, team_external_id=team_i
+            )
             team = upsert_team_profile(profile)
             teams += 1
             if store_media and team.logo_id and download_media_asset(team.logo_id):
                 media += 1
+            coach = parse_coach_from_team_profile(
+                payload.data, source=connector_id, team_external_id=team_i
+            )
+            if coach is not None:
+                person_data, entry_data = coach
+                upsert_staff_entry(person_data, entry_data, team_season)
+                staff += 1
         except Exception as exc:  # noqa: BLE001 - log and continue
             logger.warning("Skipping FEB team profile %s: %s", team_i, exc)
             failures += 1
@@ -220,17 +235,19 @@ def enrich_feb_season(
             failures += 1
 
     logger.info(
-        "FEB %s %s enrichment: %d teams, %d players, %d logos, %d failures",
+        "FEB %s %s enrichment: %d teams, %d players, %d coaches, %d logos, %d failures",
         connector_id,
         season_external_id,
         teams,
         players,
+        staff,
         media,
         failures,
     )
     return EnrichResult(
         teams_enriched=teams,
         players_enriched=players,
+        staff_ingested=staff,
         media_stored=media,
         failures=failures,
     )
