@@ -411,7 +411,7 @@ def parse_coach_from_team_profile(
         external_id = f"staff-{name_slug}"
         slug = slugify(f"entrenador-{name_slug}-{source}")[:160]
 
-    first, last = _split_name(full_name)
+    first, last = _split_given_and_surnames(full_name)
     person = NormalizedPerson(
         ref=ExternalRef(source=source, external_id=external_id),
         first_name=first,
@@ -666,6 +666,30 @@ def _person(display_name: str, *, source: str, person_id: str) -> NormalizedPers
         last_name=last,
         slug=slugify(f"{first}-{last}-{source}-{person_id}")[:160],
     )
+
+
+def _split_given_and_surnames(full_name: str) -> tuple[str, str]:
+    """Split a "GIVEN SURNAME1 SURNAME2" name into title-cased (first, last).
+
+    Parameters
+    ----------
+    full_name : str
+        Name in natural order without a comma (e.g. "RUBEN PERELLO PARICIO").
+
+    Returns
+    -------
+    tuple of str
+        ``(first_name, last_name)``. Spanish convention is assumed: the last two
+        words are the surnames when there are three or more words; with two
+        words it is one given name and one surname; a single word is used for
+        both fields.
+    """
+    words = _clean(full_name).title().split(" ")
+    if len(words) == 1:
+        return words[0] or "-", words[0] or "-"
+    if len(words) == 2:
+        return words[0], words[1]
+    return " ".join(words[:-2]), " ".join(words[-2:])
 
 
 def _split_name(display_name: str) -> tuple[str, str]:
