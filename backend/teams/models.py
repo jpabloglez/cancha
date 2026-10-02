@@ -101,6 +101,48 @@ class Club(models.Model):
         return self.name
 
 
+class ClubLinkOverride(models.Model):
+    """Manual correction to the inferred club grouping of two teams.
+
+    Roster overlap cannot tell a renamed club from a partner/filial team that
+    receives the same players, so curators can force or forbid a link.
+    :func:`ingestion.clubs.link_clubs` honours these on every run.
+
+    Attributes
+    ----------
+    team_a, team_b : Team
+        The two team rows (per-season rows of a source) the rule applies to.
+    kind : str
+        ``"separate"`` (never the same club) or ``"merge"`` (always the same).
+    note : str
+        Why the correction exists.
+    """
+
+    class Kind(models.TextChoices):
+        SEPARATE = "separate", "Never the same club"
+        MERGE = "merge", "Always the same club"
+
+    team_a = models.ForeignKey(
+        "teams.Team", on_delete=models.CASCADE, related_name="+"
+    )
+    team_b = models.ForeignKey(
+        "teams.Team", on_delete=models.CASCADE, related_name="+"
+    )
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    note = models.CharField(max_length=200, blank=True, default="")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["team_a", "team_b"], name="unique_club_link_override"
+            )
+        ]
+
+    def __str__(self) -> str:
+        """Return a readable description of the rule."""
+        return f"{self.team_a} / {self.team_b}: {self.kind}"
+
+
 class Team(models.Model):
     """A club entity, stable across seasons.
 

@@ -464,3 +464,9 @@ connector class already parameterized for both FEB tiers).
   these are logged and skipped during enrichment.
 - **FEB staff:** team pages expose only the head coach, so FEB seasons have no
   assistant coaches. A few team pages carry no coach block at all.
+- **Club grouping:** clubs are inferred (see `ingestion/clubs.py`), and roster
+  overlap cannot tell a renamed club from a partner/filial team. Corrections are
+  stored in the database (`ClubLinkOverride`, editable in the admin) and applied
+  on every `link_clubs` run. They are data, not code, so re-apply them on a new
+  environment, e.g.
+  `manage.py link_clubs --separate valencia-bc-feb-segunda-857942 cb-l-horta-godella-feb-segunda-889418 --note "filial, not the same club"`.
