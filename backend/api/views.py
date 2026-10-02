@@ -426,6 +426,37 @@ def _build_team_stats(own: dict, opp: dict) -> dict:
     return {"gamesPlayed": g, "perGame": per_game, "per100": per_100, "advanced": advanced}
 
 
+def _club_team_ids(team: Team) -> list[int]:
+    """Return the ids of every team belonging to the same club (or just ``team``)."""
+    if team.club_id is None:
+        return [team.id]
+    return list(Team.objects.filter(club_id=team.club_id).values_list("id", flat=True))
+
+
+def _canonical_team_ids() -> set[int]:
+    """Return one team id per club (its latest season) plus unclubbed teams.
+
+    Teams without a club are still de-duplicated by case-insensitive name,
+    keeping the highest id, as before clubs existed.
+    """
+    latest_by_club: dict[int, int] = {}
+    rows = (
+        TeamSeason.objects.filter(team__club__isnull=False)
+        .order_by("season__start_date", "id")
+        .values_list("team__club_id", "team_id")
+    )
+    for club_id, team_id in rows:
+        latest_by_club[club_id] = team_id
+    unclubbed = (
+        Team.objects.filter(club__isnull=True)
+        .annotate(name_lower=Lower("name"))
+        .values("name_lower")
+        .annotate(rep_id=Max("id"))
+        .values_list("rep_id", flat=True)
+    )
+    return set(latest_by_club.values()) | set(unclubbed)
+
+
 @method_decorator(cache_page(_CACHE_SHORT), name="list")
 @method_decorator(cache_page(_CACHE_SHORT), name="retrieve")
 class TeamViewSet(viewsets.ReadOnlyModelViewSet):
@@ -438,15 +469,13 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ["name", "short_name", "city"]
 
     def get_queryset(self) -> QuerySet:
-        """Return teams, deduplicating by case-insensitive name on the list action.
+        """Return teams, collapsing a club's per-season rows on the list action.
 
-        The FEB connector creates one Team row per season because FEB's website
-        uses a different external_id for the same club across seasons.  On the
-        list endpoint we collapse those duplicates by grouping on ``Lower(name)``
-        and keeping the row with the highest ``id`` (most recently ingested),
-        which is most likely to have the richest data (logo, city, etc.).
-        Detail and sub-actions use the full queryset so every slug remains
-        routable.
+        The FEB connector creates one Team row per season because FEB uses a
+        different external_id for the same club each season. Rows are grouped
+        into clubs (:mod:`ingestion.clubs`); the list endpoint keeps only the
+        club's most recent team (see :func:`_canonical_team_ids`). Detail and
+        sub-actions use the full queryset so every slug remains routable.
 
         Returns
         -------
@@ -455,13 +484,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         """
         qs = Team.objects.select_related("logo").all()
         if self.action == "list":
-            canonical_ids = (
-                Team.objects.annotate(name_lower=Lower("name"))
-                .values("name_lower")
-                .annotate(rep_id=Max("id"))
-                .values_list("rep_id", flat=True)
-            )
-            qs = qs.filter(id__in=canonical_ids)
+            qs = qs.filter(id__in=_canonical_team_ids())
         return qs
 
     @action(detail=True)
@@ -488,7 +511,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             )
         team = self.get_object()
         team_season = TeamSeason.objects.filter(
-            team=team, season_id=season_id
+            team_id__in=_club_team_ids(team), season_id=season_id
         ).first()
         if team_season is None:
             return Response([])
@@ -529,7 +552,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         """
         team = self.get_object()
         qs = StaffEntry.objects.filter(
-            team_season__team=team
+            team_season__team_id__in=_club_team_ids(team)
         ).select_related("person", "team_season__season").order_by(
             "-team_season__season__start_date", "role"
         )
@@ -567,7 +590,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             )
         team = self.get_object()
         team_season = TeamSeason.objects.filter(
-            team=team, season_id=season_id
+            team_id__in=_club_team_ids(team), season_id=season_id
         ).first()
         if team_season is None:
             return Response(
@@ -639,11 +662,11 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
 
         if season_id:
             team_season = TeamSeason.objects.filter(
-                team=team, season_id=season_id
+                team_id__in=_club_team_ids(team), season_id=season_id
             ).first()
         else:
             team_season = (
-                TeamSeason.objects.filter(team=team)
+                TeamSeason.objects.filter(team_id__in=_club_team_ids(team))
                 .order_by("-season__start_date")
                 .select_related("season")
                 .first()
@@ -693,7 +716,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         """
         team = self.get_object()
         team_seasons = (
-            TeamSeason.objects.filter(team=team)
+            TeamSeason.objects.filter(team_id__in=_club_team_ids(team))
             .select_related("season")
             .order_by("-season__start_date")
         )
@@ -1270,7 +1293,7 @@ class GlobalSearchView(APIView):
             return Response({"teams": [], "players": [], "leagues": []})
 
         teams = (
-            Team.objects.filter(name__icontains=q)
+            Team.objects.filter(name__icontains=q, id__in=_canonical_team_ids())
             .select_related("logo")
             .order_by("name")[: self.MAX_PER_TYPE]
         )
