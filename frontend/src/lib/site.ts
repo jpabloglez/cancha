@@ -8,4 +8,4 @@ export const CONTACT_EMAIL =
 
 export const GITHUB_URL =
   process.env.NEXT_PUBLIC_GITHUB_URL ??
-  "https://github.com/jpablogg/basquetestads";
+  "https://github.com/jpabloglez/cancha";
