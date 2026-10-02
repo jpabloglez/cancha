@@ -222,6 +222,11 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
+# Ingestion health thresholds (api.ingestion_health): games are ingested nightly,
+# profiles weekly; the health endpoint reports "stale" beyond these ages.
+INGESTION_MAX_AGE_HOURS = env.int("INGESTION_MAX_AGE_HOURS", default=36)
+ENRICH_MAX_AGE_DAYS = env.int("ENRICH_MAX_AGE_DAYS", default=9)
+
 # Sentry error tracking (spec §6.1). DSN is set via SENTRY_DSN env var;
 # when unset (dev, CI) the SDK no-ops.
 _sentry_dsn = env("SENTRY_DSN")

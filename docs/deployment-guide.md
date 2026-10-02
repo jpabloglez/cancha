@@ -228,6 +228,29 @@ export DC="docker compose --env-file .env.prod -f docker-compose.prod.yml"
 
 ---
 
+### 3.8 Monitorización
+
+- **Disponibilidad**: un monitor externo gratuito (p. ej. UptimeRobot) sobre
+  `https://api.tudominio.es/api/v1/health/` (la API responde) y
+  `https://api.tudominio.es/api/v1/health/ingestion/`.
+- **Salud de las ingestas**: `/api/v1/health/ingestion/` devuelve 200 cuando
+  la última ingesta de cada fuente terminó bien y hay un éxito reciente
+  (`INGESTION_MAX_AGE_HOURS`, 36 por defecto, pues la ingesta es nocturna;
+  `ENRICH_MAX_AGE_DAYS`, 9, para el enriquecimiento semanal), y **503** si la
+  última ejecución falló o está obsoleta, de modo que cualquier monitor de
+  códigos HTTP avisa. El cuerpo indica por fuente y tipo de ejecución el estado,
+  la antigüedad del último éxito y los registros procesados y fallidos (no
+  incluye mensajes de error). Una fuente sin ejecuciones aún no genera alerta.
+- **Fallos parciales**: una ingesta donde fallan *todos* los partidos (cambio
+  de estructura de la fuente) queda como `failed` y se registra con nivel
+  `ERROR`; si falla al menos la mitad se registra también como `ERROR` y, si
+  no, como `WARNING`. Con `SENTRY_DSN` configurado, los `ERROR` llegan a Sentry.
+  El detalle de cada ejecución está en el admin (`IngestionRun`).
+- Una ingesta histórica (backfill) que falle cuenta como "última ejecución"
+  hasta la siguiente ingesta nocturna.
+
+---
+
 ## 4. Opción B — Servicios gestionados gratuitos
 
 Esta arquitectura divide los componentes entre plataformas:
