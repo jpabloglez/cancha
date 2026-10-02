@@ -15,7 +15,7 @@ from django.db import transaction
 from django.utils.text import slugify
 
 from players.models import RosterEntry
-from teams.models import Club, Team, TeamSeason
+from teams.models import Club, ClubLinkOverride, Team, TeamSeason
 
 #: Shared players that on their own identify a club across consecutive seasons.
 STRONG_SHARED_PLAYERS = 5
@@ -71,6 +71,7 @@ def match_consecutive(
     previous: dict[int, set[int]],
     following: dict[int, set[int]],
     names: dict[int, str],
+    forbidden: frozenset[frozenset[int]] = frozenset(),
 ) -> list[tuple[int, int]]:
     """Pair teams of two consecutive seasons that belong to the same club.
 
@@ -80,6 +81,8 @@ def match_consecutive(
         ``team_id -> player ids`` for the earlier and later season.
     names : dict of int to str
         ``team_id -> team name``, used for the exact-name fallback.
+    forbidden : frozenset of frozenset of int
+        Team-id pairs that must never be paired (manual "separate" overrides).
 
     Returns
     -------
@@ -99,7 +102,11 @@ def match_consecutive(
     for f_id in following:
         key = normalize_name(names[f_id])
         p_id = by_name.get(key) if key else None
-        if p_id is not None and p_id not in used_prev:
+        if (
+            p_id is not None
+            and p_id not in used_prev
+            and frozenset((p_id, f_id)) not in forbidden
+        ):
             pairs.append((p_id, f_id))
             used_prev.add(p_id)
             used_next.add(f_id)
@@ -112,6 +119,7 @@ def match_consecutive(
             if p_id not in used_prev
             for f_id, f_players in following.items()
             if f_id not in used_next
+            if frozenset((p_id, f_id)) not in forbidden
             if (overlap := len(p_players & f_players)) >= MIN_SHARED_PLAYERS
             and (
                 overlap >= STRONG_SHARED_PLAYERS
@@ -148,6 +156,8 @@ def link_clubs() -> dict[str, int]:
 
     Notes
     -----
+    Manual :class:`~teams.models.ClubLinkOverride` rows are honoured: "separate"
+    pairs are never paired directly and "merge" pairs are always joined.
     Idempotent: groups are recomputed from scratch each run and attached to an
     existing club of its members when that club is not already taken by another
     group; clubs left without teams are deleted and unmatched teams get
@@ -178,12 +188,19 @@ def link_clubs() -> dict[str, int]:
     ):
         rosters[ts_id].add(person_id)
 
+    forbidden: frozenset[frozenset[int]] = frozenset(
+        frozenset((a, b))
+        for a, b in ClubLinkOverride.objects.filter(
+            kind=ClubLinkOverride.Kind.SEPARATE
+        ).values_list("team_a_id", "team_b_id")
+    )
+
     for seasons in by_league.values():
         ordered = sorted(seasons, key=lambda s: start_of[s])
         for earlier, later in zip(ordered, ordered[1:], strict=False):
             prev = {t: rosters[ts] for ts, t in seasons[earlier].items()}
             nxt = {t: rosters[ts] for ts, t in seasons[later].items()}
-            for a, b in match_consecutive(prev, nxt, names):
+            for a, b in match_consecutive(prev, nxt, names, forbidden):
                 ra, rb = _find(parent, a), _find(parent, b)
                 if ra != rb:
                     parent[rb] = ra
@@ -195,12 +212,20 @@ def link_clubs() -> dict[str, int]:
         key = (normalize_name(name), source.split("-")[0])
         if not key[0]:
             continue
-        if key in by_name:
+        if key in by_name and frozenset((by_name[key], team_id)) not in forbidden:
             ra, rb = _find(parent, by_name[key]), _find(parent, team_id)
             if ra != rb:
                 parent[rb] = ra
         else:
             by_name[key] = team_id
+
+    for a, b in ClubLinkOverride.objects.filter(
+        kind=ClubLinkOverride.Kind.MERGE
+    ).values_list("team_a_id", "team_b_id"):
+        if a in parent and b in parent:
+            ra, rb = _find(parent, a), _find(parent, b)
+            if ra != rb:
+                parent[rb] = ra
 
     groups: dict[int, set[int]] = defaultdict(set)
     for team_id in parent:

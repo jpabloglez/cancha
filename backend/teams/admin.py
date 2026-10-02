@@ -4,7 +4,15 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from .models import League, MediaAsset, Season, Team, TeamSeason
+from .models import (
+    Club,
+    ClubLinkOverride,
+    League,
+    MediaAsset,
+    Season,
+    Team,
+    TeamSeason,
+)
 
 
 @admin.register(League)
@@ -28,7 +36,25 @@ class TeamAdmin(admin.ModelAdmin):
     """Admin listing for teams."""
 
     list_display = ("name", "short_name", "city", "founded_year")
+    search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(Club)
+class ClubAdmin(admin.ModelAdmin):
+    """Admin listing for inferred clubs."""
+
+    list_display = ("name", "slug")
+    search_fields = ("name",)
+
+
+@admin.register(ClubLinkOverride)
+class ClubLinkOverrideAdmin(admin.ModelAdmin):
+    """Manual corrections to the inferred club grouping (applied by link_clubs)."""
+
+    list_display = ("team_a", "team_b", "kind", "note")
+    list_filter = ("kind",)
+    autocomplete_fields = ("team_a", "team_b")
 
 
 @admin.register(TeamSeason)

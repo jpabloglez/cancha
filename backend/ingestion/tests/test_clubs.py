@@ -114,3 +114,49 @@ def test_team_api_unifies_club_history_and_dedupes_list() -> None:
     # Roster for the older season resolves via the club even from the new slug.
     roster = client.get(f"/api/v1/teams/{new.slug}/roster/?season={s1.pk}")
     assert roster.status_code == 200
+
+
+def test_match_consecutive_respects_forbidden_pairs() -> None:
+    """A forbidden pair is not linked even with identical names or overlap."""
+    names = {1: "A CLUB", 2: "A CLUB", 3: "B CLUB", 4: "B CLUB"}
+    forbidden = frozenset({frozenset((1, 2))})
+    assert (1, 2) not in match_consecutive({1: {1}}, {2: {1}}, names, forbidden)
+    strong = {1: set(range(6))}, {2: set(range(6))}
+    assert match_consecutive(*strong, {1: "X ONE", 2: "X ONE"}, forbidden) == []
+
+
+@pytest.mark.django_db
+def test_link_clubs_honours_manual_overrides() -> None:
+    """'separate' blocks an overlap-based link; 'merge' forces an unrelated one."""
+    from teams.models import ClubLinkOverride
+
+    league = League.objects.create(name="P", slug="p", level=2, country="ES")
+    s1, s2 = _season(league, 2023), _season(league, 2024)
+    persons = [
+        Person.objects.create(
+            first_name="P", last_name=str(i), slug=f"q{i}", source="feb-primera",
+            external_id=str(i),
+        )
+        for i in range(6)
+    ]
+    filial = _team("1", "VALENCIA BC")
+    partner = _team("2", "CB GODELLA")
+    lone_a, lone_b = _team("3", "ALPHA"), _team("4", "OMEGA")
+    _roster(TeamSeason.objects.create(team=filial, season=s1, league=league), persons)
+    _roster(TeamSeason.objects.create(team=partner, season=s2, league=league), persons)
+    TeamSeason.objects.create(team=lone_a, season=s1, league=league)
+    TeamSeason.objects.create(team=lone_b, season=s2, league=league)
+
+    assert link_clubs() == {"clubs": 1, "teams_linked": 2}  # overlap links filial/partner
+
+    ClubLinkOverride.objects.create(
+        team_a=filial, team_b=partner, kind=ClubLinkOverride.Kind.SEPARATE
+    )
+    ClubLinkOverride.objects.create(
+        team_a=lone_a, team_b=lone_b, kind=ClubLinkOverride.Kind.MERGE
+    )
+    assert link_clubs() == {"clubs": 1, "teams_linked": 2}
+    filial.refresh_from_db(), partner.refresh_from_db()
+    lone_a.refresh_from_db(), lone_b.refresh_from_db()
+    assert filial.club_id is None and partner.club_id is None
+    assert lone_a.club_id == lone_b.club_id is not None
