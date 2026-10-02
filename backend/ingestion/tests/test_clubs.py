@@ -160,3 +160,24 @@ def test_link_clubs_honours_manual_overrides() -> None:
     lone_a.refresh_from_db(), lone_b.refresh_from_db()
     assert filial.club_id is None and partner.club_id is None
     assert lone_a.club_id == lone_b.club_id is not None
+
+
+@pytest.mark.django_db
+def test_team_seasons_filter_spans_the_club() -> None:
+    """``/team-seasons/?team=<id>`` lists every season of the team's club."""
+    league = League.objects.create(name="P", slug="p", level=2, country="ES")
+    s1, s2 = _season(league, 2023), _season(league, 2024)
+    club = Club.objects.create(name="Club", slug="club")
+    old, new, other = _team("1", "OLD"), _team("2", "NEW"), _team("3", "OTHER")
+    Team.objects.filter(pk__in=[old.pk, new.pk]).update(club=club)
+    TeamSeason.objects.create(team=old, season=s1, league=league)
+    TeamSeason.objects.create(team=new, season=s2, league=league)
+    TeamSeason.objects.create(team=other, season=s2, league=league)
+    client = APIClient()
+
+    body = client.get(f"/api/v1/team-seasons/?team={old.pk}").json()
+    results = body["results"] if isinstance(body, dict) else body
+    assert sorted(r["season"] for r in results) == sorted([s1.pk, s2.pk])
+    lone = client.get(f"/api/v1/team-seasons/?team={other.pk}").json()
+    lone = lone["results"] if isinstance(lone, dict) else lone
+    assert [r["season"] for r in lone] == [s2.pk]
