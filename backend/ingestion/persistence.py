@@ -525,6 +525,7 @@ def upsert_staff_entry(
             "first_name": person_data.first_name,
             "last_name": person_data.last_name,
             "slug": person_data.slug,
+            "display_name": f"{person_data.first_name} {person_data.last_name}".strip(),
         },
     )
     staff_entry, _ = StaffEntry.objects.get_or_create(
