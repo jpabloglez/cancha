@@ -103,6 +103,7 @@ TEAM_SLUG="$(api "$API/api/v1/teams/?limit=1" | python3 -c 'import sys,json;prin
 check "API lists leagues through Caddy" api "$API/api/v1/leagues/"
 check "API team staff endpoint responds" api "$API/api/v1/teams/${TEAM_SLUG}/staff/"
 check "Unknown team returns 404" bash -c "[ \"\$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: api.localhost' $API/api/v1/teams/does-not-exist/)\" = 404 ]"
+check "Ingestion health endpoint answers 200 and ok" bash -c "curl -fsS -H 'Host: api.localhost' $API/api/v1/health/ingestion/ | grep -q '\"ok\": *true'"
 check "CORS allows the frontend origin" bash -c "curl -sI -H 'Host: api.localhost' -H 'Origin: http://web.localhost:${HTTP_PORT}' $API/api/v1/leagues/ | grep -qi '^access-control-allow-origin: http://web.localhost:${HTTP_PORT}'"
 check "CORS rejects other origins" bash -c "! curl -sI -H 'Host: api.localhost' -H 'Origin: http://evil.example' $API/api/v1/leagues/ | grep -qi '^access-control-allow-origin'"
 check "Caddy serves /media/ from the shared volume" bash -c "curl -fsS -H 'Host: api.localhost' $API/media/smoke.txt | grep -q smoke"

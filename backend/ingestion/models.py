@@ -54,6 +54,10 @@ class IngestionRun(models.Model):
         Outcome of the run (running, success, failed).
     records_processed : int
         Number of records upserted during the run.
+    records_failed : int
+        Number of items skipped because they failed to fetch or parse.
+    kind : str
+        What the run did: games ingestion or profile enrichment.
     error_log : str
         Captured error output when the run fails (spec §3.3 traceability).
     """
@@ -62,6 +66,10 @@ class IngestionRun(models.Model):
         RUNNING = "running", "Running"
         SUCCESS = "success", "Success"
         FAILED = "failed", "Failed"
+
+    class Kind(models.TextChoices):
+        INGEST = "ingest", "Games ingestion"
+        ENRICH = "enrich", "Profile enrichment"
 
     data_source = models.ForeignKey(
         DataSource, on_delete=models.CASCADE, related_name="ingestion_runs"
@@ -72,6 +80,10 @@ class IngestionRun(models.Model):
         max_length=20, choices=Status.choices, default=Status.RUNNING
     )
     records_processed = models.PositiveIntegerField(default=0)
+    # Items skipped because they failed to fetch/parse (games for an ingest,
+    # profiles for an enrichment); a run can succeed with some failures.
+    records_failed = models.PositiveIntegerField(default=0)
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.INGEST)
     error_log = models.TextField(blank=True, default="")
     # Parser version active during the run, recorded so a structural source
     # change can be traced to the parser that produced (or rejected) the data

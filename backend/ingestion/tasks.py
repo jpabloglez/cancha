@@ -93,20 +93,32 @@ def run_ingest_season(connector_id: str, season_external_id: str) -> int:
                 f"Ingestion not implemented for connector {connector_id!r}"
             )
 
+        run.records_processed = result.games_ingested
+        run.records_failed = result.games_failed
+        run.finished_at = timezone.now()
+        if _is_total_failure(result.games_ingested, result.games_failed):
+            # Every game failed: almost certainly a structural change in the
+            # source. Fail the run visibly but do not raise (Celery would retry
+            # and re-fetch every page); skip the cache clear, nothing changed.
+            run.status = IngestionRun.Status.FAILED
+            run.error_log = (
+                f"All {result.games_failed} game(s) failed to parse "
+                "(possible source structure change)"
+            )
+            _save_run(run)
+            logger.error(
+                "Ingestion produced no data: connector=%s season=%s failed=%d",
+                connector_id, season_external_id, result.games_failed,
+            )
+            return 0
+        run.status = IngestionRun.Status.SUCCESS
         if result.games_failed:
             run.error_log = f"{result.games_failed} game(s) skipped (parse errors)"
-
-        run.records_processed = result.games_ingested
-        run.status = IngestionRun.Status.SUCCESS
-        run.finished_at = timezone.now()
-        run.save(
-            update_fields=[
-                "records_processed",
-                "status",
-                "finished_at",
-                "error_log",
-            ]
-        )
+            _log_partial_failure(
+                "Ingestion", connector_id, season_external_id,
+                result.games_ingested, result.games_failed,
+            )
+        _save_run(run)
         if connector_id in FEB_COMPETITIONS:
             # FEB team ids change every season; regroup them into clubs.
             link_clubs()
@@ -215,6 +227,38 @@ def backfill_acb_seasons(count: int = 5) -> dict[str, int]:
     return results
 
 
+#: Share of failed items above which a partially successful run is logged as an
+#: error (reaching Sentry) instead of a warning.
+PARTIAL_FAILURE_ERROR_RATIO = 0.5
+
+
+def _is_total_failure(processed: int, failed: int) -> bool:
+    """Return True when nothing was processed and something failed."""
+    return processed == 0 and failed > 0
+
+
+def _log_partial_failure(
+    what: str, connector_id: str, season: str, processed: int, failed: int
+) -> None:
+    """Log skipped items: an error when most of the run failed, else a warning."""
+    ratio = failed / (processed + failed)
+    level = logging.ERROR if ratio >= PARTIAL_FAILURE_ERROR_RATIO else logging.WARNING
+    logger.log(
+        level,
+        "%s partially failed: connector=%s season=%s processed=%d failed=%d",
+        what, connector_id, season, processed, failed,
+    )
+
+
+def _save_run(run: IngestionRun) -> None:
+    """Persist the outcome fields of a finished run."""
+    run.save(
+        update_fields=[
+            "records_processed", "records_failed", "status", "finished_at", "error_log",
+        ]
+    )
+
+
 def run_enrich_season(connector_id: str, season_external_id: str) -> int:
     """Enrich one already-ingested FEB season within an audit-record envelope.
 
@@ -245,18 +289,30 @@ def run_enrich_season(connector_id: str, season_external_id: str) -> int:
     run = IngestionRun.objects.create(
         data_source=_data_source_for(connector_id),
         parser_version=_parser_version(connector_id),
+        kind=IngestionRun.Kind.ENRICH,
     )
     try:
         result = enrich_feb_season(connector_id, season_external_id)
         processed = result.teams_enriched + result.players_enriched
-        if result.failures:
-            run.error_log = f"{result.failures} profile(s) skipped (fetch/parse)"
         run.records_processed = processed
-        run.status = IngestionRun.Status.SUCCESS
+        run.records_failed = result.failures
         run.finished_at = timezone.now()
-        run.save(
-            update_fields=["records_processed", "status", "finished_at", "error_log"]
-        )
+        if _is_total_failure(processed, result.failures):
+            run.status = IngestionRun.Status.FAILED
+            run.error_log = f"All {result.failures} profile(s) failed to fetch/parse"
+            logger.error(
+                "Enrichment produced no data: connector=%s season=%s failed=%d",
+                connector_id, season_external_id, result.failures,
+            )
+        else:
+            run.status = IngestionRun.Status.SUCCESS
+            if result.failures:
+                run.error_log = f"{result.failures} profile(s) skipped (fetch/parse)"
+                _log_partial_failure(
+                    "Enrichment", connector_id, season_external_id,
+                    processed, result.failures,
+                )
+        _save_run(run)
         return processed
     except Exception as exc:
         run.status = IngestionRun.Status.FAILED

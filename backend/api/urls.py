@@ -7,6 +7,7 @@ standalone function view.
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .ingestion_health import ingestion_health
 from .views import (
     AllTimeLeadersView,
     GameViewSet,
@@ -35,6 +36,7 @@ router.register("games", GameViewSet, basename="game")
 
 urlpatterns = [
     path("health/", health, name="health"),
+    path("health/ingestion/", ingestion_health, name="health-ingestion"),
     path("stats/leaders/", LeadersView.as_view(), name="leaders"),
     path("stats/alltime/", AllTimeLeadersView.as_view(), name="alltime-leaders"),
     path("stats/data-freshness/", data_freshness, name="data-freshness"),
