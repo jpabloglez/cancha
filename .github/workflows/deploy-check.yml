@@ -1,0 +1,44 @@
+# Validates the production deployment files so a broken compose/Caddy config is
+# caught in review rather than on the first deploy.
+name: deploy-check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docker-compose.prod.yml"
+      - "deploy/**"
+      - "frontend/Dockerfile.prod"
+      - ".env.prod.example"
+      - "backend/.env.prod.example"
+      - "backend/Dockerfile"
+      - ".github/workflows/deploy-check.yml"
+  pull_request:
+    paths:
+      - "docker-compose.prod.yml"
+      - "deploy/**"
+      - "frontend/Dockerfile.prod"
+      - ".env.prod.example"
+      - "backend/.env.prod.example"
+      - "backend/Dockerfile"
+      - ".github/workflows/deploy-check.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose file with the example variables
+        run: |
+          cp backend/.env.prod.example backend/.env.prod
+          docker compose --env-file .env.prod.example -f docker-compose.prod.yml config -q
+      - name: Validate Caddyfile
+        run: |
+          docker run --rm -e DOMAIN=example.es -e API_DOMAIN=api.example.es \
+            -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+      - name: Build the production frontend image
+        run: |
+          docker build -f frontend/Dockerfile.prod \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=http://api.invalid/api/v1 \
+            -t basquets-frontend:ci frontend

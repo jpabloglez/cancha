@@ -10,6 +10,7 @@ apps (``connectors``, ``ingestion``, ``stats``, ``players``, ``teams``,
 ``games``, ``api``) as described in the technical specification, §2.2.
 """
 
+import re
 from pathlib import Path
 
 import environ
@@ -107,7 +108,9 @@ REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 # The API cache lives in its own Redis database: Django's RedisCache.clear()
 # runs FLUSHDB, which on the Celery broker database (/0) would also wipe queued
 # tasks and results. Invalidating after an ingest therefore only touches /1.
-REDIS_CACHE_URL = env("REDIS_CACHE_URL", default="redis://redis:6379/1")
+REDIS_CACHE_URL = env(
+    "REDIS_CACHE_URL", default=re.sub(r"/\d+$", "", REDIS_URL) + "/1"
+)
 
 CACHES = {
     "default": {

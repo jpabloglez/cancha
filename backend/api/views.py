@@ -699,6 +699,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(rows)
 
     @action(detail=True, url_path="stats-history")
+    @method_decorator(cache_page(_CACHE_MEDIUM))
     def stats_history(self, request: Request, slug: str | None = None) -> Response:
         """Return per-season aggregated stats for all seasons this team played.
 
@@ -728,11 +729,10 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
             if not own_agg["games"]:
                 continue
 
-            game_ids = list(own_qs.values_list("game_id", flat=True))
             opp_agg = _tgs_aggregates(
-                TeamGameStats.objects.filter(game_id__in=game_ids).exclude(
-                    team_season=ts
-                )
+                TeamGameStats.objects.filter(
+                    game_id__in=own_qs.values("game_id")
+                ).exclude(team_season=ts)
             )
             league_agg = _tgs_aggregates(
                 TeamGameStats.objects.filter(game__season_id=ts.season_id)
