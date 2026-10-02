@@ -23,6 +23,7 @@ from .catalog import (
     FEB_COMPETITIONS,
     resolve_current_feb_season,
 )
+from .clubs import link_clubs
 from .feb_ingest import IngestResult as FebIngestResult
 from .feb_ingest import enrich_feb_season, ingest_feb_season
 from .models import DataSource, IngestionRun
@@ -106,6 +107,9 @@ def run_ingest_season(connector_id: str, season_external_id: str) -> int:
                 "error_log",
             ]
         )
+        if connector_id in FEB_COMPETITIONS:
+            # FEB team ids change every season; regroup them into clubs.
+            link_clubs()
         # Invalidate API cache so fresh data is served after ingestion.
         cache.clear()
         return result.games_ingested

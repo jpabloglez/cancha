@@ -75,6 +75,32 @@ class Season(models.Model):
         return f"{self.league.name} {self.name}"
 
 
+class Club(models.Model):
+    """A club across seasons, grouping the per-season ``Team`` rows of a source.
+
+    FEB assigns a new team id (and often a new sponsor name) every season, so
+    one real-world club appears as several ``Team`` rows. Clubs are inferred by
+    :mod:`ingestion.clubs`; sources with stable team ids (ACB) need none.
+
+    Attributes
+    ----------
+    name : str
+        Display name (taken from the club's most recent team).
+    slug : str
+        Unique URL-safe identifier.
+    """
+
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=60, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        """Return the club name for admin and logging output."""
+        return self.name
+
+
 class Team(models.Model):
     """A club entity, stable across seasons.
 
@@ -116,6 +142,13 @@ class Team(models.Model):
     # (e.g. "acb", "seed"); ``external_id`` is the source's own key.
     source = models.CharField(max_length=50, db_index=True)
     external_id = models.CharField(max_length=100, db_index=True)
+    club = models.ForeignKey(
+        "teams.Club",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teams",
+    )
 
     class Meta:
         ordering = ["name"]
