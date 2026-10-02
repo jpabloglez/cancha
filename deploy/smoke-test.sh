@@ -117,6 +117,8 @@ check "Worker reports healthy" bash -c "
   done; exit 1"
 check "API cache lives in Redis db 1, Celery in db 0" bash -c "
   [ \"\$(${DC[*]} exec -T redis redis-cli -n 1 dbsize | tr -d '\\r')\" -gt 0 ]"
+check "Redis is memory-capped with volatile-lru eviction" bash -c "
+  ${DC[*]} exec -T redis redis-cli config get maxmemory-policy | grep -q volatile-lru"
 check "No dev ports are published (only Caddy)" bash -c "
   [ \"\$(docker ps --filter label=com.docker.compose.project=${COMPOSE_PROJECT_NAME} --format '{{.Ports}}' | grep -c '0.0.0.0:\\(5432\\|6379\\|8000\\|3000\\)')\" = 0 ]"
 

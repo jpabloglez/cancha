@@ -25,6 +25,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    # Bounded memory: the API cache stores one entry per distinct URL. Only keys
+    # with a TTL (cache entries, Celery results) may be evicted, so queued Celery
+    # tasks are never dropped.
+    command: ["redis-server", "--maxmemory", "${REDIS_MAXMEMORY:-256mb}", "--maxmemory-policy", "volatile-lru"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -36,7 +40,7 @@ services:
     build:
       context: ./backend
     restart: unless-stopped
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} --timeout 60
     env_file:
       - ./backend/.env.prod
     volumes:
