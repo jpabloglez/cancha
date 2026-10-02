@@ -1,4 +1,4 @@
-# Frontend CI: lint + typecheck + build. Path-filtered so it only runs on
+# Frontend CI: lint + typecheck + unit tests + build. Path-filtered so it only runs on
 # frontend changes (spec §8, monorepo discipline).
 name: frontend
 
@@ -34,5 +34,7 @@ jobs:
         run: npm run lint
       - name: Typecheck
         run: npm run typecheck
+      - name: Unit tests
+        run: npm test
       - name: Build
         run: npm run build
