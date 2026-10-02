@@ -65,6 +65,15 @@ latencia de cola empeora (p95 72 ms frente a 57 ms y, en frío, 280 ms frente a
 - Tests: la caché se sustituye por una en memoria en cada test (`conftest.py`),
   para que una respuesta cacheada no se filtre entre tests ni entre ejecuciones.
 
+## Límite de peticiones
+
+La API pública limita las peticiones sin caché por IP de cliente (300/min por
+defecto, `API_THROTTLE_RATE`). Solo cuenta el tráfico que llega a través de
+Caddy (cabecera `X-Forwarded-For`, `API_NUM_PROXIES=1`); las llamadas internas
+del SSR de Next.js están exentas porque comparten una única IP. Las respuestas
+servidas desde la caché no se cuentan, ya que son baratas. La prueba de humo
+verifica el 429 a través de Caddy y que las páginas siguen renderizando.
+
 ## Limitaciones y pendiente
 
 - Medido en un único equipo (WSL2) con otros contenedores activos y el

@@ -199,6 +199,12 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 50,
+    # Public read-only API: limit uncached requests per client IP (see
+    # api.throttling). Tune with API_THROTTLE_RATE, e.g. "600/min".
+    "DEFAULT_THROTTLE_CLASSES": ("api.throttling.ExternalClientThrottle",),
+    "DEFAULT_THROTTLE_RATES": {"anon": env("API_THROTTLE_RATE", default="300/min")},
+    # Caddy is the single proxy in front of the API; trust the address it adds.
+    "NUM_PROXIES": env.int("API_NUM_PROXIES", default=1),
 }
 
 # CORS: read-only public API restricted to the frontend origin (spec §6.4).
