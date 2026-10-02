@@ -12,7 +12,7 @@ COMPOSE := docker compose
 
 .DEFAULT_GOAL := help
 .PHONY: help build up up-build down stop start restart logs ps images \
-        migrate makemigrations seed smoke-prod superuser shell djshell test lint \
+        migrate makemigrations seed smoke-prod db-backup db-verify-backup superuser shell djshell test lint \
         clean prune
 
 help: ## Show this help
@@ -112,3 +112,9 @@ prune: clean ## Also remove the locally built basquets images
 
 smoke-prod: ## Build and test the production stack end to end (see deploy/smoke-test.sh)
 	./deploy/smoke-test.sh
+
+db-backup: ## Dump the database to data/backups/ (see scripts/db_backup.sh)
+	./scripts/db_backup.sh
+
+db-verify-backup: ## Restore a fresh dump into a scratch Postgres and compare row counts
+	./scripts/db_verify_backup.sh
