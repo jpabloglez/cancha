@@ -1,0 +1,102 @@
+# Production stack (single VPS). Standalone file: it does NOT extend
+# docker-compose.yml, so no dev bind-mounts, published DB/Redis ports or dev
+# servers leak into production.
+#
+#   cp .env.prod.example .env.prod && cp backend/.env.prod.example backend/.env.prod
+#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+name: basquets-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: basketball_stats
+      POSTGRES_USER: basketball_stats
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.prod}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basketball_stats"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: basquets-backend:prod
+    build:
+      context: ./backend
+    restart: unless-stopped
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60
+    env_file:
+      - ./backend/.env.prod
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    image: basquets-backend:prod
+    restart: unless-stopped
+    command: celery -A config worker --beat --loglevel=info
+    env_file:
+      - ./backend/.env.prod
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: basquets-frontend:prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?set in .env.prod}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?set in .env.prod}
+        NEXT_PUBLIC_CONTACT_EMAIL: ${NEXT_PUBLIC_CONTACT_EMAIL:?set in .env.prod}
+        NEXT_PUBLIC_GITHUB_URL: ${NEXT_PUBLIC_GITHUB_URL:?set in .env.prod}
+    restart: unless-stopped
+    environment:
+      # Server-side fetches reach the backend over the compose network.
+      API_INTERNAL_BASE_URL: http://backend:8000/api/v1
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env.prod}
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN in .env.prod}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - media:/srv/media:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  media:
+  caddy_data:
+  caddy_config:

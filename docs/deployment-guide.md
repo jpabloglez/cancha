@@ -66,7 +66,7 @@ Crear `frontend/.env.local` (o variables de entorno en la plataforma):
 NEXT_PUBLIC_API_BASE_URL=https://api.tudominio.es/api/v1
 API_INTERNAL_BASE_URL=http://backend:8000/api/v1    # solo si frontend está en el mismo Docker network
 NEXT_PUBLIC_CONTACT_EMAIL=derechos@tudominio.es
-NEXT_PUBLIC_GITHUB_URL=https://github.com/<org>/basquetestads
+NEXT_PUBLIC_GITHUB_URL=https://github.com/jpabloglez/cancha
 ```
 
 ### 2.2 Secreto de Django
@@ -127,80 +127,49 @@ adduser deploy
 usermod -aG docker deploy
 ```
 
-### 3.3 Proxy inverso con Caddy
+### 3.3 Proxy inverso (Caddy en contenedor)
 
-Caddy gestiona SSL automático vía Let's Encrypt sin configuración adicional.
+Caddy forma parte de `docker-compose.prod.yml`: obtiene y renueva los
+certificados HTTPS (Let's Encrypt) automáticamente y no hay que instalar nada
+en el host. Su configuración está en `deploy/Caddyfile`:
 
-```bash
-apt install -y caddy
-```
-
-`/etc/caddy/Caddyfile`:
-
-```
-tudominio.es {
-    reverse_proxy localhost:3000
-}
-
-api.tudominio.es {
-    reverse_proxy localhost:8000
-    handle_path /media/* {
-        root * /srv/basquetestads/backend
-        file_server
-    }
-}
-```
-
-```bash
-systemctl enable --now caddy
-```
+- `DOMAIN` → frontend (`frontend:3000`).
+- `API_DOMAIN` → backend (`backend:8000`), sirviendo `/media/*` directamente
+  desde el volumen compartido de medios (Django solo sirve `/media/` con
+  `DEBUG=True`).
 
 ### 3.4 Despliegue de la aplicación
 
 ```bash
 # Como usuario deploy
-git clone https://github.com/<org>/basquetestads /srv/basquetestads
+git clone https://github.com/jpabloglez/cancha /srv/basquetestads
 cd /srv/basquetestads
 
-# Crear los archivos de entorno
-cp backend/.env.example backend/.env   # y editar
-cp frontend/.env.local.example frontend/.env.local   # y editar
+# Crear los archivos de entorno a partir de las plantillas y editarlos
+cp .env.prod.example .env.prod                    # dominios, contraseña de Postgres, NEXT_PUBLIC_*
+cp backend/.env.prod.example backend/.env.prod    # secreto de Django, DATABASE_URL, CORS
 
-# Construir y arrancar
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Construir y arrancar (fichero autónomo: no se combina con docker-compose.yml)
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 
 # Primera vez: migraciones y datos
-docker compose exec backend python manage.py migrate
-docker compose exec backend python manage.py collectstatic --noinput
-docker compose exec backend python manage.py sync_beat_schedule
-docker compose exec backend python manage.py backfill --seasons 5
-docker compose exec backend python manage.py backfill_rounds
+alias dc='docker compose --env-file .env.prod -f docker-compose.prod.yml'
+dc exec backend python manage.py migrate
+dc exec backend python manage.py collectstatic --noinput
+dc exec backend python manage.py sync_beat_schedule
+dc exec backend python manage.py backfill --seasons 5
+dc exec backend python manage.py backfill_rounds
 ```
 
-#### `docker-compose.prod.yml` (overrides de producción)
+La contraseña de `POSTGRES_PASSWORD` (`.env.prod`) debe coincidir con la de
+`DATABASE_URL` (`backend/.env.prod`). Ambos ficheros están en `.gitignore`.
+Los valores `NEXT_PUBLIC_*` se incrustan en el bundle del navegador durante el
+build, por lo que cambiarlos exige reconstruir la imagen del frontend.
 
-Crear este fichero en la raíz del repositorio para sobreescribir los valores
-de desarrollo sin tocar `docker-compose.yml`:
-
-```yaml
-services:
-  backend:
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2
-    volumes: []     # no montar código en prod; usar la imagen construida
-
-  worker:
-    volumes: []
-
-  frontend:
-    build:
-      context: ./frontend
-    command: node server.js   # next build && next start
-    environment:
-      - NODE_ENV=production
-    volumes: []
-```
-
-> **Nota:** añadir `gunicorn` a `backend/requirements.txt` si aún no está.
+Diferencias respecto al entorno de desarrollo: sin montajes del código, sin
+puertos de Postgres/Redis publicados, gunicorn en lugar de `runserver`, Next.js
+compilado (`frontend/Dockerfile.prod`) y volumen `media` compartido entre
+backend, worker y Caddy.
 
 ### 3.5 DNS (Cloudflare)
 
@@ -214,8 +183,8 @@ services:
 ```bash
 cd /srv/basquetestads
 git pull
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-docker compose exec backend python manage.py migrate
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend python manage.py migrate
 ```
 
 ---
@@ -281,7 +250,7 @@ Esta arquitectura divide los componentes entre plataformas:
    ```
    NEXT_PUBLIC_API_BASE_URL=https://api.tudominio.es/api/v1
    NEXT_PUBLIC_CONTACT_EMAIL=derechos@tudominio.es
-   NEXT_PUBLIC_GITHUB_URL=https://github.com/<org>/basquetestads
+   NEXT_PUBLIC_GITHUB_URL=https://github.com/jpabloglez/cancha
    ```
    > `API_INTERNAL_BASE_URL` no aplica en Vercel (el SSR llama a la URL pública).
 4. **Custom domain**: añadir `tudominio.es` en Settings → Domains de Vercel.
@@ -330,8 +299,8 @@ jobs:
           script: |
             cd /srv/basquetestads
             git pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-            docker compose exec -T backend python manage.py migrate
+            docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+            docker compose --env-file .env.prod -f docker-compose.prod.yml exec -T backend python manage.py migrate
 ```
 
 ### Opción B (Railway + Vercel)

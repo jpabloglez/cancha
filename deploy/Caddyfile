@@ -1,0 +1,20 @@
+# Reverse proxy with automatic HTTPS (Let's Encrypt). DOMAIN and API_DOMAIN come
+# from .env.prod (e.g. DOMAIN=example.es, API_DOMAIN=api.example.es).
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy frontend:3000
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	# Stored logos/photos are served straight from the shared media volume
+	# (Django only serves /media/ when DEBUG is on).
+	handle_path /media/* {
+		root * /srv/media
+		file_server
+	}
+
+	reverse_proxy backend:8000
+}
