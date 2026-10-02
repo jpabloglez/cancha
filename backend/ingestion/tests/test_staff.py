@@ -107,3 +107,20 @@ def test_team_staff_endpoint_filters_by_season() -> None:
     other = client.get(f"/api/v1/teams/club/staff/?season={team_season.season_id + 999}")
     assert other.status_code == 200
     assert other.json() == []
+
+
+@pytest.mark.django_db
+def test_staff_endpoint_is_cached_until_the_cache_is_cleared() -> None:
+    """Responses are cached; the post-ingest ``cache.clear()`` makes data fresh."""
+    from django.core.cache import cache
+
+    team_season = _team_season()
+    client = APIClient()
+    assert client.get("/api/v1/teams/club/staff/").json() == []
+
+    person, entry = _coach()
+    upsert_staff_entry(person, entry, team_season)
+    assert client.get("/api/v1/teams/club/staff/").json() == []  # still cached
+
+    cache.clear()
+    assert len(client.get("/api/v1/teams/club/staff/").json()) == 1

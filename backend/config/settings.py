@@ -102,6 +102,12 @@ DATABASES = {
     ),
 }
 
+# Reuse database connections across requests instead of reconnecting each time
+# (measurable per-request cost on a read-heavy API); the health check drops
+# connections that Postgres closed in the meantime.
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+
 # Cache + Celery (Redis shared as broker and cache backend, §2.2)
 REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 

@@ -167,6 +167,10 @@ La contraseña de `POSTGRES_PASSWORD` (`.env.prod`) debe coincidir con la de
 Los valores `NEXT_PUBLIC_*` se incrustan en el bundle del navegador durante el
 build, por lo que cambiarlos exige reconstruir la imagen del frontend.
 
+El ajuste de workers de gunicorn (`GUNICORN_WORKERS`, 3 por defecto), el límite de
+memoria de Redis (`REDIS_MAXMEMORY`) y los resultados de las pruebas de carga
+están en `docs/performance-analysis.md`.
+
 Antes del primer despliegue (y tras cambios en el stack) se puede comprobar todo
 el conjunto sin dominio ni secretos reales con `make smoke-prod`
 (`deploy/smoke-test.sh`): construye las imágenes, arranca el stack detrás de

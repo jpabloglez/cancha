@@ -184,6 +184,7 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["league"]
 
     @action(detail=True)
+    @method_decorator(cache_page(_CACHE_MEDIUM))
     def standings(self, request: Request, pk: str | None = None) -> Response:
         """Return the standings for a season, computed from finished games.
 
@@ -254,6 +255,7 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
     @action(detail=True)
+    @method_decorator(cache_page(_CACHE_MEDIUM))
     def rounds(self, request: Request, pk: str | None = None) -> Response:
         """Return the distinct round labels for a season, sorted numerically.
 
@@ -488,6 +490,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return qs
 
     @action(detail=True)
+    @method_decorator(cache_page(_CACHE_SHORT))
     def roster(self, request: Request, slug: str | None = None) -> Response:
         """Return a team's roster for the season given by ``?season=``.
 
@@ -534,6 +537,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
     @action(detail=True)
+    @method_decorator(cache_page(_CACHE_SHORT))
     def staff(self, request: Request, slug: str | None = None) -> Response:
         """Return coaching staff for a team, optionally filtered by season.
 
@@ -567,6 +571,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(StaffEntrySerializer(qs, many=True).data)
 
     @action(detail=True, url_path="season-stats")
+    @method_decorator(cache_page(_CACHE_SHORT))
     def season_stats(self, request: Request, slug: str | None = None) -> Response:
         """Return per-game, per-100-possessions and advanced stats for a season.
 
@@ -635,6 +640,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
     @action(detail=True, url_path="recent-games")
+    @method_decorator(cache_page(_CACHE_SHORT))
     def recent_games(self, request: Request, slug: str | None = None) -> Response:
         """Return the most recent finished games for this team in a season.
 
@@ -760,6 +766,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(rows)
 
 
+@method_decorator(cache_page(_CACHE_MEDIUM), name="list")
 class TeamSeasonViewSet(viewsets.ReadOnlyModelViewSet):
     """List team-season participations, filterable by team/season/league."""
 
@@ -821,6 +828,7 @@ class PersonViewSet(viewsets.ReadOnlyModelViewSet):
         return qs
 
     @action(detail=True)
+    @method_decorator(cache_page(_CACHE_MEDIUM))
     def stats(self, request: Request, slug: str | None = None) -> Response:
         """Return a player's per-season stats (basic + advanced).
 
@@ -926,6 +934,7 @@ class PlayerSeasonAggregateViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["person", "season"]
 
 
+@method_decorator(cache_page(_CACHE_SHORT), name="list")
 @method_decorator(cache_page(_CACHE_LONG), name="retrieve")
 class GameViewSet(viewsets.ReadOnlyModelViewSet):
     """List/retrieve finished games and expose full box scores."""
@@ -939,6 +948,7 @@ class GameViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["season", "round", "home_team_season", "away_team_season"]
 
     @action(detail=True)
+    @method_decorator(cache_page(_CACHE_LONG))
     def boxscore(self, request: Request, pk: str | None = None) -> Response:
         """Return the full box score for a finished game.
 
@@ -967,6 +977,7 @@ class GameViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
 
+@method_decorator(cache_page(_CACHE_SHORT), name="get")
 class LeadersView(APIView):
     """Statistical leaders ranking (``/stats/leaders``, spec §5.2)."""
 
@@ -1093,6 +1104,7 @@ class LeadersView(APIView):
         return aggregates.filter(games_played__gte=threshold)
 
 
+@method_decorator(cache_page(_CACHE_SHORT), name="get")
 class AllTimeLeadersView(APIView):
     """Cross-season cumulative and average statistical ranking (``/stats/alltime/``)."""
 
