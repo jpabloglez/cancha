@@ -1,0 +1,28 @@
+# End-to-end smoke test of the production Docker stack (deploy/smoke-test.sh):
+# builds every image, starts the stack behind Caddy, seeds demo data and checks
+# the public behaviour. Slow (builds the backend image with Chromium), so it only
+# runs when the deployment surface changes, weekly, and on demand.
+name: stack-smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 1"
+  pull_request:
+    paths:
+      - "docker-compose.prod.yml"
+      - "deploy/**"
+      - "backend/Dockerfile"
+      - "backend/requirements.txt"
+      - "frontend/Dockerfile.prod"
+      - "frontend/package-lock.json"
+      - ".github/workflows/stack-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test the production stack
+        run: ./deploy/smoke-test.sh

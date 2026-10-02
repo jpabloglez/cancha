@@ -12,7 +12,7 @@ COMPOSE := docker compose
 
 .DEFAULT_GOAL := help
 .PHONY: help build up up-build down stop start restart logs ps images \
-        migrate makemigrations seed superuser shell djshell test lint \
+        migrate makemigrations seed smoke-prod superuser shell djshell test lint \
         clean prune
 
 help: ## Show this help
@@ -109,3 +109,6 @@ clean: ## Stop and remove containers, networks and volumes (drops the DB)
 
 prune: clean ## Also remove the locally built basquets images
 	-docker rmi basquets-backend basquets-frontend
+
+smoke-prod: ## Build and test the production stack end to end (see deploy/smoke-test.sh)
+	./deploy/smoke-test.sh

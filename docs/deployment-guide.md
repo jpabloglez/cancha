@@ -167,6 +167,14 @@ La contraseña de `POSTGRES_PASSWORD` (`.env.prod`) debe coincidir con la de
 Los valores `NEXT_PUBLIC_*` se incrustan en el bundle del navegador durante el
 build, por lo que cambiarlos exige reconstruir la imagen del frontend.
 
+Antes del primer despliegue (y tras cambios en el stack) se puede comprobar todo
+el conjunto sin dominio ni secretos reales con `make smoke-prod`
+(`deploy/smoke-test.sh`): construye las imágenes, arranca el stack detrás de
+Caddy con contraseñas temporales y una carpeta de Postgres temporal (no toca
+`./data/postgres`), carga datos de demostración y verifica frontend, API, CORS,
+`/media/`, el worker de Celery y la separación de bases de Redis. El mismo
+script corre en CI (`stack-smoke`) cuando cambian los ficheros de despliegue.
+
 Diferencias respecto al entorno de desarrollo: sin montajes del código, sin
 puertos de Postgres/Redis publicados, gunicorn en lugar de `runserver`, Next.js
 compilado (`frontend/Dockerfile.prod`) y volumen `media` compartido entre
