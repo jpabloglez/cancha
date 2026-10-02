@@ -40,6 +40,7 @@ REDIS_URL=redis://redis:6379/0
 REDIS_CACHE_URL=redis://redis:6379/1
 CORS_ALLOWED_ORIGINS=http://web.localhost:${HTTP_PORT}
 INGEST_STORE_MEDIA=False
+API_THROTTLE_RATE=20/min
 ENV
 
 # docker-compose.prod.yml reads backend/.env.prod; point it at the temp file via
@@ -121,5 +122,12 @@ check "Redis is memory-capped with volatile-lru eviction" bash -c "
   ${DC[*]} exec -T redis redis-cli config get maxmemory-policy | grep -q volatile-lru"
 check "No dev ports are published (only Caddy)" bash -c "
   [ \"\$(docker ps --filter label=com.docker.compose.project=${COMPOSE_PROJECT_NAME} --format '{{.Ports}}' | grep -c '0.0.0.0:\\(5432\\|6379\\|8000\\|3000\\)')\" = 0 ]"
+
+# Last on purpose: once the limit trips, this client IP is throttled for a minute.
+check "Public API rate limit answers 429 through Caddy" bash -c "
+  for i in \$(seq 1 40); do
+    curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: api.localhost' \"$API/api/v1/players/?limit=1&_t=\$i\"
+  done | grep -q 429"
+check "Frontend pages still render while the public IP is throttled (internal calls exempt)" bash -c "curl -fsS -H 'Host: web.localhost' $API/equipos/${TEAM_SLUG}?x=throttle | grep -q 'Plantilla'"
 
 echo "== smoke test passed (${PASS} checks)"
