@@ -53,6 +53,7 @@ DJANGO_ALLOWED_HOSTS=api.tudominio.es,tudominio.es
 
 DATABASE_URL=postgres://user:pass@host:5432/basketball_stats
 REDIS_URL=redis://redis:6379/0
+REDIS_CACHE_URL=redis://redis:6379/1   # caché de la API: distinta BD que Celery
 
 CORS_ALLOWED_ORIGINS=https://tudominio.es
 
@@ -220,6 +221,7 @@ Esta arquitectura divide los componentes entre plataformas:
    ```
    DATABASE_URL=<de Railway PostgreSQL>
    REDIS_URL=<de Upstash>
+   REDIS_CACHE_URL=<segunda base de datos/instancia de Upstash>  # no puede ser la misma que REDIS_URL
    DJANGO_SECRET_KEY=<generada>
    DJANGO_DEBUG=False
    DJANGO_ALLOWED_HOSTS=<slug>.railway.app,api.tudominio.es
