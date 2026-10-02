@@ -450,3 +450,17 @@ connector class already parameterized for both FEB tiers).
    to filesystem unless you want auditability.
 4. **Playwright:** acceptable to add to the worker image if ACB needs it, or
    keep strictly `httpx`-only and defer any JS-rendered source?
+
+---
+
+## 14. Known source limitations
+
+- **Primera FEB 2020-21:** the FEB results listing for `t=2020` mixes in games
+  from other competitions (e.g. LF Endesa, which have no box-score tables) and
+  only 50 LEB Oro games (10 clubs, first phase) have box scores. Those 50 are
+  ingested; the rest fail parsing and are skipped (logged). Standings for this
+  season are therefore partial.
+- **FEB profiles:** some player profile pages return 404 (older/loaned players);
+  these are logged and skipped during enrichment.
+- **FEB staff:** team pages expose only the head coach, so FEB seasons have no
+  assistant coaches. A few team pages carry no coach block at all.
