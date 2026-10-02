@@ -130,4 +130,7 @@ check "Public API rate limit answers 429 through Caddy" bash -c "
   done | grep -q 429"
 check "Frontend pages still render while the public IP is throttled (internal calls exempt)" bash -c "curl -fsS -H 'Host: web.localhost' $API/equipos/${TEAM_SLUG}?x=throttle | grep -q 'Plantilla'"
 
+check "Backup restores into a scratch database with identical row counts" \
+  env DC="${DC[*]}" BACKUP_DIR="$WORK/backups" ./scripts/db_verify_backup.sh
+
 echo "== smoke test passed (${PASS} checks)"

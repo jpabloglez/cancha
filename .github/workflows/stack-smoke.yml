@@ -12,6 +12,7 @@ on:
     paths:
       - "docker-compose.prod.yml"
       - "deploy/**"
+      - "scripts/db_*.sh"
       - "backend/Dockerfile"
       - "backend/requirements.txt"
       - "frontend/Dockerfile.prod"

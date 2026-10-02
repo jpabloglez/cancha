@@ -9,6 +9,8 @@
 # so no connections are active during the restore.
 set -euo pipefail
 
+DC="${DC:-docker compose}"  # see db_backup.sh for the production value
+
 DUMP="${1:-}"
 if [[ -z "$DUMP" ]]; then
   echo "Usage: $0 <path-to-dump-file>" >&2
@@ -25,13 +27,13 @@ echo "  This will DROP all existing data. Ctrl-C within 5 s to abort."
 sleep 5
 
 # Drop and recreate the public schema to guarantee a clean slate.
-docker compose exec -T db psql \
+$DC exec -T db psql \
   --username=basketball_stats \
   --dbname=basketball_stats \
   --command="DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 
 # Restore. --no-owner so objects keep the basketball_stats owner.
-docker compose exec -T db pg_restore \
+$DC exec -T db pg_restore \
   --username=basketball_stats \
   --dbname=basketball_stats \
   --no-owner \

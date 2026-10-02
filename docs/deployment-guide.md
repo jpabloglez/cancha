@@ -202,6 +202,32 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml exec backend pyth
 
 ---
 
+### 3.7 Copias de seguridad
+
+Los scripts de `scripts/` sirven para desarrollo y producción; en producción
+indica el compose a usar con `DC`:
+
+```bash
+export DC="docker compose --env-file .env.prod -f docker-compose.prod.yml"
+
+# Copia diaria con retención de 14 días (crontab del usuario deploy, 03:30)
+30 3 * * * cd /srv/basquetestads && DC="docker compose --env-file .env.prod -f docker-compose.prod.yml" KEEP_DAYS=14 ./scripts/db_backup.sh >> data/backups/cron.log 2>&1
+```
+
+- Copia además `data/backups/` fuera del servidor (otro proveedor o un bucket):
+  una copia en el mismo disco no protege contra la pérdida del servidor.
+- Una copia solo vale si se puede restaurar. `./scripts/db_verify_backup.sh`
+  la restaura en un PostgreSQL desechable (no toca la base real) y compara el
+  número de filas de todas las tablas con la base en vivo; falla con código 1 y
+  muestra la diferencia si algo no coincide. Ejecútalo tras el primer despliegue
+  y de forma periódica (p. ej. mensual); la prueba de humo (`make smoke-prod`)
+  también lo comprueba.
+- Restaurar sobre la base real (borra todos los datos): para `backend` y
+  `worker`, ejecuta `$DC` junto con `./scripts/db_restore.sh <dump>` y vuelve a
+  arrancar los servicios.
+
+---
+
 ## 4. Opción B — Servicios gestionados gratuitos
 
 Esta arquitectura divide los componentes entre plataformas:
