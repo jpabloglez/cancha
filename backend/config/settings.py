@@ -104,10 +104,15 @@ DATABASES = {
 # Cache + Celery (Redis shared as broker and cache backend, §2.2)
 REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 
+# The API cache lives in its own Redis database: Django's RedisCache.clear()
+# runs FLUSHDB, which on the Celery broker database (/0) would also wipe queued
+# tasks and results. Invalidating after an ingest therefore only touches /1.
+REDIS_CACHE_URL = env("REDIS_CACHE_URL", default="redis://redis:6379/1")
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": REDIS_URL,
+        "LOCATION": REDIS_CACHE_URL,
     }
 }
 
