@@ -531,7 +531,7 @@ class TeamViewSet(viewsets.ReadOnlyModelViewSet):
         qs = StaffEntry.objects.filter(
             team_season__team=team
         ).select_related("person", "team_season__season").order_by(
-            "-team_season__season__start_year", "role"
+            "-team_season__season__start_date", "role"
         )
         season_id = request.query_params.get("season")
         if season_id:
