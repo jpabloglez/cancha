@@ -765,7 +765,24 @@ class TeamSeasonViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = TeamSeason.objects.select_related("team", "season", "league").all()
     serializer_class = TeamSeasonSerializer
-    filterset_fields = ["team", "season", "league"]
+    filterset_fields = ["season", "league"]
+
+    def get_queryset(self) -> QuerySet:
+        """Filter by ``?team=<id>`` across every team of that team's club.
+
+        Returns
+        -------
+        QuerySet
+            Team-seasons, restricted to the club's teams when ``team`` is given.
+        """
+        qs = super().get_queryset()
+        team_id = self.request.query_params.get("team")
+        if team_id and team_id.isdigit():
+            team = Team.objects.filter(pk=int(team_id)).first()
+            if team is None:
+                return qs.none()
+            qs = qs.filter(team_id__in=_club_team_ids(team))
+        return qs
 
 
 @method_decorator(cache_page(_CACHE_MEDIUM), name="retrieve")
