@@ -85,7 +85,8 @@ def test_link_clubs_groups_renamed_club_and_is_idempotent() -> None:
     second = link_clubs()
 
     assert first == second == {"clubs": 1, "teams_linked": 2}
-    old.refresh_from_db(), new.refresh_from_db(), other.refresh_from_db()
+    for team in (old, new, other):
+        team.refresh_from_db()
     assert old.club_id == new.club_id is not None
     assert other.club_id is None
     assert Club.objects.get().name == "GUUK GIPUZKOA BASKET"
@@ -156,8 +157,8 @@ def test_link_clubs_honours_manual_overrides() -> None:
         team_a=lone_a, team_b=lone_b, kind=ClubLinkOverride.Kind.MERGE
     )
     assert link_clubs() == {"clubs": 1, "teams_linked": 2}
-    filial.refresh_from_db(), partner.refresh_from_db()
-    lone_a.refresh_from_db(), lone_b.refresh_from_db()
+    for team in (filial, partner, lone_a, lone_b):
+        team.refresh_from_db()
     assert filial.club_id is None and partner.club_id is None
     assert lone_a.club_id == lone_b.club_id is not None
 
